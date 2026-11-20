@@ -683,5 +683,7 @@ name="Tamu";drawMe();
 if(store.get("kmAuto")==="1"&&store.get("kmName")&&store.get("kmPw")){store.set("kmAuto","");setName(store.get("kmName"));toast("Perangkat berhasil ditautkan")}else showAuth();
 window.addEventListener("online",()=>flush(cur));setInterval(()=>{if(db)flush(cur)},20000);
 drawChs();subscribe();
-(async()=>{try{if(!window.claude)return;const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);if(u)try{uid=await u.id()}catch(e){}if(d){db=d;stat();subscribe();registerMe();lkInit()}}catch(e){}})();
+(()=>{try{const c=window.FIREBASE_CONFIG;if(!c||!c.apiKey||/ISI_/.test(c.apiKey)||!window.firebase)return;
+ if(!firebase.apps.length)firebase.initializeApp(c);const d=firebase.firestore();db=d;stat();subscribe();registerMe();lkInit()}catch(e){console.error("Firebase gagal:",e)}})();
+(async()=>{try{if(!window.claude||db)return;const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);if(u)try{uid=await u.id()}catch(e){}if(d){db=d;stat();subscribe();registerMe();lkInit()}}catch(e){}})();
 })();

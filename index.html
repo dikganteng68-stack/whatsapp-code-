@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WhatsApp Code – Chat Bebas Kirim Kode</title>
+<link rel="icon" href="assets/logo.jpg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><div class="logo"><img src="assets/logo.jpg" alt="Logo WhatsApp Code"></div><div><b>WhatsApp <span>Code</span></b><small>Chat bebas, kirim kode sepuasnya</small></div><button class="kebab" id="kebab" aria-label="Menu">⋮</button>
+      <div class="pop hide" id="pop"><button data-a="grup">Grup baru</button><button data-a="kom">Komunitas baru</button><button data-a="siar">Daftar siaran</button><button data-a="perangkat">Perangkat tertaut</button><button data-a="bintang">Berbintang</button><button data-a="baca">Baca semua</button><button data-a="teman">Tambah teman</button><button data-a="set">Pengaturan</button></div></div>
+    <div class="me"><span><span class="mav" id="meAv">👤</span><b id="meName">Tamu</b></span><button id="rename">Keluar</button></div>
+    <div class="chs" id="chs"></div>
+    <div class="note">Kode yang dikirim hanya ditampilkan sebagai teks dan tidak pernah dijalankan. Tidak ada batas panjang pesan atau jumlah pesan dari aplikasi ini.</div>
+  </aside>
+  <main class="main">
+    <div class="top"><button class="menu" id="menu">☰</button><div class="av" id="chAv">#</div><div class="t"><b id="chName">Umum</b><small id="chStat"></small></div><button class="gset hide" id="gSet" aria-label="Izin grup" title="Izin grup">⚙️</button></div>
+    <div class="rule" id="ruleBar"></div>
+    <div class="list" id="list"></div>
+    <div class="comp">
+      <div class="tools">
+        <div class="seg"><button id="mT" class="on">Teks</button><button id="mC">Kode</button></div>
+        <select id="lang" class="hide"><option>Teks biasa</option><option>Python</option><option>JavaScript</option><option>HTML</option><option>CSS</option><option>PHP</option><option>Java</option><option>C++</option><option>SQL</option><option>Bash</option><option>JSON</option></select>
+        <small style="color:var(--muted)" id="hint">Enter = kirim, Shift+Enter = baris baru</small>
+      </div>
+      <div id="chk" class="chk hide"></div>
+      <div class="row"><textarea id="ta" rows="1" placeholder="Ketik pesan..."></textarea><button class="send" id="send" aria-label="Kirim">➤</button></div>
+    </div>
+  </main>
+</div>
+<div class="ov hide" id="frOv"><div class="dlg">
+  <div class="logo" style="margin:0 auto">👥</div><h2>Tambah teman</h2>
+  <p>Masukkan kode teman (8 huruf/angka). Server akan memeriksa apakah kodenya benar.</p>
+  <div class="mycode">Kodemu: <b id="myCode"></b><button class="lnk" id="cpCode">Salin</button></div>
+  <input id="frIn" maxlength="8" placeholder="contoh: dik34h82" autocapitalize="off" autocomplete="off" spellcheck="false">
+  <div id="frMsg" class="chk hide"></div>
+  <button id="frOk">Kirim</button><button class="lnk" id="frClose">Tutup</button>
+</div></div>
+<div class="prof sh hide" id="sholat">
+  <div class="pbar"><button id="shBack" aria-label="Kembali">←</button><b>Siaran · Waktu Salat</b><button class="shbtn" id="shFmt">24j</button></div>
+  <div class="shscroll"><div class="shbody" id="shBody"></div></div>
+  <svg class="skyl" viewBox="0 0 1000 150" preserveAspectRatio="none" aria-hidden="true"><path fill="#1c070b" d="M0 150V122h60v-32l8-16 8 16v32h60v-22q40-52 80 0v22h80v-62l6-22 6 22v62h90v-26q55-72 110 0v26h70v-72l7-26 7 26v72h80v-36q35-46 70 0v36h120v-22h70v28z"/></svg>
+</div>
+<div class="ov hide" id="shPick"><div class="sheet"><header><span id="pkT"></span><button id="pkClose" aria-label="Tutup">✕</button></header><input id="pkIn" autocomplete="off" spellcheck="false"><div class="sl" id="pkList"></div></div></div>
+<div class="prof sh hide" id="store">
+  <div class="pbar"><button id="stBack" aria-label="Kembali">←</button><b>Storage</b><button class="shbtn" id="stAdd">＋ Unggah</button></div>
+  <div class="shscroll"><div class="shbody">
+    <div class="sht"><div><small class="l">Penyimpanan bersama</small><h1>Storage</h1><div class="ct" id="stStat"></div></div></div>
+    <div class="shnote" style="margin:10px 0 14px">Kode bisa disalin siapa saja. Untuk mengambil file atau folder, beri dukungan ⭐ bintang 5 dulu.</div>
+    <div class="stbar"><div class="seg" id="stFil"><button data-f="all" class="on">Semua</button><button data-f="code">Kode</button><button data-f="file">File</button><button data-f="folder">Folder</button></div><input id="stQ" placeholder="Cari judul, bahasa, atau nama..." autocomplete="off"></div>
+    <div id="stList"></div>
+  </div></div>
+</div>
+<div class="ov hide" id="stUp"><div class="sheet"><header><span>Unggah ke Storage</span><button id="suClose" aria-label="Tutup">✕</button></header>
+  <div class="sl" style="padding:12px 14px">
+    <div class="seg" id="suKind" style="margin-bottom:10px;width:max-content"><button data-k="code" class="on">Kode</button><button data-k="file">File</button><button data-k="folder">Folder</button></div>
+    <input id="suTitle" class="fld" maxlength="80" placeholder="Judul" autocomplete="off">
+    <input id="suDesc" class="fld" maxlength="200" placeholder="Deskripsi singkat (opsional)" autocomplete="off">
+    <div id="suCode"><select id="suLang" class="fld"><option>Teks biasa</option><option>Python</option><option>JavaScript</option><option>HTML</option><option>CSS</option><option>PHP</option><option>Java</option><option>C++</option><option>SQL</option><option>Bash</option><option>JSON</option></select><textarea id="suBody" class="fld mono" placeholder="Tempel kode di sini..." spellcheck="false"></textarea></div>
+    <div id="suPick" class="hide"><button class="stbtn sec" id="suPickBtn">Pilih file</button></div>
+    <input type="file" id="fIn" class="hide"><input type="file" id="dIn" class="hide" webkitdirectory multiple>
+    <div class="gl" id="suInfo" style="margin:8px 0"></div>
+    <div id="suErr" class="chk bad hide" style="margin-bottom:8px;text-align:left"></div>
+    <button class="stbtn" id="suOk" style="width:100%;padding:12px">Unggah</button>
+  </div></div></div>
+<div class="ov hide" id="grOv"><div class="dlg">
+  <div class="logo" style="margin:0 auto">👥</div><h2>Grup baru</h2>
+  <p>Beri nama grupmu, atur izinnya, lalu pilih anggota dari kontak.</p>
+  <input id="grName" maxlength="25" placeholder="Masukkan nama grup" autocomplete="off">
+  <button class="gear" id="grGear">⚙️ <span>Izin grup</span><small id="grSum">Atur ›</small></button>
+  <div class="gl">Anggota (dari kontakmu)</div>
+  <div class="mems" id="grMem"></div>
+  <div id="grMsg" class="chk bad hide" style="margin-bottom:10px;text-align:left"></div>
+  <button id="grOk">Buat grup</button><button class="lnk" id="grClose">Batal</button>
+</div></div>
+<div class="prof gp hide" id="gperm">
+  <div class="pbar"><button id="gpBack" aria-label="Kembali">←</button><b>Izin grup</b></div>
+  <div class="pbody"><div id="gpRows"></div></div>
+</div>
+<div class="prof hide" id="prof">
+  <div class="pbar"><button id="pBack" aria-label="Kembali">←</button><b>Profil</b></div>
+  <div class="pbody">
+    <div class="pav"><img id="pImg" class="hide" alt="Foto profil"><span id="pIni">?</span><button id="pCam" aria-label="Ganti foto">📷</button><input type="file" id="pFile" accept="image/*" class="hide"></div>
+    <div id="pRows"></div>
+    <button class="pout" id="pOut">Keluar dari beranda &amp; akun</button>
+  </div>
+</div>
+<div class="ov hide" id="nameOv"><div class="dlg"><div class="logo" style="margin:0 auto;width:64px;height:64px;border-radius:18px"><img src="assets/logo.jpg" alt="Logo WhatsApp Code"></div><h2 id="dTitle"></h2><p id="dSub"></p>
+<div id="vAuth"><input id="nameIn" maxlength="24" placeholder="Nama kamu" autocomplete="username"><div class="pwwrap"><input id="pwIn" type="password" maxlength="64" placeholder="Kata sandi" autocomplete="current-password"><button type="button" class="eye" id="eye" aria-label="Tampilkan sandi">👁️</button></div><button id="nameOk">Masuk</button><button class="lnk" id="forgot">Lupa sandi?</button><button class="lnk" id="authLink">Tautkan dari perangkat lain</button></div>
+<div id="vCode" class="hide"><input id="codeIn" inputmode="numeric" maxlength="12" placeholder="Kode verifikasi"><button id="codeOk">Verifikasi</button><button class="lnk" id="back1">Kembali</button></div>
+<div id="vRec" class="hide"><div class="rec">Nama: <b id="recName"></b><br>Sandi: <b id="recPw"></b></div><input id="newPw" maxlength="64" placeholder="Sandi baru (kosongkan jika tidak diganti)"><button id="pwSave">Simpan</button></div>
+</div></div>
+<div class="prof sh hide" id="story">
+  <div class="pbar"><button id="svBack" aria-label="Kembali">←</button><b>Story</b><button class="shbtn" id="svAdd">＋ Tambah</button></div>
+  <div class="shscroll"><div class="shbody">
+    <div class="sht"><div><small class="l">Foto &amp; video 23 detik · hilang setelah 24 jam</small><h1>Story</h1><div class="ct" id="svStat"></div></div></div>
+    <div class="shnote" style="margin:10px 0 14px">Semua pengguna bisa melihat story satu sama lain tanpa harus berteman. Foto atau video, tiap story otomatis hilang 24 jam setelah diposting.</div>
+    <div id="svMine"></div>
+    <div class="sech" style="padding-left:6px">STORY TERBARU</div>
+    <div id="svList"></div>
+  </div></div>
+</div>
+<div class="ov hide" id="svUp"><div class="sheet"><header><span>Tambah Story</span><button id="svUpX" aria-label="Tutup">✕</button></header>
+  <div class="sl" style="padding:12px 14px">
+    <div class="shnote" style="margin:0 0 10px">Foto atau video (maks. 23 detik). Hilang otomatis setelah 24 jam.</div>
+    <div class="svpick"><button class="stbtn sec" id="svPick">🖼️ Pilih foto/video</button><button class="stbtn sec" id="svRec">📷 Kamera</button></div>
+    <input type="file" id="svF" accept="image/*,video/*" class="hide"><input type="file" id="svC" accept="image/*,video/*" capture="environment" class="hide">
+    <video id="svPrev" class="svprev hide" controls playsinline muted></video><img id="svPrevI" class="svprev hide" alt="Pratinjau foto">
+    <div class="gl" id="svInfo" style="margin:6px 0"></div>
+    <input id="svCap" class="fld" maxlength="100" placeholder="Tambahkan keterangan (opsional)" autocomplete="off">
+    <div class="svpg hide" id="svPg"><b id="svPgb"></b></div><div class="gl hide" id="svPgt"></div>
+    <div id="svErr" class="chk bad hide" style="margin-bottom:8px;text-align:left"></div>
+    <button class="stbtn svok" id="svOk" disabled>Posting story</button>
+  </div></div></div>
+<div class="svv hide" id="svView">
+  <div class="svstage">
+    <video id="svVid" playsinline></video><img id="svImg" class="svimg hide" alt="Story">
+    <div class="svload" id="svLoad"></div>
+    <div class="svzone" id="svZone"></div>
+    <div class="svbars" id="svBars"></div>
+    <div class="svtop"><span class="svav" id="svAv"></span><div class="w"><b id="svWho"></b><small id="svWhen"></small></div><button id="svMute" aria-label="Suara">🔊</button><button id="svDel" class="hide" aria-label="Hapus story">🗑</button><button id="svX" aria-label="Tutup">✕</button></div>
+    <div class="svcap hide" id="svCapT"></div>
+  </div>
+</div>
+<div class="prof sh hide" id="linkP">
+  <div class="pbar"><button id="lkBack" aria-label="Kembali">←</button><b>Perangkat tertaut</b></div>
+  <div class="shscroll"><div class="shbody">
+    <div class="sht"><div><small class="l">Pindah ke HP baru tanpa kehilangan akun</small><h1>Perangkat tertaut</h1><div class="ct" id="lkStat"></div></div></div>
+    <div class="lkcard"><h3>🔐 Kode tautanmu</h3>
+      <div id="lkNew"><p class="lkp">Buat kode 8 angka untuk memindahkan akunmu ke HP baru kalau HP ini hilang. Isi nama lengkap dan tanggal lahir sebagai cadangan kalau suatu saat kamu lupa kodenya.</p>
+        <input id="lkFull" class="fld" maxlength="80" placeholder="Nama lengkap" autocomplete="off"><input id="lkDob" class="fld" type="date">
+        <div id="lkErr" class="chk hide"></div><button class="stbtn" id="lkCreate">Buat kode tautan</button></div>
+      <div id="lkHave" class="hide"><div class="lkcode" id="lkCodeV">••••••••</div>
+        <div class="lkrow"><button class="stbtn sec" id="lkEye">👁️ Tampilkan</button><button class="stbtn" id="lkCopy">📋 Salin kode</button><button class="stbtn sec" id="lkSync">🔄 Sinkronkan</button></div>
+        <div class="shnote" style="margin:12px 0 0">Simpan kode ini dengan benar dan aman. Siapa pun yang memegang kode ini bisa membuka akunmu di perangkat lain, jadi jangan dibagikan.</div><div class="gl" id="lkSyncT"></div></div>
+    </div>
+    <div class="lkcard"><h3>📲 Tautkan perangkat ini</h3><p class="lkp">Pakai HP baru? Masukkan kode 8 angka dari akun lamamu. Akun, kontak, grup, dan pesan berbintang akan dipindahkan ke perangkat ini.</p>
+      <input id="lkIn" class="fld" inputmode="numeric" maxlength="8" placeholder="Contoh: 00100871" autocomplete="off"><div id="lkMsg" class="chk hide"></div><button class="stbtn" id="lkGo">Tautkan</button></div>
+    <div class="lkcard"><h3>❓ Lupa kode? Verifikasi</h3><p class="lkp">Isi nama lengkap dan tanggal lahir yang kamu daftarkan. Kalau benar, kodemu akan ditampilkan lagi. Salin, lalu isi di kolom tautan di atas.</p>
+      <input id="lkFull2" class="fld" maxlength="80" placeholder="Nama lengkap" autocomplete="off"><input id="lkDob2" class="fld" type="date">
+      <div id="lkMsg2" class="chk hide"></div><button class="stbtn" id="lkRec">Verifikasi</button>
+      <div id="lkRes" class="hide"><div class="lkcode" id="lkResCode"></div><div class="lkrow"><button class="stbtn" id="lkResCopy">📋 Salin kode</button><button class="stbtn sec" id="lkResUse">Isi ke kolom tautan</button></div></div></div>
+  </div></div>
+</div>
+<div class="prof sh hide" id="starP">
+  <div class="pbar"><button id="starBack" aria-label="Kembali">←</button><b>Berbintang</b></div>
+  <div class="shscroll"><div class="shbody">
+    <div class="sht"><div><small class="l">Pesan dan kode yang kamu simpan</small><h1>Berbintang</h1><div class="ct" id="starCt"></div></div></div>
+    <div class="shnote" style="margin:10px 0 14px">Cara menyimpan: ketuk pesan 2 kali, lalu tekan ⭐ di pojok atas pesan. Ketuk item di bawah untuk melihat isinya lagi.</div>
+    <div id="starList"></div>
+  </div></div>
+</div>
+<script src="js/script.js"></script>
+</body>
+</html>

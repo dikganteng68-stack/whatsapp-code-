@@ -1,28 +1,22 @@
-# Whatsschat
+# Whatsschat (versi baru, satu file)
 
-Chat pakai kode teman, story, Storage kode, dan AI. Bisa dipasang sebagai aplikasi (PWA).
+Buka `index.html` di browser. Semua tampilan ada di satu file (HTML, CSS, JS).
 
-## Struktur
-```
-index.html            -> halaman
-css/style.css         -> tampilan
-js/script.js          -> logika aplikasi
-api/ai.js             -> fungsi server AI (Vercel)
-manifest.webmanifest  -> PWA
-sw.js                 -> service worker (cache offline)
-assets/               -> ikon
-```
+## Isi
+- Login akun (nama, tanggal lahir, kata sandi) dengan peringatan menjaga kata sandi
+- Rel ikon kiri, daftar chat teman (lewat kode 8 karakter), Diarsipkan
+- Chat teman: tanggal pemisah, kirim teks dan foto, info kontak
+- Story (teks, foto, video maks. 20 detik, hilang 24 jam, daftar penonton)
+- Storage kode (cek bahasa, foto pratinjau, bintang untuk menyalin) dan Berbintang
+- Pengaturan: Profil, Akun, Privasi, Notifikasi, Bantuan dan masukan
+- Chat AI (analisis data, kode web, kepribadian bisa diatur)
 
-## Deploy
-Pakai **Vercel** (GitHub Pages tidak bisa menjalankan `api/ai.js`):
-1. Push semua file ke GitHub, lalu import repo di vercel.com.
-2. Project → Settings → **Environment Variables**: tambahkan `ANTHROPIC_API_KEY` (dari https://console.anthropic.com).
-3. Opsional: `ANTHROPIC_MODEL` (bawaan `claude-haiku-5-5`) dan `ALLOWED_ORIGIN` (alamat situsmu, mis. `https://namamu.vercel.app`).
-4. **Redeploy**. Jangan taruh kunci API di file JS.
-
-Batas bawaan AI: 20 pesan per 10 menit per IP.
-Kalau situs di GitHub Pages dan fungsi AI di Vercel, isi `window.AI_ENDPOINT="https://proyekmu.vercel.app/api/ai"` sebelum `js/script.js` di `index.html`, dan atur `ALLOWED_ORIGIN`.
-Di claude.ai (dibuka sebagai artifact), AI memakai koneksi claude.ai dan tidak butuh server.
-
-## PWA
-Buka lewat HTTPS, lalu Chrome HP: ⋮ → **Instal aplikasi**. Setelah update, naikkan nama cache `V` di `sw.js`.
+## Penting
+- Fitur **AI** dan **DM antar pengguna** memakai kemampuan khusus claude.ai.
+  Di luar claude.ai, AI menampilkan pesan "hanya aktif di claude.ai" dan chat teman
+  berjalan di **mode demo** (tersimpan di browser saja).
+- Untuk DM, foto, Story, dan Storage yang dibagi ke semua pengguna, sambungkan ke
+  Firebase milikmu (Firestore dan Storage) dan atur `firestore.rules` agar hanya
+  pengirim dan penerima yang bisa membaca percakapan.
+- Login memakai penyimpanan browser (kata sandi di-hash dengan PBKDF2). Ini belum
+  setara akun server. Pakai HTTPS atau localhost agar fitur enkripsi browser aktif.

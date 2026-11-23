@@ -1,818 +1,268 @@
-function copyTxt(t){t=String(t==null?"":t);
- const fb=()=>new Promise((ok,no)=>{try{const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.cssText="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0";document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,t.length);const r=document.execCommand("copy");a.remove();r?ok():no(new Error("copy"))}catch(e){no(e)}});
- if(navigator.clipboard&&window.isSecureContext){return navigator.clipboard.writeText(t).catch(fb)}return fb()}
-
-(()=>{
+const P={chat:"M4 5h16v11H9l-5 4z",story:"M12 4a8 8 0 1 0 8 8M12 8a4 4 0 1 0 4 4",store:"M3 7l2-3h14l2 3v12H3zM3 7h18M10 12h4",ai:"M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z",arch:"M4 4h16v4H4zM5 8v12h14V8M12 11v6M9 14l3 3 3-3",search:"M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",plus:"M12 5v14M5 12h14",send:"M3 11l18-8-8 18-2-8z",user:"M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM5 20c1-4 4-5 7-5s6 1 7 5",cam:"M4 8h4l2-3h4l2 3h4v11H4zM12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",doc:"M7 3h7l4 4v14H7zM14 3v4h4"};
+const I=n=>`<svg class="i" viewBox="0 0 24 24"><path d="${P[n]}"/></svg>`;
 const $=id=>document.getElementById(id);
-const CH=[["umum","#","Umum","Bebas bahas apa saja, tanpa kata kasar"],["kode","</>","Kode","Khusus kirim kode saja"]];
-const ICONS={"@doc":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#ff3347" d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#8a0d1b" d="M14 2l6 6h-4a2 2 0 0 1-2-2z"/><rect x="8" y="14" width="8" height="2" rx="1" fill="#2a0408"/></svg>',"@clap":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#ff3347" d="M4 10h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path fill="#ff3347" d="M3.5 4.2l15.2-2.6.9 4.8L4.4 9z"/><path d="M8 3.6l2.2 3.6M12.6 2.8l2.2 3.6" stroke="#2a0408" stroke-width="1.6"/></svg>',"@minus":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="5" y="10" width="14" height="4" rx="2" fill="#ff3347"/></svg>'};
-const PERSON='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="#ff3347"/><path fill="#ff3347" d="M3.8 21c.4-4.6 3.8-7.2 8.2-7.2s7.8 2.6 8.2 7.2z"/></svg>';
-function setIc(el,ic){if(ICONS[ic])el.innerHTML=ICONS[ic];else el.textContent=ic}
-try{for(const k of ["kmMsgs_bantuan","kmMsgs_santai","kmSeen_bantuan","kmSeen_santai"])localStorage.removeItem(k)}catch(e){}
-const RULES={umum:"🛡️ Chat Umum: bebas membahas apa saja, tapi tanpa kata kasar. Pesan yang mengandung kata kasar otomatis dihapus.",kode:"💻 Chat Kode: khusus untuk mengirim kode saja. Pesan tanpa kode akan ditolak."};
-const BAD_EXACT=new Set(["babi","asu","puki","anj","anjg","anjk"]);
-const BAD_STEM=["kontol","memek","ngentot","bangsat","bajingan","goblok","tolol","jancok","jancuk","pepek","brengsek","anjing","pukimak"];
-const LEET={"0":"o","1":"i","3":"e","4":"a","5":"s","7":"t","@":"a","$":"s","!":"i"};
-const purged=new Set();
-function kasar(s){
- const tk=String(s).toLowerCase().replace(/[013457@$!]/g,c=>LEET[c]).split(/[^a-z]+/).filter(Boolean);
- const out=[];let run="";
- for(const w of tk){if(w.length===1)run+=w;else{if(run){out.push(run);run=""}out.push(w)}}
- if(run)out.push(run);
- return out.some(w=>{w=w.replace(/(.)\1+/g,"$1");return BAD_EXACT.has(w)||BAD_STEM.some(b=>w.startsWith(b))})}
-function applyChannel(){{const rt=RULES[cur]||(isGrp()?grpRule():"💬 Chat pribadi dengan "+(dmName()||"temanmu")+". Bebas ngobrol, tanpa filter.");{const tx=String(rt).replace(/^\p{Extended_Pictographic}\uFE0F?\s*/u,""),box=$("ruleTx");box.textContent="";const k=tx.indexOf(". "),l1=k>0?tx.slice(0,k+1):tx,l2=k>0?tx.slice(k+2):"",c=l1.indexOf(":"),d1=document.createElement("div");d1.className="r1";if(c>0&&c<24){const bb=document.createElement("b");bb.textContent=l1.slice(0,c+1);d1.append(bb,document.createTextNode(l1.slice(c+1)))}else d1.textContent=l1;box.appendChild(d1);if(l2){const d2=document.createElement("div");d2.className="r2";d2.textContent=l2;box.appendChild(d2)}}$("ruleBar").classList.remove("hide")}$("gSet").classList.toggle("hide",!isGrp());if(cur==="kode"){setMode("code");if($("lang").value==="Teks biasa")$("lang").value="Python"}chkOff()}
-let cur="umum",db=null,uid="lokal-"+Math.random().toString(36).slice(2,8),name="",mode="text",unsub=null,msgs=[],timer=null;
-const LKRE=/^km(Name|Pw|About|User|Link|Code|Photo|Thumb|Friends|Groups|Star)$/;let lkSoonFn=null;
-const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}if(lkSoonFn&&LKRE.test(k))lkSoonFn()}};
-let localUid=store.get("kmUid");if(!localUid){localUid="lokal-"+Math.random().toString(36).slice(2,10);store.set("kmUid",localUid)}uid=localUid;
-function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
-function hue(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return `hsl(${h} 85% 72%)`}
-function drawChs(){const box=$("chs");box.textContent="";for(const [id,ic,n,d] of CH){const b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setIc(b.querySelector(".av"),ic);b.querySelector("b").textContent=n;b.querySelector("small").textContent=d;b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
- {const b=document.createElement("button");b.className="ch";b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setIc(b.querySelector(".av"),"@doc");b.querySelector("b").textContent="Storage";b.querySelector("small").textContent="Kode & file untuk semua orang";b.onclick=()=>{$("side").classList.remove("open");openStore()};box.appendChild(b)}
- {const b=document.createElement("button");b.className="ch";b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setIc(b.querySelector(".av"),"@clap");b.querySelector("b").textContent="Story";b.querySelector("small").textContent="Foto & video 23 detik - hilang 24 jam";b.onclick=()=>{$("side").classList.remove("open");openStory()};box.appendChild(b)}
- if(groups.length){const h=document.createElement("div");h.className="sech";h.textContent="GRUP";box.appendChild(h)}
- for(const g of groups){const id="grp_"+g.id,b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.dataset.id=id;b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';b.querySelector(".av").textContent="👥";b.querySelector("b").textContent=g.name;b.querySelector("small").textContent="Grup";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
- if(friends.length){const h=document.createElement("div");h.className="sech";h.textContent="KONTAK";box.appendChild(h)}
- for(const f of friends){const id=dmId(f.code),b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.dataset.id=id;b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setAv(b.querySelector(".av"),f);b.querySelector("b").textContent=f.name||"Teman";b.querySelector("small").textContent="Chat pribadi";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
- const c=CH.find(x=>x[0]===cur)||(()=>{const g=grpOf(cur);if(g)return["","👥",g.name,""];const f=friends.find(x=>dmId(x.code)===cur);return f?["",(f.name||"?").charAt(0).toUpperCase(),f.name||"Teman","",f.photo||""]:CH[0]})();{const av=$("chAv");av.style.backgroundImage=c[4]?"url("+c[4]+")":"";av.style.backgroundSize="cover";av.style.backgroundPosition="center";if(c[4])av.textContent="";else setIc(av,c[1])}$("chName").textContent=c[2];stat();applyChannel();try{watchSync();updBadges()}catch(e){}}
-function setAv(el,f){const ph=f&&f.photo;el.style.backgroundImage=ph?"url("+ph+")":"";el.style.backgroundSize="cover";el.style.backgroundPosition="center";el.textContent=ph?"":((f&&f.name)||"?").charAt(0).toUpperCase()}
-function sqScale(im,size){const W=im.naturalWidth||im.width,H=im.naturalHeight||im.height,s=Math.min(W,H),sx=(W-s)/2,sy=(H-s)/2,t=Math.min(s,2048);
- let cv=document.createElement("canvas");cv.width=cv.height=t;let x=cv.getContext("2d");x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";x.drawImage(im,sx,sy,s,s,0,0,t,t);
- while(cv.width/2>=size){const n=document.createElement("canvas");n.width=n.height=Math.round(cv.width/2);const nx=n.getContext("2d");nx.imageSmoothingQuality="high";nx.drawImage(cv,0,0,n.width,n.height);cv=n}
- const o=document.createElement("canvas");o.width=o.height=size;const ox=o.getContext("2d");ox.imageSmoothingQuality="high";ox.drawImage(cv,0,0,size,size);return o}
-function mkThumb(src){return new Promise(res=>{const im=new Image();im.onload=()=>{try{res(sqScale(im,192).toDataURL("image/jpeg",.86))}catch(e){res("")}};im.onerror=()=>res("");im.src=src})}
-function stat(){$("chStat").innerHTML=db?'<span class="dot"></span>Terhubung • dibagikan ke semua yang membuka halaman ini':'<span class="dot off"></span>Mode lokal • pesan tersimpan di perangkat ini'}
-function render(){const L=$("list"),near=L.scrollHeight-L.scrollTop-L.clientHeight<120;L.textContent="";
- if(!msgs.length){const e=document.createElement("div");e.className="empty";e.textContent="Belum ada pesan di sini. Kirim pesan pertama atau tempel kode kamu!";L.appendChild(e)}
- for(const m of msgs){const own=isOwn(m),el=document.createElement("div");el.className="msg"+(own?" own":"");
-  const w=document.createElement("div");w.className="who";w.style.color=own?"#ffd0d4":hue(m.name||"?");w.textContent=own?"Kamu":(m.name||"Tamu");el.appendChild(w);
-  if(m.t==="code"){const c=document.createElement("div");c.className="code";const h=document.createElement("header");const s=document.createElement("span");s.textContent=m.lang||"Kode";const b=document.createElement("button");b.textContent="Salin";b.onclick=async()=>{try{await copyTxt(m.body);toast("Kode disalin")}catch(e){toast("Gagal menyalin")}};h.append(s,b);const p=document.createElement("pre"),cd=document.createElement("code");cd.textContent=m.body;p.appendChild(cd);c.append(h,p);el.appendChild(c)}
-  else{const t=document.createElement("div");t.className="txt";t.textContent=m.body;el.appendChild(t)}
-  const mt=document.createElement("div");mt.className="meta";const d=new Date(m.ts||Date.now());mt.textContent=d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});el.appendChild(mt);
-  if(own){const x=document.createElement("button");x.className="del";x.textContent="×";x.title="Hapus";x.onclick=()=>{if(x.dataset.arm){del(m)}else{x.dataset.arm="1";x.textContent="Hapus?";x.style.display="block";setTimeout(()=>{x.dataset.arm="";x.textContent="×";x.style.display=""},3000)}};el.appendChild(x)}
-  {const sb=document.createElement("button"),on=isStar(m.id);sb.className="mstar"+(on?" on":"");sb.textContent=on?"★":"☆";sb.title="Berbintang";sb.setAttribute("aria-label","Bintangi pesan");
-   sb.onclick=e=>{e.stopPropagation();if(!el.classList.contains("arm")){toast("Ketuk pesan 2 kali dulu, lalu tekan ⭐");return}toggleStar(m)};el.appendChild(sb);
-   if(armedId===m.id)el.classList.add("arm");
-   el.onclick=e=>{if(e.target.closest("button,a"))return;const n=Date.now();if(n-(el._t||0)<400){el._t=0;armMsg(el,m.id)}else el._t=n}}
-  L.appendChild(el)}
- if(near||msgs.length<2)L.scrollTop=L.scrollHeight}
-const MK="kmMsgs_",caches={};
-let delIds=new Set();try{delIds=new Set(JSON.parse(store.get("kmDel")||"[]"))}catch(e){}
-function saveDel(){store.set("kmDel",JSON.stringify([...delIds].slice(-5000)))}
-function cacheOf(ch){if(!caches[ch]){const mp=new Map();try{for(const m of JSON.parse(store.get(MK+ch)||"[]")){if(m&&m.id&&!delIds.has(m.id))mp.set(m.id,m)}}catch(e){}caches[ch]=mp}return caches[ch]}
-function cacheSave(ch){let a=[...cacheOf(ch).values()].sort((x,y)=>(x.ts||0)-(y.ts||0));for(let i=0;i<6;i++){try{localStorage.setItem(MK+ch,JSON.stringify(a));return}catch(e){a=a.slice(Math.ceil(a.length/4))}}}
-function isOwn(m){return m.uid===uid||m.uid===localUid}
-function view(ch){let a=[...cacheOf(ch).values()].sort((x,y)=>(x.ts||0)-(y.ts||0));if(ch==="umum")a=a.filter(m=>!kasar(m.body||""));else if(ch==="kode")a=a.filter(m=>m.t==="code");return a}
-async function flush(ch){if(!db)return;const mp=cacheOf(ch);let chg=false;for(const m of [...mp.values()]){if(m.sent===false&&isOwn(m)){try{const {sent,...rest}=m;await db.collection("ch_"+ch).doc(m.id).set(rest);m.sent=true;chg=true}catch(e){break}}}if(chg){cacheSave(ch)}}
-function subscribe(){if(unsub){unsub();unsub=null}const ch=cur;try{if(!document.hidden)markSeen(ch)}catch(e){}let first1=true;msgs=view(ch);render();$("list").scrollTop=$("list").scrollHeight;if(!db)return;flush(ch);
- try{unsub=db.collection("ch_"+ch).orderBy("ts","asc").onSnapshot(s=>{const mp=cacheOf(ch);let chg=false;
-  for(const d of s.docs){const x={id:d.id,...d.data()};if(delIds.has(x.id))continue;const o=mp.get(x.id);if(!o||!o.sent){x.sent=true;mp.set(x.id,x);chg=true;if(!first1&&!o&&!isOwn(x)){try{if(chIds().includes(ch))notifyMsg(ch,x)}catch(e){}}}
-   if(ch==="umum"&&kasar(x.body||"")&&!purged.has(x.id)){purged.add(x.id);try{db.collection("ch_umum").doc(x.id).delete().catch(()=>{})}catch(e){}}}
-  first1=false;if(chg)cacheSave(ch);
-  if(ch===cur){msgs=view(ch);render()}},e=>toast("Gagal memuat pesan"))}catch(e){toast("Gagal memuat pesan")}}
-async function del(m){const ch=cur;delIds.add(m.id);saveDel();cacheOf(ch).delete(m.id);cacheSave(ch);msgs=view(ch);render();if(db){try{await db.collection("ch_"+ch).doc(m.id).delete()}catch(e){toast("Tidak bisa menghapus di server")}}}
-async function send(){const ta=$("ta"),body=ta.value.replace(/\s+$/,"");if(!body.trim()||checking)return;
- {const g=grpOf(cur);if(g&&g.perms.send==="admin"&&!isAdmin(g)){chk("bad","⚠️ Di grup ini hanya admin yang boleh mengirim pesan baru.");return}}
- if(cur==="umum"&&kasar(body)){chk("bad","⚠️ Pesan mengandung kata kasar, jadi tidak dikirim. Chat Umum harus tetap sopan. Coba ubah kalimatmu lalu kirim lagi.");return}
- if(cur==="kode"&&(mode!=="code"||$("lang").value==="Teks biasa")){chk("bad","⚠️ Coba lagi, pesan ini hanya untuk mengirim kode saja. Pilih mode Kode dan bahasanya, lalu tempel kodenya.");return}
- if(mode==="code"&&$("lang").value!=="Teks biasa"&&!(await verify(body,$("lang").value)))return;
- const id=Date.now()+"-"+Math.random().toString(36).slice(2,7),m={id,t:mode,lang:mode==="code"?$("lang").value:"",body,name,uid,ts:Date.now(),sent:false};ta.value="";fit();
- const ch=cur;cacheOf(ch).set(id,m);cacheSave(ch);msgs=view(ch);render();$("list").scrollTop=$("list").scrollHeight;
- if(db){const {sent,...rest}=m;try{await db.collection("ch_"+ch).doc(id).set(rest);m.sent=true;cacheSave(ch)}catch(e){toast("Pesan tersimpan di perangkat, tapi belum terkirim ke server. Akan dicoba lagi otomatis.")}}}
-let checking=false;
-function chk(c,t){const e=$("chk");e.className="chk "+c;e.textContent=t}
-function chkOff(){$("chk").className="chk hide"}
-function detect(code,lang){
- const R=re=>{const m=code.match(re);return m?m.length:0},t=code.trim();
- let json=false;try{JSON.parse(t);json=/^[\[{]/.test(t)}catch(e){}
- const S={
-  "Python":2*R(/^\s*def\s+\w+\s*\(.*\)\s*(->.*)?:/gm)+2*R(/^\s*(import\s+\w+|from\s+[\w.]+\s+import\s)/gm)+2*R(/\bprint\s*\(/g)+R(/^\s*(if|elif|else|for|while|class|try|except|finally|with)\b[^{};]*:\s*$/gm)+R(/\b(self|None|True|False|elif|lambda)\b/g)+R(/\b(input|range|len)\s*\(/g)-2*R(/;\s*$/gm),
-  "JavaScript":2*R(/\b(const|let|var)\s+[\w$]+/g)+2*R(/=>/g)+2*R(/\bfunction\s*[\w$]*\s*\(/g)+2*R(/\bconsole\.\w+\(/g)+2*R(/\b(document|window)\./g)+R(/===|!==/g)+2*R(/\brequire\(|\bexport\s+(default|const|function)\b/g)+R(/\b(async|await)\b/g),
-  "HTML":R(/<\/?(html|head|body|div|span|p|a|h[1-6]|ul|ol|li|img|br|hr|table|tr|td|th|form|input|button|label|section|header|footer|nav|main|script|style|link|meta|title|textarea|select|option|canvas|svg|video|audio|iframe|b|i|strong|em)(?=[\s\/>])[^<>]*>/gi)+3*R(/<!doctype html/gi),
-  "CSS":2*R(/[\w\-.#:>+~*,][\w\-.#:>+~*,\s]*\{\s*[\w-]+\s*:[^{}]*\}/g)+R(/^\s*[\w-]+\s*:\s*[^;{}\n]+;\s*$/gm)+2*R(/@(media|import|keyframes|font-face)\b/g),
-  "PHP":4*R(/<\?php/g)+R(/\$[a-zA-Z_]\w*/g)+2*R(/\becho\b[^;\n]*;/g)+R(/->\w+/g)+R(/::\w+/g)+R(/\barray\s*\(/g),
-  "Java":3*R(/\b(public|private|protected)\s+(static\s+)?(final\s+)?(class|void|int|String|boolean|double)\b/g)+3*R(/System\.out\.print(ln)?\(/g)+2*R(/\bString\[\]\s+args/g)+2*R(/^\s*import\s+javax?\./gm)+R(/\b(int|double|boolean|String|long|float|char)\s+\w+\s*(=|;|\()/g)+R(/\bnew\s+[A-Z]\w*\(/g),
-  "C++":4*R(/#include\s*[<"]/g)+3*R(/\bstd::/g)+3*R(/\b(cout|cin)\s*(<<|>>)/g)+3*R(/\bint\s+main\s*\(/g)+2*R(/using\s+namespace\s+std/g)+R(/\b(int|double|float|char|bool|long|string)\s+\w+\s*(=|;|\()/g),
-  "SQL":3*R(/\bselect\s+(\*|[\w.,\s`]+)\s+from\s+\w+/gi)+3*R(/\binsert\s+into\b/gi)+3*R(/\bupdate\s+\w+\s+set\b/gi)+3*R(/\bdelete\s+from\b/gi)+3*R(/\b(create|alter|drop)\s+(table|database|index|view)\b/gi)+R(/\b(where|join|group by|order by|values)\b/gi),
-  "Bash":4*R(/^#!\/bin\/(ba)?sh/gm)+2*R(/^\s*(sudo|apt|apt-get|cd|ls|chmod|chown|mkdir|rm|cp|mv|grep|curl|wget|git|npm|pip|echo|cat|touch)\b(?!\s*[=(.,:\[])/gm)+2*R(/^\s*export\s+\w+=/gm)+2*R(/\$\(/g)+R(/^\s*(fi|done|esac)\s*$/gm)+R(/\bthen\s*$/gm),
-  "JSON":json?5:0
- };
- for(const k in S)S[k]=Math.max(0,S[k]);
- const sel=S[lang]||0;let best="",bs=0;for(const k in S)if(k!==lang&&S[k]>bs){best=k;bs=S[k]}
- const top=Math.max(sel,bs);
- if(lang==="JSON"?json:((sel>=2&&sel>=top*0.6)||(sel>=1&&sel>=top)))return{ok:true};
- if(best&&bs>=2)return{msg:"Terdeteksi kode "+best+", tapi kamu memilih "+lang+"."};
- return{msg:lang==="JSON"?"Format JSON tidak valid.":"Teks ini tidak terlihat seperti kode "+lang+"."}}
-async function verify(code,lang){checking=true;$("send").disabled=true;chk("load","⏳ Memeriksa apakah ini benar-benar kode "+lang+"...");
- await new Promise(r=>setTimeout(r,800));checking=false;$("send").disabled=false;
- const r=detect(code,lang);if(r.ok){chkOff();return true}
- chk("bad","⚠️ "+r.msg+" Masukkan kode dengan benar."+(cur==="kode"?" Chat Kode hanya untuk mengirim kode.":""));return false}
-function fit(){const t=$("ta");t.style.height="auto";t.style.height=Math.min(t.scrollHeight,200)+"px"}
-function setMode(m){mode=m;chkOff();$("mT").classList.toggle("on",m==="text");$("mC").classList.toggle("on",m==="code");$("lang").classList.toggle("hide",m!=="code");$("ta").classList.toggle("mono",m==="code");$("ta").placeholder=m==="code"?"Tempel kode di sini...":"Ketik pesan...";$("hint").textContent=m==="code"?"Enter = baris baru, Ctrl+Enter = kirim":"Enter = kirim, Shift+Enter = baris baru"}
-function setView(v){const reg=!store.get("kmPw");["vAuth","vCode","vRec"].forEach(i=>$(i).classList.toggle("hide",i!==v));
- $("dTitle").textContent=v==="vCode"?"Verifikasi lupa sandi":v==="vRec"?"Data akunmu":reg?"Buat akun Whatsschat":"Masuk ke Whatsschat";
- $("dSub").textContent=v==="vCode"?"Masukkan kode verifikasi untuk melihat nama dan sandi yang tersimpan di browser ini.":v==="vRec"?"Kamu bisa mengganti sandi. Tekan Simpan, lalu masuk kembali.":reg?"Pilih nama panggilan dan kata sandi. Keduanya disimpan di browser ini.":"Masukkan nama dan kata sandi yang kamu buat sebelumnya.";
- $("nameOk").textContent=reg?"Daftar & Masuk":"Masuk";$("forgot").classList.toggle("hide",reg)}
-function showAuth(){$("nameOv").classList.remove("hide");$("nameIn").value=store.get("kmName")||"";$("pwIn").value="";$("pwIn").type="password";$("eye").textContent="👁️";setView("vAuth");$("nameIn").focus()}
-let named=false;function setName(n){name=n;named=true;store.set("kmName",n);$("meName").textContent=n;if(db)registerMe()}
-$("nameOk").onclick=()=>{const n=$("nameIn").value.trim(),p=$("pwIn").value,sp=store.get("kmPw");
- if(!n){toast("Nama tidak boleh kosong");return}if(!p){toast("Kata sandi tidak boleh kosong");return}
- if(sp===null){store.set("kmPw",p)}else if(n!==store.get("kmName")||p!==sp){toast("Nama atau kata sandi salah");return}
- setName(n);$("nameOv").classList.add("hide")};
-$("forgot").onclick=()=>{$("codeIn").value="";setView("vCode");$("codeIn").focus()};
-$("back1").onclick=()=>setView("vAuth");
-$("codeOk").onclick=()=>{if($("codeIn").value.trim()!=="210002"){toast("Kode salah");return}
- $("recName").textContent=store.get("kmName")||"(belum ada)";$("recPw").textContent=store.get("kmPw")||"(belum ada)";$("newPw").value="";setView("vRec")};
-$("pwSave").onclick=()=>{const v=$("newPw").value;if(v){store.set("kmPw",v);toast("Sandi baru disimpan")}showAuth()};
-$("eye").onclick=()=>{const p=$("pwIn"),show=p.type==="password";p.type=show?"text":"password";$("eye").textContent=show?"🙈":"👁️";$("eye").setAttribute("aria-label",show?"Sembunyikan sandi":"Tampilkan sandi");p.focus()};
-$("pwIn").onkeydown=e=>{if(e.key==="Enter")$("nameOk").click()};$("codeIn").onkeydown=e=>{if(e.key==="Enter")$("codeOk").click()};$("newPw").onkeydown=e=>{if(e.key==="Enter")$("pwSave").click()};
-$("nameIn").onkeydown=e=>{if(e.key==="Enter")$("nameOk").click()};
-$("rename").onclick=()=>{$("side").classList.remove("open");showAuth()};
-const PK={name:"kmName",about:"kmAbout",user:"kmUser",pw:"kmPw",link:"kmLink",code:"kmCode"};
-const PROWS=[["name","👤","Nama","Nama kamu"],["about","ℹ️","Tentang","Halo! Aku pakai Whatsschat"],["user","@","Nama pengguna","Tambah nama pengguna"],["pw","🔑","Kata sandi","Kata sandi"],["link","🔗","Tautan","Tambah tautan"],["code","🆔","Kode teman (tekan untuk menyalin)",""]];
-let pwShow=false,editing="";
-function pVal(k){return store.get(PK[k])||""}
-function drawMe(){const p=store.get("kmPhoto"),a=$("meAv");a.style.backgroundImage=p?"url("+p+")":"";a.textContent="";if(!p)a.innerHTML=PERSON}
-function drawProf(){
- const p=store.get("kmPhoto"),im=$("pImg");
- if(p){im.src=p;im.classList.remove("hide");$("pIni").textContent=""}else{im.classList.add("hide");$("pIni").textContent=(pVal("name")||"?").charAt(0).toUpperCase()}
- const box=$("pRows");box.textContent="";
- for(const [k,ic,label,ph] of PROWS){
-  const r=document.createElement("div");r.className="prow";const i=document.createElement("i");i.textContent=ic;
-  const c=document.createElement("div");c.className="pc";const b=document.createElement("b");b.textContent=label;c.appendChild(b);r.append(i,c);
-  if(editing===k){
-   const inp=document.createElement("input");inp.value=pVal(k);inp.maxLength=k==="name"?24:k==="about"?120:64;inp.placeholder=ph;
-   const acts=document.createElement("div");acts.className="acts";const ok=document.createElement("button");ok.className="ok";ok.textContent="Simpan";const no=document.createElement("button");no.textContent="Batal";acts.append(ok,no);
-   const save=()=>{const v=inp.value.trim();if((k==="name"||k==="pw")&&!v){toast(k==="name"?"Nama tidak boleh kosong":"Kata sandi tidak boleh kosong");return}if(k==="name")setName(v);else store.set(PK[k],v);editing="";drawProf();toast("Tersimpan")};
-   ok.onclick=e=>{e.stopPropagation();save()};no.onclick=e=>{e.stopPropagation();editing="";drawProf()};
-   inp.onclick=e=>e.stopPropagation();inp.onkeydown=e=>{if(e.key==="Enter")save();if(e.key==="Escape"){editing="";drawProf()}};
-   c.append(inp,acts);setTimeout(()=>inp.focus(),0)
-  }else{
-   const v=document.createElement("div");v.className="v";const val=pVal(k);
-   if(k==="pw")v.textContent=pwShow?val:"•".repeat(Math.min(val.length,24));else if(val)v.textContent=val;else{v.textContent=ph;v.classList.add("ph")}
-   c.appendChild(v);
-   if(k==="pw"){const e2=document.createElement("button");e2.className="eye2";e2.textContent=pwShow?"🙈":"👁️";e2.onclick=ev=>{ev.stopPropagation();pwShow=!pwShow;drawProf()};r.appendChild(e2)}
-   r.onclick=k==="code"?()=>copyCode():()=>{editing=k;drawProf()}
-  }
-  box.appendChild(r)}}
-function openProf(){$("side").classList.remove("open");editing="";pwShow=false;drawProf();$("prof").classList.remove("hide")}
-$("kebab").onclick=e=>{e.stopPropagation();$("pop").classList.toggle("hide")};
-document.addEventListener("click",()=>$("pop").classList.add("hide"));
-$("pop").onclick=e=>{const a=e.target.closest("button");if(!a)return;$("pop").classList.add("hide");if(a.dataset.a==="set")openProf();else if(a.dataset.a==="teman")openFriend();else if(a.dataset.a==="grup")openGroup();else if(a.dataset.a==="siar")openSholat();else if(a.dataset.a==="perangkat")openLink();else if(a.dataset.a==="bintang")openStar();else toast("Fitur ini belum tersedia")};
-$("pBack").onclick=()=>$("prof").classList.add("hide");
-let friends=[];try{friends=JSON.parse(store.get("kmFriends")||"[]")}catch(e){}
-function saveFriends(){store.set("kmFriends",JSON.stringify(friends))}
-let groups=[];try{groups=JSON.parse(store.get("kmGroups")||"[]")}catch(e){}
-function saveGroups(){store.set("kmGroups",JSON.stringify(groups))}
-const DEFP={add:"all",invite:"admin",appr:"off",send:"all",edit:"all"};
-function grpOf(id){return groups.find(g=>"grp_"+g.id===id)}
-function isGrp(){return !!grpOf(cur)}
-function isAdmin(g){return g.owner===myCode()}
-function grpRule(){const g=grpOf(cur);return "👥 Grup "+g.name+" · Kirim pesan: "+(g.perms.send==="admin"?"hanya admin":"semua orang")+". Ketuk ⚙️ untuk melihat izin grup."}
-const PSEC=[["Bergabung ke grup",[["add","👤","Tambah anggota baru"],["invite","🔗","Bagikan undangan grup"],["appr","⏳","Memerlukan persetujuan admin"]]],["Pengiriman pesan",[["send","💬","Kirim pesan baru"]]],["Mengelola grup",[["edit","✏️","Edit pengaturan grup"]]]];
-function pLabel(k,v){return k==="appr"?(v==="on"?"Aktif":"Nonaktif"):(v==="admin"?"Hanya admin":"Semua orang")}
-let pTarget=null,pCan=false,pDone=null;
-function drawPerm(){const box=$("gpRows");box.textContent="";
- for(const [title,rows] of PSEC){const h=document.createElement("div");h.className="sech";h.textContent=title;box.appendChild(h);
-  for(const [k,ic,label] of rows){const r=document.createElement("div");r.className="prow";const i=document.createElement("i");i.textContent=ic;const c=document.createElement("div");c.className="pc";const b=document.createElement("b");b.textContent=label;const v=document.createElement("div");v.className="v";v.textContent=pLabel(k,pTarget[k]);c.append(b,v);r.append(i,c);
-   r.onclick=()=>{if(!pCan){toast("Hanya admin yang bisa mengubah izin");return}pTarget[k]=k==="appr"?(pTarget[k]==="on"?"off":"on"):(pTarget[k]==="admin"?"all":"admin");if(pDone)pDone();drawPerm()};
-   box.appendChild(r)}}}
-function openPerm(perms,can,done){pTarget=perms;pCan=can;pDone=done;drawPerm();$("gperm").classList.remove("hide")}
-$("gpBack").onclick=()=>{$("gperm").classList.add("hide");sumPerm()};
-$("gSet").onclick=()=>{const g=grpOf(cur);if(!g)return;openPerm(g.perms,isAdmin(g)||g.perms.edit==="all",()=>{g.ts=Date.now();saveGroups();pushGroup(g);drawChs()})};
-let dPerms={...DEFP},dMem=new Set();
-function sumPerm(){$("grSum").textContent=(dPerms.send==="admin"?"Kirim: admin":"Kirim: semua")+" ›"}
-function openGroup(){$("side").classList.remove("open");dPerms={...DEFP};dMem=new Set();$("grName").value="";$("grMsg").className="chk bad hide";sumPerm();
- const box=$("grMem");box.textContent="";
- if(!friends.length){const e=document.createElement("div");e.className="gl";e.style.padding="10px 0";e.textContent="Belum ada kontak. Kamu bisa membuat grup dulu, lalu menambah teman lewat menu Tambah teman.";box.appendChild(e)}
- for(const f of friends){const l=document.createElement("label");l.className="mem";const c=document.createElement("input");c.type="checkbox";c.onchange=()=>{c.checked?dMem.add(f.code):dMem.delete(f.code)};const t=document.createElement("span");t.textContent=f.name||"Teman";l.append(c,t);box.appendChild(l)}
- $("grOv").classList.remove("hide");$("grName").focus()}
-function pushGroup(g){if(!db)return;for(const code of g.members||[]){if(code===myCode())continue;try{db.collection("inbox_"+code).doc("g_"+g.id).set({grp:g,ts:Date.now()}).catch(()=>{})}catch(e){}}}
-function createGroup(){const gn=$("grName").value.trim(),m=$("grMsg");
- if(!gn){m.textContent="⚠️ Nama grup tidak boleh kosong.";m.classList.remove("hide");return}
- if(kasar(gn)){m.textContent="⚠️ Nama grup mengandung kata kasar. Ganti namanya.";m.classList.remove("hide");return}
- const g={id:newCode(),name:gn,perms:{...dPerms},owner:myCode(),ownerName:name,members:[myCode(),...dMem],ts:Date.now()};
- groups.push(g);saveGroups();$("grOv").classList.add("hide");cur="grp_"+g.id;drawChs();subscribe();pushGroup(g);
- toast(db?"Grup dibuat":"Grup dibuat (mode lokal, anggota belum bisa melihat)")}
-$("grGear").onclick=()=>openPerm(dPerms,true,null);
-$("grOk").onclick=createGroup;$("grClose").onclick=()=>$("grOv").classList.add("hide");$("grName").onkeydown=e=>{if(e.key==="Enter")createGroup()};
-function myCode(){return store.get("kmCode")||""}
-function newCode(){const a="abcdefghijklmnopqrstuvwxyz0123456789",r=new Uint32Array(8);crypto.getRandomValues(r);let s="";for(const n of r)s+=a[n%36];return s}
-if(!myCode())store.set("kmCode",newCode());
-function dmId(code){return "dm_"+[myCode(),code].sort().join("_")}
-function dmName(){const f=friends.find(x=>dmId(x.code)===cur);return f?f.name:""}
-function copyCode(){copyTxt(myCode()).then(()=>toast("Kode disalin"),()=>toast("Gagal menyalin"))}
-let inboxUnsub=null,watchedCode="";
-function watchInbox(){try{inboxUnsub=db.collection("inbox_"+myCode()).onSnapshot(s=>{let ch=false;for(const d of s.docs){const f=d.data();if(f&&f.grp&&f.grp.id){const x=f.grp,ex=groups.find(q=>q.id===x.id);if(!ex){groups.push({...x});ch=true;toast("Kamu ditambahkan ke grup "+x.name)}else if((x.ts||0)>(ex.ts||0)){Object.assign(ex,x);ch=true}continue}if(f&&f.code&&f.code!==myCode()){const ex=friends.find(x=>x.code===f.code);if(!ex){friends.push({code:f.code,name:f.name||"Teman",photo:f.photo||""});ch=true;toast((f.name||"Teman")+" menambahkanmu sebagai teman")}else if((f.name&&ex.name!==f.name)||(f.photo||"")!==(ex.photo||"")){if(f.name)ex.name=f.name;ex.photo=f.photo||"";ch=true}}}if(ch){saveFriends();saveGroups();drawChs()}},()=>{})}catch(e){}}
-function pushProfile(th){if(!db)return;for(const f of friends){try{db.collection("inbox_"+f.code).doc(myCode()).set({code:myCode(),name,photo:th||store.get("kmThumb")||"",ts:Date.now()}).catch(()=>{})}catch(e){}}}
-async function registerMe(){if(!db||!named)return;try{
- let code=myCode();const ref=()=>db.collection("users").doc(code);let s=await ref().get();
- while(s.exists&&s.data().uid!==uid){code=newCode();store.set("kmCode",code);s=await ref().get()}
- let th=store.get("kmThumb")||"";if((!th||store.get("kmThumbV")!=="2")&&store.get("kmPhoto")){th=(await mkThumb(store.get("kmPhoto")))||th;if(th){store.set("kmThumb",th);store.set("kmThumbV","2")}}
- await ref().set({code,name,uid,photo:th,ts:Date.now()});pushProfile(th);
- if(watchedCode!==code){if(inboxUnsub)inboxUnsub();watchedCode=code;watchInbox()}
- if(!$("prof").classList.contains("hide"))drawProf()}catch(e){}}
-function openFriend(){$("side").classList.remove("open");$("myCode").textContent=myCode();$("frIn").value="";$("frMsg").className="chk hide";$("frOv").classList.remove("hide");$("frIn").focus()}
-function frMsg(c,t){const e=$("frMsg");e.className="chk "+c;e.textContent=t}
-let frBusy=false;
-async function addFriend(){if(frBusy)return;const code=$("frIn").value.trim().toLowerCase();
- if(!/^[a-z0-9]{8}$/.test(code)){frMsg("bad","⚠️ Kode harus 8 karakter huruf/angka, contoh: dik34h82.");return}
- if(code===myCode()){frMsg("bad","⚠️ Itu kodemu sendiri. Berikan kode ini ke temanmu, lalu masukkan kode milik temanmu di sini.");return}
- if(friends.some(f=>f.code===code)){frMsg("bad","ℹ️ Dia sudah ada di kontakmu.");return}
- if(!db){frMsg("bad","⚠️ Server belum terhubung, jadi kode belum bisa diperiksa.");return}
- frBusy=true;$("frOk").disabled=true;frMsg("load","⏳ Server sedang menganalisis kode verifikasi...");
- try{await new Promise(r=>setTimeout(r,900));const s=await db.collection("users").doc(code).get();
-  if(!s.exists){frMsg("bad","❌ Kode salah atau tidak ditemukan. Periksa lagi kode temanmu.")}
-  else{const f=s.data();friends.push({code,name:f.name||"Teman",photo:f.photo||""});saveFriends();
-   try{await db.collection("inbox_"+code).doc(myCode()).set({code:myCode(),name,photo:store.get("kmThumb")||"",ts:Date.now()})}catch(e){}
-   frMsg("ok","✅ Kode benar! "+(f.name||"Teman")+" sekarang ada di daftar KONTAK, paling bawah di sidebar.");drawChs();$("frIn").value=""}
- }catch(e){frMsg("bad","⚠️ Gagal memeriksa kode. Coba lagi.")}
- frBusy=false;$("frOk").disabled=false}
-$("frOk").onclick=addFriend;$("frIn").onkeydown=e=>{if(e.key==="Enter")addFriend()};$("frClose").onclick=()=>$("frOv").classList.add("hide");$("cpCode").onclick=copyCode;
-$("pOut").onclick=()=>{$("prof").classList.add("hide");showAuth()};
-$("pCam").onclick=()=>$("pFile").click();
-$("pFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const full=sqScale(im,512).toDataURL("image/jpeg",.92);store.set("kmPhoto",full);mkThumb(full).then(t=>{store.set("kmThumb",t);store.set("kmThumbV","2");if(db)registerMe()});drawProf();drawMe();toast("Foto diperbarui")};im.onerror=()=>toast("Gambar tidak valid");im.src=rd.result};rd.readAsDataURL(f);e.target.value=""};$("menu").onclick=()=>$("side").classList.toggle("open");$("ruleX").onclick=()=>$("ruleBar").classList.add("hide");
-$("mT").onclick=()=>setMode("text");$("mC").onclick=()=>setMode("code");$("send").onclick=send;
-$("ta").oninput=()=>{fit();if(!checking)chkOff()};$("lang").onchange=chkOff;
-$("ta").onkeydown=e=>{if(e.key!=="Enter")return;if(mode==="code"){if(e.ctrlKey||e.metaKey){e.preventDefault();send()}}else if(!e.shiftKey){e.preventDefault();send()}};
+let S={chats:[],me:""},view="chat",flt="all",cur=null,tt;
+try{S=JSON.parse(localStorage.getItem("wsc")||"null")||S}catch(e){}
+if(!S.me)S.me=Math.random().toString(36).slice(2,10);
+if(!S.name)S.name="Tamu";if(!S.stars)S.stars=[];
+if(!S.items)S.items=[{id:"s1",by:"Rina",code:"rina2026",lang:"JavaScript",title:"Hitung diskon",body:"function diskon(harga, persen){\n  return harga - (harga * persen / 100);\n}\nconsole.log(diskon(100000, 15));",ts:2},{id:"s2",by:"Dimas",code:"dimas777",lang:"Python",title:"Cek bilangan genap",body:"def genap(n):\n    return n % 2 == 0\n\nprint(genap(10))",ts:1}];
+if(!S.chats.some(c=>c.id=="ai"))S.chats.unshift({id:"ai",name:"AI Whatsschat",ai:1,msgs:[{t:"Halo! Aku AI Whatsschat. Fitur utamanya belum tersambung, ini masih tampilan HTML dulu.",time:hm()}],unread:0});
+const save=()=>{try{localStorage.setItem("wsc",JSON.stringify(S))}catch(e){}};
+function hm(){return new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}).replace(":",".")}
+const ini=n=>(n[0]||"?").toUpperCase(),esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nav=[["chat","chat","Chat"],["story","story","Update"],["store","store","Storage"],["ai","ai","AI"]];
+$("rail").innerHTML=nav.map(n=>`<button data-v="${n[0]}" title="${n[2]}" aria-label="${n[2]}">${I(n[1])}<span class="dot hide" id="rd${n[0]}"></span></button>`).join("")+`<button data-v="arsip" title="Diarsipkan">${I("arch")}</button><hr><div class="sp"></div><button data-v="me" id="rMe" title="Pengaturan">${I("user")}</button>`;
+$("bnav").innerHTML=nav.map(n=>`<button data-v="${n[0]}"><i>${I(n[1])}</i>${n[2]}</button>`).join("");
+$("add").innerHTML=I("plus");$("snd").innerHTML=I("send");$("sri").innerHTML=I("search");$("arc").innerHTML=I("arch")+`<span>Diarsipkan</span><em id="ac"></em>`;
+document.querySelector(".cam").innerHTML=I("cam");$("qi1").innerHTML=I("arch");$("qi2").innerHTML=I("ai");$("qi3").innerHTML=I("user");
+$("chips").innerHTML=[["all","Semua"],["unread","Belum dibaca"],["fav","Favorit"],["group","Grup"]].map(c=>`<button data-f="${c[0]}">${c[1]}</button>`).join("");
+const menu=[["grup","Grup baru"],["kom","Komunitas baru"],["upd","Detail update"],["perangkat","Perangkat tertaut"],["bintang","Berbintang"],["baca","Baca semua"],["teman","Tambah teman"],["arsip","Diarsipkan"],["storage","Storage"],["profil","Pengaturan"]];
+$("pop").innerHTML=menu.map(m=>`<button data-a="${m[0]}">${m[1]}</button>`).join("");
+$("my").textContent=S.me;
 
-const CTRY=[
-["ID","Indonesia",20,["Jakarta","Bandung","Surabaya","Semarang","Yogyakarta","Medan","Makassar","Palembang","Denpasar","Banda Aceh","Lhokseumawe","Pematangsiantar","Padang","Bukittinggi","Pekanbaru","Dumai","Batam","Tanjung Pinang","Jambi","Bengkulu","Bandar Lampung","Pangkal Pinang","Bogor","Depok","Bekasi","Tangerang","Serang","Cirebon","Tasikmalaya","Sukabumi","Garut","Surakarta","Magelang","Pekalongan","Tegal","Purwokerto","Kudus","Malang","Kediri","Madiun","Jember","Banyuwangi","Probolinggo","Sidoarjo","Gresik","Mataram","Kupang","Pontianak","Palangka Raya","Banjarmasin","Balikpapan","Samarinda","Tarakan","Manado","Gorontalo","Palu","Parepare","Kendari","Mamuju","Ambon","Ternate","Jayapura","Sorong","Manokwari","Merauke"]],
-["MY","Malaysia",17,["Kuala Lumpur","George Town","Johor Bahru","Ipoh","Kota Kinabalu","Kuching","Malacca","Shah Alam","Kuantan","Kota Bharu"]],
-["SG","Singapura",11,["Singapore"]],
-["BN","Brunei",3,["Bandar Seri Begawan"]],
-["TH","Thailand",3,["Bangkok","Pattani","Yala","Chiang Mai","Phuket"]],
-["PH","Filipina",3,["Manila","Marawi","Davao","Cotabato"]],
-["SA","Arab Saudi",4,["Mecca","Medina","Riyadh","Jeddah","Dammam","Taif","Tabuk","Abha"]],
-["AE","Uni Emirat Arab",16,["Dubai","Abu Dhabi","Sharjah","Al Ain"]],
-["QA","Qatar",10,["Doha"]],
-["KW","Kuwait",9,["Kuwait City"]],
-["BH","Bahrain",8,["Manama"]],
-["OM","Oman",8,["Muscat"]],
-["YE","Yaman",3,["Sanaa","Aden"]],
-["JO","Yordania",23,["Amman"]],
-["LB","Lebanon",3,["Beirut"]],
-["SY","Suriah",3,["Damascus"]],
-["IQ","Irak",3,["Baghdad","Basra","Najaf","Karbala"]],
-["IR","Iran",7,["Tehran","Mashhad","Isfahan","Shiraz","Qom"]],
-["PS","Palestina",3,["Jerusalem","Gaza","Hebron","Ramallah"]],
-["TR","Turki",13,["Istanbul","Ankara","Izmir","Bursa","Konya"]],
-["EG","Mesir",5,["Cairo","Alexandria","Giza","Aswan"]],
-["MA","Maroko",21,["Casablanca","Rabat","Marrakesh","Fes"]],
-["DZ","Aljazair",19,["Algiers","Oran","Constantine"]],
-["TN","Tunisia",18,["Tunis","Sfax"]],
-["LY","Libya",3,["Tripoli","Benghazi"]],
-["SD","Sudan",3,["Khartoum"]],
-["SO","Somalia",3,["Mogadishu"]],
-["ET","Ethiopia",3,["Addis Ababa"]],
-["KE","Kenya",3,["Nairobi","Mombasa"]],
-["NG","Nigeria",3,["Lagos","Kano","Abuja"]],
-["ZA","Afrika Selatan",3,["Johannesburg","Cape Town","Durban"]],
-["PK","Pakistan",1,["Karachi","Lahore","Islamabad","Peshawar","Quetta"]],
-["IN","India",1,["Delhi","Mumbai","Hyderabad","Kolkata","Chennai"]],
-["BD","Bangladesh",1,["Dhaka","Chittagong"]],
-["AF","Afghanistan",1,["Kabul"]],
-["UZ","Uzbekistan",3,["Tashkent","Samarkand"]],
-["KZ","Kazakhstan",3,["Almaty","Astana"]],
-["RU","Rusia",14,["Moscow","Kazan","Grozny"]],
-["CN","Tiongkok",3,["Beijing","Shanghai","Urumqi"]],
-["JP","Jepang",3,["Tokyo","Osaka"]],
-["KR","Korea Selatan",3,["Seoul"]],
-["AU","Australia",3,["Sydney","Melbourne","Perth","Brisbane"]],
-["GB","Inggris Raya",3,["London","Birmingham","Manchester","Glasgow"]],
-["FR","Prancis",12,["Paris","Marseille","Lyon"]],
-["DE","Jerman",3,["Berlin","Munich","Hamburg","Cologne"]],
-["NL","Belanda",3,["Amsterdam","Rotterdam"]],
-["US","Amerika Serikat",2,["New York","Los Angeles","Chicago","Houston","Washington"]],
-["CA","Kanada",2,["Toronto","Montreal","Vancouver"]]
-];
-const MNAME={20:"KEMENAG (Kementerian Agama RI)",17:"JAKIM (Malaysia)",11:"MUIS (Singapura)",4:"Umm al-Qura (Makkah)",3:"Muslim World League",2:"ISNA (Amerika Utara)",5:"Egyptian General Authority",13:"Diyanet (Turki)",1:"Univ. Ilmu Islam Karachi",7:"Univ. Teheran",8:"Wilayah Teluk",9:"Kuwait",10:"Qatar",12:"UOIF (Prancis)",14:"Spiritual Administration of Muslims of Russia",16:"Dubai",18:"Tunisia",19:"Aljazair",21:"Maroko",23:"Yordania"};
-const ORD=[["Fajr","Subuh","✨"],["Dhuhr","Zuhur","☀️"],["Asr","Ashar","🌤️"],["Maghrib","Maghrib","🌇"],["Isha","Isya","🌙"]];
-let sh={cc:"ID",city:"Jakarta",res:null,loading:false,err:"",h24:store.get("kmH24")==="1"};
-try{const sv=JSON.parse(store.get("kmSholat")||"null");if(sv&&sv.cc&&sv.city){sh.cc=sv.cc;sh.city=sv.city}}catch(e){}
-function ctry(cc){return CTRY.find(c=>c[0]===cc)||CTRY[0]}
-function tzNow(tz){const pad=n=>String(n).padStart(2,"0");
- try{const f=new Intl.DateTimeFormat("en-GB",{timeZone:tz||undefined,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}),o={};for(const p of f.formatToParts(new Date()))o[p.type]=p.value;return{min:(+o.hour%24)*60+(+o.minute)+(+o.second)/60,dmY:o.day+"-"+o.month+"-"+o.year}}
- catch(e){const d=new Date();return{min:d.getHours()*60+d.getMinutes(),dmY:pad(d.getDate())+"-"+pad(d.getMonth()+1)+"-"+d.getFullYear()}}}
-function hm(t){const m=/(\d{1,2}):(\d{2})/.exec(t||"");return m?(+m[1])*60+(+m[2]):null}
-function fmtT(t){const v=hm(t);if(v==null)return"--:--";const h=Math.floor(v/60)%24,m=v%60,pad=n=>String(n).padStart(2,"0");return sh.h24?pad(h)+":"+pad(m):((h%12)||12)+":"+pad(m)+(h<12?"am":"pm")}
-function fmtLeft(l){l=Math.max(0,Math.round(l));const h=Math.floor(l/60),m=l%60;return h?h+"j "+m+"m":m+"m"}
-async function getJson(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);try{const r=await fetch(url,{signal:c.signal});return await r.json()}finally{clearTimeout(t)}}
-let shSeq=0;
-async function loadSholat(){const my=++shSeq,cc=sh.cc,city=sh.city,c=ctry(cc);sh.loading=true;sh.err="";drawSholat();
- const base="https://api.aladhan.com/v1/timingsByCity",q="city="+encodeURIComponent(city)+"&country="+encodeURIComponent(cc)+"&method="+c[2];
- try{let j=await getJson(base+"?"+q);if(!j||j.code!==200||!j.data||!j.data.timings)throw new Error("NF");
-  const tz=(j.data.meta&&j.data.meta.timezone)||"",cd=tzNow(tz).dmY;
-  if(j.data.date&&j.data.date.gregorian&&j.data.date.gregorian.date!==cd){try{const j2=await getJson(base+"/"+cd+"?"+q);if(j2&&j2.code===200&&j2.data&&j2.data.timings)j=j2}catch(e){}}
-  if(my!==shSeq)return;
-  sh.res={cc,city,d:j.data,tz,date:(j.data.date&&j.data.date.gregorian&&j.data.date.gregorian.date)||cd};
-  store.set("kmSholat",JSON.stringify({cc,city}));store.set("kmSholatCache_"+cc+"_"+city,JSON.stringify(sh.res))
- }catch(e){if(my!==shSeq)return;let cached=null;try{cached=JSON.parse(store.get("kmSholatCache_"+cc+"_"+city)||"null")}catch(x){}
-  if(cached&&e.message!=="NF"){sh.res=cached;sh.err="Tidak bisa terhubung ke server. Menampilkan jadwal tersimpan terakhir."}
-  else{sh.res=null;sh.err=e.message==="NF"?'Kota "'+city+'" tidak ditemukan di '+c[1]+". Coba nama kota lain.":(e.name==="AbortError"?"Server terlalu lama merespons.":"Gagal mengambil jadwal. Periksa internet, lalu coba lagi.")}}
- if(my===shSeq){sh.loading=false;drawSholat()}}
-function mk(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function drawSholat(){const B=$("shBody");B.textContent="";const c=ctry(sh.cc),r=sh.res;$("shFmt").textContent=sh.h24?"12j":"24j";
- const top=mk("div","sht"),L=mk("div"),R=mk("div","shr");L.append(mk("small","l","Waktu Salat di"),mk("h1","",sh.city),mk("div","ct",c[1]));top.append(L,R);
- if(r&&!sh.loading){const D=r.d,H=D.date&&D.date.hijri;let ds="";try{ds=new Intl.DateTimeFormat("id-ID",{timeZone:r.tz||undefined,weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date())}catch(e){ds=D.date.readable||""}
-  R.appendChild(mk("div","shd",ds+(H?" | "+H.day+" "+(H.month&&H.month.en)+" "+H.year:"")));
-  const mid=D.meta&&D.meta.method&&D.meta.method.id,b=mk("div","badge");b.append(mk("i","","✓"),mk("span","",MNAME[mid]||(D.meta&&D.meta.method&&D.meta.method.name)||"Metode resmi"));R.appendChild(b);
-  R.appendChild(mk("div","pill","Imsak "+fmtT(D.timings.Imsak)+" | Iftar "+fmtT(D.timings.Maghrib)))}
- B.appendChild(top);
- const ctl=mk("div","shctl"),b1=mk("button","pk"),b2=mk("button","pk"),b3=mk("button","pk rf","🔄");
- b1.append(mk("small","","🌍 Negara"),mk("span","",c[1]+" ▾"));b2.append(mk("small","","📍 Kota"),mk("span","",sh.city+" ▾"));b3.title="Muat ulang";b3.setAttribute("aria-label","Muat ulang");
- b1.onclick=()=>openPick("c");b2.onclick=()=>openPick("k");b3.onclick=()=>loadSholat();ctl.append(b1,b2,b3);B.appendChild(ctl);
- if(sh.loading){const l=mk("div","shld");l.append(mk("div","spin"),mk("div","","Mencari jadwal salat "+sh.city+", "+c[1]+"..."));B.appendChild(l);const g=mk("div","pgrid");for(let i=0;i<5;i++)g.appendChild(mk("div","sk"));B.appendChild(g);return}
- if(sh.err){const e=mk("div","sherr");e.append(mk("span","",(r?"⚠️ ":"❌ ")+sh.err));const rb=mk("button","","Coba lagi");rb.onclick=()=>loadSholat();e.appendChild(rb);B.appendChild(e)}
- if(!r)return;
- const T=r.d.timings,now=tzNow(r.tz).min,mins=ORD.map(o=>hm(T[o[0]]));let cur=-1;for(let i=0;i<5;i++)if(mins[i]!=null&&mins[i]<=now)cur=i;
- let nx,left;if(cur===-1){nx=0;left=mins[0]-now;cur=4}else if(cur===4){nx=0;left=mins[0]+1440-now}else{nx=cur+1;left=mins[nx]-now}
- const g=mk("div","pgrid");
- ORD.forEach((o,i)=>{const cd=mk("div","pc2"+(i===cur?" now":""));if(i===cur)cd.appendChild(mk("span","tag","Sekarang"));const n=mk("div","n");n.append(mk("span","",o[1]),mk("span","",o[2]));cd.append(n,mk("div","tm",fmtT(T[o[0]])));if(i===nx&&isFinite(left))cd.appendChild(mk("div","nx","dalam "+fmtLeft(left)));g.appendChild(cd)});
- B.appendChild(g);B.appendChild(mk("div","shnote","Zona waktu: "+(r.tz||"setempat")+" · Sumber data: Aladhan · Waktu mengikuti kota yang dipilih, bukan jam perangkatmu."))}
-function openSholat(){$("side").classList.remove("open");$("sholat").classList.remove("hide");if(!sh.res||sh.err||tzNow(sh.res.tz).dmY!==sh.res.date)loadSholat();else drawSholat()}
-let pkMode="";
-function openPick(m){pkMode=m;$("pkT").textContent=m==="c"?"Pilih negara":"Pilih kota · "+ctry(sh.cc)[1];$("pkIn").value="";$("pkIn").placeholder=m==="c"?"Cari negara...":"Cari kota, atau ketik kota lain...";drawPick();$("shPick").classList.remove("hide");setTimeout(()=>$("pkIn").focus(),0)}
-function drawPick(){const raw=$("pkIn").value.trim(),q=raw.toLowerCase(),box=$("pkList");box.textContent="";
- const add=(label,sub,on,fn)=>{const b=document.createElement("button");if(on)b.className="on";b.appendChild(mk("span","",label));if(sub)b.appendChild(mk("small","",sub));b.onclick=fn;box.appendChild(b)};
- if(pkMode==="c"){for(const c of CTRY.slice().sort((a,b)=>a[1].localeCompare(b[1],"id"))){if(q&&!c[1].toLowerCase().includes(q))continue;add(c[1],c[3].length+" kota",c[0]===sh.cc,()=>pickCountry(c[0]))}}
- else{const c=ctry(sh.cc);let exact=false;for(const city of c[3].slice().sort()){if(city.toLowerCase()===q)exact=true;if(q&&!city.toLowerCase().includes(q))continue;add(city,"",city===sh.city,()=>pickCity(city))}
-  if(q&&!exact)add('Cari "'+raw+'" di '+c[1],"cari di server",false,()=>pickCity(raw))}
- if(!box.children.length)box.appendChild(mk("div","gl","Tidak ditemukan."))}
-function pickCountry(cc){const c=ctry(cc);if(cc===sh.cc){$("shPick").classList.add("hide");return}sh.cc=cc;sh.city=c[3][0];sh.res=null;loadSholat();if(c[3].length>1)openPick("k");else $("shPick").classList.add("hide")}
-function pickCity(city){$("shPick").classList.add("hide");sh.city=city;sh.res=null;loadSholat()}
-$("pkIn").oninput=drawPick;$("pkClose").onclick=()=>$("shPick").classList.add("hide");$("shPick").onclick=e=>{if(e.target===$("shPick"))$("shPick").classList.add("hide")};
-$("shBack").onclick=()=>$("sholat").classList.add("hide");
-$("shFmt").onclick=()=>{sh.h24=!sh.h24;store.set("kmH24",sh.h24?"1":"0");drawSholat()};
-setInterval(()=>{if($("sholat").classList.contains("hide")||sh.loading||!sh.res)return;if(tzNow(sh.res.tz).dmY!==sh.res.date)loadSholat();else drawSholat()},20000);
-
-const ST={items:[],rates:{},cm:{},bc:{},det:null,pu:null,u3:null,filter:"all",q:"",u1:null,u2:null,kind:"code",file:null,files:[]};
-const MAXB=3*1024*1024,CHK=190000,MAXCODE=200*1024;
-function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
-function fmtSize(n){n=+n||0;return n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(2)+" MB"}
-function bytesToB64(u){let t="";for(let i=0;i<u.length;i+=0x8000)t+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(t)}
-function b64ToBytes(b){const t=atob(b),u=new Uint8Array(t.length);for(let i=0;i<t.length;i++)u[i]=t.charCodeAt(i);return u}
-function readBytes(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(new Uint8Array(r.result));r.onerror=()=>rej(r.error);r.readAsArrayBuffer(f)})}
-const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
-function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRCT[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
-function makeZip(entries){const enc=new TextEncoder(),parts=[],cen=[];let off=0;const d=new Date(),dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(),tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
- for(const e of entries){const nm=enc.encode(e.name),crc=crc32(e.data),sz=e.data.length;
-  const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);lh.setUint16(10,tm,true);lh.setUint16(12,dt,true);lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);lh.setUint16(28,0,true);
-  parts.push(new Uint8Array(lh.buffer),nm,e.data);
-  const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);ch.setUint16(12,tm,true);ch.setUint16(14,dt,true);ch.setUint32(16,crc,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
-  cen.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+sz}
- let cs=0;for(const c of cen)cs+=c.length;
- const end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,entries.length,true);end.setUint16(10,entries.length,true);end.setUint32(12,cs,true);end.setUint32(16,off,true);
- const all=[...parts,...cen,new Uint8Array(end.buffer)];let tot=0;for(const a of all)tot+=a.length;const out=new Uint8Array(tot);let q=0;for(const a of all){out.set(a,q);q+=a.length}return out}
-function toChunks(u){const b=bytesToB64(u),a=[];for(let i=0;i<b.length;i+=CHK)a.push(b.slice(i,i+CHK));return a}
-function isMine(it){return it.uid===uid||it.uid===localUid}
-function stLoad(){if(ST.u1){ST.u1();ST.u1=null}if(ST.u2){ST.u2();ST.u2=null}if(ST.u3){ST.u3();ST.u3=null}
- $("stStat").innerHTML=db?'<span class="dot"></span>Terhubung · dibagikan ke semua pengguna':'<span class="dot off"></span>Mode lokal · hanya terlihat di perangkat ini';
- if(db){try{ST.u1=db.collection("store_items").orderBy("ts","asc").onSnapshot(sn=>{ST.items=sn.docs.map(d=>({id:d.id,...d.data()}));drawStore()},()=>toast("Gagal memuat Storage"))}catch(e){toast("Gagal memuat Storage")}
-  try{ST.u2=db.collection("store_rates").onSnapshot(sn=>{const r={};for(const d of sn.docs){const v=d.data();if(v&&v.item&&v.uid)(r[v.item]=r[v.item]||{})[v.uid]=v.stars}ST.rates=r;drawStore()},()=>{})}catch(e){}
-  try{ST.u3=db.collection("store_comments").orderBy("ts","asc").onSnapshot(sn=>{const c={};for(const d of sn.docs){const v=d.data();if(v&&v.item)(c[v.item]=c[v.item]||[]).push({id:d.id,...v})}ST.cm=c;drawStore();if(ST.det)drawCm()},()=>{})}catch(e){}}
- else{try{ST.items=JSON.parse(store.get("kmSt_items")||"[]")}catch(e){ST.items=[]}try{ST.rates=JSON.parse(store.get("kmSt_rates")||"{}")}catch(e){ST.rates={}}try{ST.cm=JSON.parse(store.get("kmSt_cm")||"{}")}catch(e){ST.cm={}}drawStore()}}
-function openStore(){$("store").classList.remove("hide");stLoad()}
-function closeStore(){$("store").classList.add("hide");closeDet();if(ST.u1){ST.u1();ST.u1=null}if(ST.u2){ST.u2();ST.u2=null}if(ST.u3){ST.u3();ST.u3=null}}
-function starRow(it,my,mine){const w=mk("span","stars");for(let n=1;n<=5;n++){const b=mk("button",n<=(my||0)?"on":"","★");b.title=n+" bintang";b.setAttribute("aria-label",n+" bintang");b.onclick=()=>stRate(it,n);w.appendChild(b)}return w}
-function stCard(it){const c=mk("div","stcard"),h=mk("h3"),rt=ST.rates[it.id]||{},arr=Object.entries(rt).filter(e=>e[0]!==it.uid).map(e=>e[1]),avg=arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0,my=rt[uid]||rt[localUid],mine=isMine(it);
- h.append(mk("span","",{code:"💻",file:"📄",folder:"📁"}[it.kind]||"📦"),mk("span","",it.title||"Tanpa judul"));if(it.kind==="code")h.appendChild(mk("span","chip",it.lang||"Kode"));c.appendChild(h);
- let ex="";if(it.kind==="file")ex=" · "+(it.fname||"")+" · "+fmtSize(it.size);else if(it.kind==="folder")ex=" · "+(it.count||0)+" file · "+fmtSize(it.size);
- c.appendChild(mk("div","stmeta","oleh "+(mine?"kamu":(it.by||"Tamu"))+" · "+new Date(it.ts||Date.now()).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})+ex));
- if(it.desc)c.appendChild(mk("div","stdesc",it.desc));
- if(it.kind==="code")c.appendChild(mk("pre","stpre",it.body||""));
- if(it.kind==="folder"&&it.names&&it.names.length){const ul=mk("ul","fl");for(const n of it.names)ul.appendChild(mk("li","",n));c.appendChild(ul)}
- const r=mk("div","strate");r.append(mk("span","",arr.length?"⭐ "+avg.toFixed(1)+" ("+arr.length+" penilaian)":"Belum ada penilaian"));
- if(!mine&&it.kind!=="code"){r.append(mk("span","","· Nilaimu:"),starRow(it,my,mine))}c.appendChild(r);
- const a=mk("div","stacts");
- {const n=(ST.cm[it.id]||[]).length,v=mk("button","stbtn sec","👁 Buka · 💬 "+(n?n+" komentar":"Komentar"));v.onclick=()=>openDet(it);a.appendChild(v)}
- if(it.kind==="code"){const b=mk("button","stbtn","📋 Salin kode");b.onclick=async()=>{try{await copyTxt(it.body||"");toast(ST.rates[it.id]&&(ST.rates[it.id][uid]||ST.rates[it.id][localUid])?"Kode disalin":"Kode disalin ✓ Beri bintang ⭐ ya")}catch(e){toast("Gagal menyalin")}};a.appendChild(b)}
- else{const ok=mine||my===5,b=mk("button","stbtn"+(ok?"":" lock"),ok?"⬇️ Ambil / Unduh":"🔒 Beri ⭐ 5 untuk mengambil");b.onclick=()=>{if(!ok){toast("Beri bintang 5 dulu sebagai dukungan, lalu file bisa diambil");return}stDownload(it,b)};a.appendChild(b)}
- if(mine){const d=mk("button","stbtn sec","🗑 Hapus");d.onclick=()=>{if(d.dataset.arm){stDelete(it)}else{d.dataset.arm="1";d.textContent="Yakin hapus?";setTimeout(()=>{d.dataset.arm="";d.textContent="🗑 Hapus"},3000)}};a.appendChild(d)}
- if(it.kind==="code"){const fb=mk("span","stfb");fb.append(mk("span","","Beri nilai"),starRow(it,my,mine));a.appendChild(fb)}
- c.appendChild(a);return c}
-function drawStore(){const L=$("stList");if(!L)return;L.textContent="";const q=ST.q.toLowerCase();
- const list=ST.items.slice().sort((a,b)=>(b.ts||0)-(a.ts||0)).filter(it=>(ST.filter==="all"||it.kind===ST.filter)&&(!q||((it.title||"")+" "+(it.desc||"")+" "+(it.lang||"")+" "+(it.fname||"")+" "+(it.by||"")).toLowerCase().includes(q)));
- if(!list.length){L.appendChild(mk("div","empty",ST.items.length?"Tidak ada yang cocok dengan pencarianmu.":"Storage masih kosong. Tekan ＋ Unggah untuk membagikan kode, file, atau folder pertama."));return}
- for(const it of list)L.appendChild(stCard(it))}
-async function stRate(it,n){const k=it.id+"_"+uid;(ST.rates[it.id]=ST.rates[it.id]||{})[uid]=n;drawStore();
- if(db){try{await db.collection("store_rates").doc(k).set({item:it.id,uid,name,stars:n,ts:Date.now()})}catch(e){toast("Penilaian gagal terkirim")}}else{lsSet("kmSt_rates",JSON.stringify(ST.rates))}
- if(n===5)toast("Terima kasih atas dukunganmu! ⭐")}
-async function stChunk(id,i){if(db){const sn=await db.collection("store_chunks").doc(id+"_"+i).get();if(!sn.exists)throw new Error("x");return sn.data().d}const v=localStorage.getItem("kmSt_c_"+id+"_"+i);if(v==null)throw new Error("x");return v}
-async function stDownload(it,btn){const rt=ST.rates[it.id]||{};if(!(isMine(it)||rt[uid]===5||rt[localUid]===5)){toast("Beri bintang 5 dulu untuk mengambil");return}
- if(btn){btn.disabled=true;btn.textContent="⏳ Menyiapkan..."}
- try{const parts=[];for(let i=0;i<(it.chunks||0);i++)parts.push(await stChunk(it.id,i));const bytes=b64ToBytes(parts.join("")),blob=new Blob([bytes],{type:it.kind==="folder"?"application/zip":(it.mime||"application/octet-stream")}),a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);a.download=it.kind==="folder"?(it.fname||it.title||"folder")+".zip":(it.fname||"file");document.body.appendChild(a);a.click();setTimeout(()=>{try{URL.revokeObjectURL(a.href)}catch(e){}a.remove()},1500);toast("Unduhan dimulai")}
- catch(e){toast("Gagal mengunduh, coba lagi")}
- if(btn){btn.disabled=false;btn.textContent="⬇️ Ambil / Unduh"}}
-async function stDelete(it){ST.items=ST.items.filter(x=>x.id!==it.id);drawStore();
- if(db){try{await db.collection("store_items").doc(it.id).delete();for(const c of (ST.cm[it.id]||[]))db.collection("store_comments").doc(c.id).delete().catch(()=>{});for(let i=0;i<(it.chunks||0);i++)db.collection("store_chunks").doc(it.id+"_"+i).delete().catch(()=>{})}catch(e){toast("Gagal menghapus di server")}}
- else{lsSet("kmSt_items",JSON.stringify(ST.items));for(let i=0;i<(it.chunks||0);i++)try{localStorage.removeItem("kmSt_c_"+it.id+"_"+i)}catch(e){}}}
-function suErr(t){const e=$("suErr");if(!t){e.className="chk bad hide";return}e.textContent="⚠️ "+t;e.className="chk bad"}
-function suKind(k){ST.kind=k;ST.file=null;ST.files=[];suErr("");$("suInfo").textContent="";for(const b of $("suKind").children)b.classList.toggle("on",b.dataset.k===k);
- $("suCode").classList.toggle("hide",k!=="code");$("suPick").classList.toggle("hide",k==="code");$("suPickBtn").textContent=k==="file"?"📄 Pilih file":"📁 Pilih folder"}
-function openUp(){$("suTitle").value="";$("suDesc").value="";$("suBody").value="";suKind("code");$("suOk").disabled=false;$("suOk").textContent="Unggah";$("stUp").classList.remove("hide");$("suTitle").focus()}
-function skipPath(p){return /(^|\/)(node_modules|\.git)\//.test(p)}
-async function stPost(){suErr("");const title=$("suTitle").value.trim(),desc=$("suDesc").value.trim(),k=ST.kind;
- if(!title){suErr("Judul tidak boleh kosong.");return}
- if(kasar(title+" "+desc)){suErr("Judul atau deskripsi mengandung kata kasar.");return}
- const it={id:Date.now()+"-"+Math.random().toString(36).slice(2,7),kind:k,title,desc,by:name,uid,ts:Date.now()};let chunks=[];
- try{
-  if(k==="code"){const body=$("suBody").value;if(!body.trim()){suErr("Kode tidak boleh kosong.");return}if(body.length>MAXCODE){suErr("Kode terlalu besar (maks 200 KB). Unggah sebagai file saja.");return}it.body=body;it.lang=$("suLang").value}
-  else if(k==="file"){const f=ST.file;if(!f){suErr("Pilih file dulu.");return}if(f.size>MAXB){suErr("File terlalu besar (maks 3 MB).");return}const u=await readBytes(f);it.fname=f.name;it.size=u.length;it.mime=f.type||"";chunks=toChunks(u)}
-  else{const fs=ST.files.filter(f=>!skipPath(f.webkitRelativePath||f.name));if(!fs.length){suErr("Pilih folder yang berisi file.");return}let tot=0;for(const f of fs)tot+=f.size;if(tot>MAXB){suErr("Folder terlalu besar ("+fmtSize(tot)+"). Maksimal 3 MB.");return}
-   const ents=[];for(const f of fs)ents.push({name:f.webkitRelativePath||f.name,data:await readBytes(f)});const z=makeZip(ents);if(z.length>MAXB){suErr("Hasil zip terlalu besar (maks 3 MB).");return}
-   it.fname=(ents[0].name.split("/")[0])||title;it.count=ents.length;it.size=tot;it.names=ents.map(e=>e.name).slice(0,200);it.mime="application/zip";chunks=toChunks(z)}
- }catch(e){suErr("Gagal membaca file.");return}
- it.chunks=chunks.length;$("suOk").disabled=true;$("suOk").textContent="⏳ Mengunggah...";
- try{
-  if(db){for(let i=0;i<chunks.length;i++)await db.collection("store_chunks").doc(it.id+"_"+i).set({item:it.id,i,d:chunks[i]});await db.collection("store_items").doc(it.id).set(it)}
-  else{for(let i=0;i<chunks.length;i++){if(!lsSet("kmSt_c_"+it.id+"_"+i,chunks[i]))throw new Error("quota")}ST.items.push(it);if(!lsSet("kmSt_items",JSON.stringify(ST.items))){ST.items.pop();throw new Error("quota")}drawStore()}
-  $("stUp").classList.add("hide");toast("Berhasil diunggah ke Storage")
- }catch(e){if(!db)for(let i=0;i<chunks.length;i++)try{localStorage.removeItem("kmSt_c_"+it.id+"_"+i)}catch(x){}suErr(e&&e.message==="quota"?"Penyimpanan perangkat penuh.":"Gagal mengunggah ke server. Coba lagi.");$("suOk").disabled=false;$("suOk").textContent="Unggah"}}
-$("stBack").onclick=closeStore;$("stAdd").onclick=openUp;$("suClose").onclick=()=>$("stUp").classList.add("hide");$("suOk").onclick=stPost;
-$("suKind").onclick=e=>{const b=e.target.closest("button");if(b)suKind(b.dataset.k)};
-$("suPickBtn").onclick=()=>$(ST.kind==="file"?"fIn":"dIn").click();
-$("fIn").onchange=e=>{const f=e.target.files[0];ST.file=f||null;if(f){$("suInfo").textContent=f.name+" · "+fmtSize(f.size);if(!$("suTitle").value)$("suTitle").value=f.name}e.target.value=""};
-$("dIn").onchange=e=>{const a=[...e.target.files];ST.files=a;if(a.length){const use=a.filter(f=>!skipPath(f.webkitRelativePath||f.name));let t=0;for(const f of use)t+=f.size;const root=((a[0].webkitRelativePath||"").split("/")[0])||"folder";$("suInfo").textContent=root+" · "+use.length+" file · "+fmtSize(t)+(use.length<a.length?" ("+(a.length-use.length)+" file node_modules/.git dilewati)":"");if(!$("suTitle").value)$("suTitle").value=root}e.target.value=""};
-$("stFil").onclick=e=>{const b=e.target.closest("button");if(!b)return;ST.filter=b.dataset.f;for(const x of $("stFil").children)x.classList.toggle("on",x===b);drawStore()};
-$("stQ").oninput=()=>{ST.q=$("stQ").value.trim();drawStore()};
-
-
-/* ===== Storage: buka item + komentar ===== */
-const TXT_EXT=/\.(txt|md|markdown|js|mjs|cjs|ts|tsx|jsx|json|html?|css|scss|py|php|java|c|h|cpp|hpp|cs|go|rs|rb|sh|bash|sql|xml|yml|yaml|toml|ini|env|csv|log|vue|svelte|kt|swift|lua|r|bat|ps1|gitignore|gradle|dart)$/i,IMG_EXT=/\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)$/i;
-function unzip(u){const out=[],dv=new DataView(u.buffer,u.byteOffset,u.byteLength),dec=new TextDecoder();let p=0;while(p+30<=u.length&&dv.getUint32(p,true)===0x04034b50){const sz=dv.getUint32(p+18,true),nl=dv.getUint16(p+26,true),el=dv.getUint16(p+28,true),s0=p+30+nl+el;out.push({name:dec.decode(u.subarray(p+30,p+30+nl)),data:u.subarray(s0,s0+sz)});p=s0+sz}return out}
-function asText(u){const n=Math.min(u.length,4000);for(let i=0;i<n;i++)if(u[i]===0)return null;return new TextDecoder("utf-8").decode(u.length>400000?u.subarray(0,400000):u)+(u.length>400000?"\n\n… (dipotong, file terlalu panjang untuk pratinjau)":"")}
-async function stBytes(it){if(ST.bc[it.id])return ST.bc[it.id];const parts=[];for(let i=0;i<(it.chunks||0);i++)parts.push(await stChunk(it.id,i));const b=b64ToBytes(parts.join(""));ST.bc[it.id]=b;return b}
-function showData(box,name,data,mime){box.textContent="";if(ST.pu){try{URL.revokeObjectURL(ST.pu)}catch(e){}ST.pu=null}
- if(IMG_EXT.test(name)||/^image\//.test(mime||"")){const t=IMG_EXT.test(name)&&/\.svg$/i.test(name)?"image/svg+xml":(mime||"image/"+(name.split(".").pop()||"png").toLowerCase().replace("jpg","jpeg"));ST.pu=URL.createObjectURL(new Blob([data],{type:t}));const im=mk("img","sdimg");im.alt=name;box.appendChild(im);im.src=ST.pu;return}
- const t=(TXT_EXT.test(name)||/^text\//.test(mime||"")||!/\.[a-z0-9]+$/i.test(name))?asText(data):null;
- if(t!=null){const h=mk("div","sdfn",name+" · "+fmtSize(data.length));const pre=mk("pre","stpre sdpre",t);box.append(h,pre);return}
- box.appendChild(mk("div","empty","File ini tidak bisa dipratinjau ("+name+", "+fmtSize(data.length)+"). Beri ⭐ 5 untuk mengunduhnya."))}
-function closeDet(){ST.det=null;$("stDet").classList.add("hide");if(ST.pu){try{URL.revokeObjectURL(ST.pu)}catch(e){}ST.pu=null}}
-function openDet(it){ST.det=it.id;const B=$("sdBody");B.textContent="";$("sdTitle").textContent=({code:"💻",file:"📄",folder:"📁"}[it.kind]||"📦")+" "+(it.title||"Tanpa judul");
- B.appendChild(mk("div","stmeta","oleh "+(isMine(it)?"kamu":(it.by||"Tamu"))+" · "+new Date(it.ts||Date.now()).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})+(it.kind==="code"?" · "+(it.lang||"Kode"):it.kind==="file"?" · "+(it.fname||"")+" · "+fmtSize(it.size):" · "+(it.count||0)+" file · "+fmtSize(it.size))));
- if(it.desc)B.appendChild(mk("div","stdesc",it.desc));
- const pv=mk("div","sdpv");B.appendChild(pv);
- if(it.kind==="code"){pv.appendChild(mk("pre","stpre sdpre",it.body||""));const cb=mk("button","stbtn sec","📋 Salin kode");cb.style.marginBottom="8px";cb.onclick=()=>copyTxt(it.body||"").then(()=>toast("Kode disalin"),()=>toast("Gagal menyalin"));pv.appendChild(cb)}
- else{pv.appendChild(mk("div","empty","⏳ Memuat isi dari server..."));
-  stBytes(it).then(b=>{if(ST.det!==it.id)return;pv.textContent="";
-   if(it.kind==="file"){const box=mk("div");pv.appendChild(box);showData(box,it.fname||"file",b,it.mime)}
-   else{let ents=[];try{ents=unzip(b)}catch(e){}if(!ents.length){pv.appendChild(mk("div","empty","Isi folder tidak bisa dibaca."));return}
-    const lst=mk("div","sdfl"),box=mk("div");let cur=null;
-    for(const e of ents){const bt=mk("button","sdf",e.name);bt.onclick=()=>{if(cur)cur.classList.remove("on");cur=bt;bt.classList.add("on");showData(box,e.name,e.data,"");box.scrollIntoView({block:"nearest"})};lst.appendChild(bt)}
-    pv.append(mk("div","sdfn","Pilih file untuk melihat isinya:"),lst,box);const f=lst.querySelector("button");if(f)f.click()}
-  }).catch(()=>{if(ST.det===it.id){pv.textContent="";pv.appendChild(mk("div","empty","Gagal memuat isi. Coba buka lagi."))}})}
- const h=mk("h4","sdh","💬 Komentar & ulasan");B.appendChild(h);
- const f=mk("div","sdform"),sel=mk("select","fld");sel.id="cmKind";for(const [v,t] of [["ulasan","💬 Ulasan"],["bug","🐞 Laporan bug"],["saran","💡 Saran perbaikan"]]){const o=mk("option","",t);o.value=v;sel.appendChild(o)}
- const ta=mk("textarea","fld");ta.id="cmText";ta.maxLength=500;ta.placeholder="Tulis ulasan, laporkan bug, atau saran apa yang perlu diperbaiki...";ta.rows=3;
- const er=mk("div","chk bad hide");er.id="cmErr";er.style.marginBottom="8px";
- const sb=mk("button","stbtn","Kirim komentar");sb.id="cmSend";sb.onclick=()=>postCm(it.id);
- f.append(sel,ta,er,sb);B.appendChild(f);const L=mk("div","sdcm");L.id="cmList";B.appendChild(L);drawCm();
- $("stDet").classList.remove("hide");B.scrollTop=0}
-const CMLBL={ulasan:"💬 Ulasan",bug:"🐞 Bug",saran:"💡 Saran"};
-function drawCm(){const L=$("cmList");if(!L||!ST.det)return;L.textContent="";const arr=ST.cm[ST.det]||[];
- if(!arr.length){L.appendChild(mk("div","empty","Belum ada komentar. Jadilah yang pertama!"));return}
- for(const c of arr.slice().sort((a,b)=>(b.ts||0)-(a.ts||0))){const r=mk("div","cmrow"),hd=mk("div","cmhd");hd.append(mk("b","",c.name||"Tamu"),mk("span","chip",CMLBL[c.kind]||CMLBL.ulasan),mk("small","",new Date(c.ts||Date.now()).toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})));
-  if(c.uid===uid||c.uid===localUid){const d=mk("button","cmdel","🗑");d.title="Hapus komentarmu";d.onclick=()=>delCm(c);hd.appendChild(d)}
-  r.append(hd,mk("div","cmtx",c.text||""));L.appendChild(r)}}
-function cmErr(t){const e=$("cmErr");if(!e)return;if(!t){e.className="chk bad hide";return}e.textContent="⚠️ "+t;e.className="chk bad"}
-let cmBusy=false;
-async function postCm(item){if(cmBusy)return;cmErr("");const text=$("cmText").value.trim(),kind=$("cmKind").value;
- if(!text){cmErr("Komentar tidak boleh kosong.");return}if(text.length>500){cmErr("Maksimal 500 karakter.");return}if(kasar(text)){cmErr("Komentar mengandung kata kasar.");return}
- const c={id:Date.now()+"-"+Math.random().toString(36).slice(2,7),item,uid,name:name||"Tamu",kind,text,ts:Date.now()};cmBusy=true;$("cmSend").disabled=true;
- try{if(db){await db.collection("store_comments").doc(c.id).set({item,uid,name:c.name,kind,text,ts:c.ts})}
-  else{(ST.cm[item]=ST.cm[item]||[]).push(c);lsSet("kmSt_cm",JSON.stringify(ST.cm));drawCm();drawStore()}
-  $("cmText").value="";toast("Komentar terkirim")}
- catch(e){cmErr("Gagal mengirim komentar. Coba lagi.")}
- cmBusy=false;const b=$("cmSend");if(b)b.disabled=false}
-async function delCm(c){if(db){try{await db.collection("store_comments").doc(c.id).delete();toast("Komentar dihapus")}catch(e){toast("Gagal menghapus komentar")}}
- else{ST.cm[c.item]=(ST.cm[c.item]||[]).filter(x=>x.id!==c.id);lsSet("kmSt_cm",JSON.stringify(ST.cm));drawCm();drawStore()}}
-$("sdX").onclick=closeDet;$("stDet").onclick=e=>{if(e.target===$("stDet"))closeDet()};
-
-
-/* ===== Notifikasi pesan ===== */
-const NT={init:{},done:new Set(),base:"Whatsschat",orig:"",last:null};
-function chIds(){return [...groups.map(g=>"grp_"+g.id),...friends.map(f=>dmId(f.code))]}
-function seenGet(ch){let v=store.get("kmSeen_"+ch);if(v==null){v=String(Date.now());try{localStorage.setItem("kmSeen_"+ch,v)}catch(e){}}return +v}
-function markSeen(ch){try{localStorage.setItem("kmSeen_"+ch,String(Date.now()))}catch(e){}updBadges()}
-function unreadOf(ch){if(ch===cur&&!document.hidden)return 0;const s=seenGet(ch);let n=0;for(const m of cacheOf(ch).values())if(!isOwn(m)&&(m.ts||0)>s)n++;return n}
-function favBadge(n){const l=document.querySelector('link[rel="icon"]');if(!l)return;if(!NT.orig)NT.orig=l.href;if(NT.last===(n>0))return;NT.last=n>0;
- if(!n){l.href=NT.orig;return}
- const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d");x.drawImage(im,0,0,64,64);x.beginPath();x.arc(46,18,17,0,7);x.fillStyle="#fff";x.fill();x.beginPath();x.arc(46,18,13,0,7);x.fillStyle="#ff1f3a";x.fill();l.href=c.toDataURL("image/png")}catch(e){}};im.src=NT.orig}
-function updBadges(){let tot=0;for(const id of chIds()){const n=unreadOf(id),b=document.querySelector('#chs .ch[data-id="'+id+'"]');
-  if(b){let g=b.querySelector(".bdg");if(!g){g=document.createElement("i");g.className="bdg hide";b.appendChild(g)}g.textContent=n>99?"99+":String(n);g.classList.toggle("hide",!n)}tot+=n}
- document.title=(tot?"("+tot+") ":"")+NT.base;favBadge(tot);const mn=$("menu");if(mn)mn.classList.toggle("dot",tot>0)}
-function pvText(m){return m.t==="code"?"💻 Kode"+(m.lang?" ("+m.lang+")":"")+": "+String(m.body||"").split("\n")[0].slice(0,60):String(m.body||"").replace(/\s+/g," ").slice(0,120)}
-function goCh(id){if(id==="bantuan"||id==="santai")id="umum";cur=id;$("side").classList.remove("open");drawChs();subscribe();markSeen(id)}
-function beep(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;NT.ac=NT.ac||new A();const a=NT.ac;if(a.state!=="running")return;const t=a.currentTime;[[880,0],[1320,.12]].forEach(([f,d])=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.12,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.25);o.start(t+d);o.stop(t+d+.3)})}catch(e){}}
-let nbT=null;
-function inBanner(ch,title,body,f){let b=$("nbn");if(!b){b=document.createElement("div");b.id="nbn";b.innerHTML='<span class="nav"></span><div class="ntx"><b></b><span></span></div>';document.body.appendChild(b)}
- const av=b.querySelector(".nav");setAv(av,f||{name:title});b.querySelector("b").textContent=title;b.querySelector(".ntx span").textContent=body;b.onclick=()=>{b.classList.remove("show");goCh(ch)};b.classList.add("show");clearTimeout(nbT);nbT=setTimeout(()=>b.classList.remove("show"),5000)}
-async function sysNotify(ch,title,body,icon){if(!("Notification" in window)||Notification.permission!=="granted")return;
- const o={body,icon:icon||"assets/icon-192.png",badge:"assets/icon-192.png",tag:"msg_"+ch,renotify:true,data:{ch}};
- try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,o);return}}catch(e){}
- try{const n=new Notification(title,o);n.onclick=()=>{window.focus();goCh(ch);n.close()}}catch(e){}}
-function notifyMsg(ch,m){if(!m||NT.done.has(m.id))return;NT.done.add(m.id);
- if(!document.hidden&&ch===cur){markSeen(ch);return}
- const g=grpOf(ch),f=g?null:friends.find(x=>dmId(x.code)===ch),title=g?g.name+" · "+(m.name||"Tamu"):(m.name||(f&&f.name)||"Pesan baru"),body=pvText(m);
- updBadges();
- if(document.hidden)sysNotify(ch,title,body,f&&f.photo||"");else{beep();inBanner(ch,title,body,f)}}
-const WT={};
-function watchSync(){if(!db)return;const want=new Set(chIds());
- for(const ch of want){if(ch in WT)continue;WT[ch]=null;
-  try{WT[ch]=db.collection("ch_"+ch).orderBy("ts","desc").limit(30).onSnapshot(s=>{const mp=cacheOf(ch);let chg=false;const fresh=[];
-   for(const d of s.docs){const x={id:d.id,...d.data()};if(delIds.has(x.id))continue;const o=mp.get(x.id);if(o&&o.sent!==false)continue;if(o&&isOwn(o)){o.sent=true;chg=true;continue}x.sent=true;mp.set(x.id,x);chg=true;if(!isOwn(x))fresh.push(x)}
-   if(chg)cacheSave(ch);const first=!NT.init[ch];NT.init[ch]=true;
-   if(!first)for(const m of fresh.sort((a,b)=>(a.ts||0)-(b.ts||0)))notifyMsg(ch,m);
-   if(ch===cur){msgs=view(ch);render();if(!document.hidden)markSeen(ch)}
-   updBadges()},()=>{})}catch(e){WT[ch]=null}}
- for(const ch of Object.keys(WT))if(!want.has(ch)){try{WT[ch]&&WT[ch]()}catch(e){}delete WT[ch]}
- notifUi()}
-const IOSWEB=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone&&!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
-function notifUi(){const b=$("notifBtn");if(!b)return;const has="Notification" in window;
- if(has){b.textContent="🔔 Aktifkan notifikasi pesan";b.classList.toggle("hide",!db||Notification.permission==="granted")}
- else if(IOSWEB){b.textContent="📲 Pasang ke layar utama untuk notifikasi";b.classList.toggle("hide",false)}else b.classList.add("hide")}
-$("notifBtn").onclick=async()=>{
- if(!("Notification" in window)){toast("Di iPhone: buka menu Bagikan di Safari, pilih “Tambah ke Layar Utama”, lalu buka aplikasinya dari layar utama.");return}
- if(Notification.permission==="denied"){toast("Notifikasi diblokir. Buka pengaturan situs di browser lalu izinkan Notifikasi.");return}
- try{const r=await Notification.requestPermission();if(r==="granted"){toast("Notifikasi aktif");sysNotify("test","Whatsschat","Notifikasi pesan sudah aktif.")}}catch(e){}notifUi()};
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)markSeen(cur);else updBadges()});
-try{if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(()=>{});navigator.serviceWorker.addEventListener("message",e=>{const d=e.data;if(d&&d.type==="open"&&d.ch)goCh(d.ch)})}}catch(e){}
-{const q=new URLSearchParams(location.search).get("ch");if(q)setTimeout(()=>{try{goCh(q)}catch(e){}},900)}
-setInterval(()=>{try{watchSync()}catch(e){}},4000);
-
-/* ===== STORY: video 23 detik, hilang setelah 24 jam ===== */
-const SV={items:[],seen:new Set(),vw:{},marked:new Set(),u2:null,u1:null,file:null,meta:null,busy:false,urls:new Map(),cleaned:new Set(),play:[],gi:0,ii:0,tok:0,muted:false,pu:null,tick:null,TTL:24*3600*1000,MAXS:23,MAXV:3.5*1024*1024};
-try{SV.seen=new Set(JSON.parse(store.get("kmSvSeen")||"[]"))}catch(e){}
-function svSaveSeen(){store.set("kmSvSeen",JSON.stringify([...SV.seen].slice(-400)))}
-function svExp(it){return it.exp||((it.ts||0)+SV.TTL)}
-function svAlive(it){return svExp(it)>Date.now()}
-function svAgo(ts){const m=Math.max(0,Math.floor((Date.now()-ts)/6e4));return m<1?"Baru saja":m<60?m+" mnt lalu":Math.floor(m/60)+" jam lalu"}
-function svLeft(it){const m=Math.max(0,Math.ceil((svExp(it)-Date.now())/6e4));return m<60?m+" mnt":Math.ceil(m/60)+" jam"}
-function svPurge(list){for(const it of list){if(SV.cleaned.has(it.id))continue;SV.cleaned.add(it.id);
- if(db){try{for(const v of (SV.vw[it.id]||[]))db.collection("story_views").doc(v.id).delete().catch(()=>{});db.collection("story_items").doc(it.id).delete().catch(()=>{});for(let i=0;i<(it.chunks||0);i++)db.collection("story_chunks").doc(it.id+"_"+i).delete().catch(()=>{})}catch(e){}}
- else for(let i=0;i<(it.chunks||0);i++)try{localStorage.removeItem("kmSv_c_"+it.id+"_"+i)}catch(e){}}}
-function svLoad(){if(SV.u1){SV.u1();SV.u1=null}if(SV.u2){SV.u2();SV.u2=null}
- $("svStat").innerHTML=db?'<span class="dot"></span>Terhubung · dibagikan ke semua pengguna':'<span class="dot off"></span>Mode lokal · hanya terlihat di perangkat ini';
- const set=arr=>{const dead=arr.filter(x=>!svAlive(x));if(dead.length)svPurge(dead);SV.items=arr.filter(svAlive);if(!db)lsSet("kmSv_items",JSON.stringify(SV.items));svDraw()};
- if(db){try{SV.u1=db.collection("story_items").orderBy("ts","asc").onSnapshot(sn=>set(sn.docs.map(d=>({id:d.id,...d.data()}))),()=>toast("Gagal memuat Story"))}catch(e){toast("Gagal memuat Story")}}
- if(db){try{SV.u2=db.collection("story_views").onSnapshot(sn=>{const m={};for(const d of sn.docs){const v=d.data();if(v&&v.item)(m[v.item]=m[v.item]||[]).push({id:d.id,...v})}SV.vw=m;svEyeRefresh()},()=>{})}catch(e){}}
- else{let a=[];try{a=JSON.parse(store.get("kmSv_items")||"[]")}catch(e){}set(a)}}
-function openStory(){$("story").classList.remove("hide");svLoad();clearInterval(SV.tick);SV.tick=setInterval(svDraw,60000)}
-function closeStory(){$("story").classList.add("hide");if(SV.u1){SV.u1();SV.u1=null}if(SV.u2){SV.u2();SV.u2=null}clearInterval(SV.tick)}
-function svGroups(){const m=new Map();for(const it of SV.items){const mine=isMine(it),k=mine?"me":it.uid;if(!m.has(k))m.set(k,{uid:k,by:it.by||"Tamu",mine,items:[]});m.get(k).items.push(it)}
- const g=[...m.values()];for(const x of g){x.items.sort((a,b)=>a.ts-b.ts);x.last=x.items[x.items.length-1];x.by=x.last.by||x.by}
- g.sort((a,b)=>(b.mine-a.mine)||(b.last.ts-a.last.ts));return g}
-function svRow(g){const b=mk("button","svrow"),last=g.last,all=g.items.every(x=>SV.seen.has(x.id)),ring=mk("span","svring"+(g.mine?"":(all?" seen":""))),i=mk("i");
- if(last&&last.poster)i.style.backgroundImage="url("+last.poster+")";else i.textContent=(g.by||"?").charAt(0).toUpperCase();
- ring.appendChild(i);const w=mk("div");w.append(mk("b","",g.mine?"Story saya":g.by),mk("small","",g.items.length+" story · "+svAgo(last.ts)+" · sisa "+svLeft(last)));b.append(ring,w);b.onclick=()=>svOpen(g);return b}
-function svDraw(){const box=$("svList"),mine=$("svMine");if(!box)return;SV.items=SV.items.filter(svAlive);box.textContent="";mine.textContent="";
- const gs=svGroups(),me=gs.find(g=>g.mine),others=gs.filter(g=>!g.mine);
- if(me)mine.appendChild(svRow(me));
- else{const b=mk("button","svrow"),r=mk("span","svring add"),i=mk("i","","＋");r.appendChild(i);const w=mk("div");w.append(mk("b","","Story saya"),mk("small","","Ketuk untuk menambahkan story"));b.append(r,w);b.onclick=svOpenUp;mine.appendChild(b)}
- if(!others.length){box.appendChild(mk("div","empty","Belum ada story dari orang lain. Story yang diposting akan muncul di sini selama 24 jam."));return}
- for(const g of others)box.appendChild(svRow(g))}
-/* ---- penampil ---- */
-async function svChunk(id,i){if(db){const sn=await db.collection("story_chunks").doc(id+"_"+i).get();if(!sn.exists)throw new Error("x");return sn.data().d}const v=localStorage.getItem("kmSv_c_"+id+"_"+i);if(v==null)throw new Error("x");return v}
-async function svUrl(it){if(SV.urls.has(it.id))return SV.urls.get(it.id);const parts=[];for(let i=0;i<(it.chunks||0);i++)parts.push(await svChunk(it.id,i));
- const u=URL.createObjectURL(new Blob([b64ToBytes(parts.join(""))],{type:it.mime||"video/mp4"}));SV.urls.set(it.id,u);return u}
-function svOpen(g){const gs=svGroups(),i=gs.findIndex(x=>x.uid===g.uid);if(i<0)return;SV.play=gs;SV.gi=i;let ii=g.items.findIndex(x=>!SV.seen.has(x.id));if(ii<0)ii=0;SV.ii=ii;$("svView").classList.remove("hide");svShow()}
-function svMuteIcon(){$("svMute").textContent=SV.muted?"🔇":"🔊"}
-function svClose(){svVwClose(false);clearInterval(SV.itv);const v=$("svVid");try{v.pause()}catch(e){}v.removeAttribute("src");try{v.load()}catch(e){}SV.tok++;$("svView").classList.add("hide");svDraw()}
-function svNext(){const g=SV.play[SV.gi];if(!g){svClose();return}if(SV.ii+1<g.items.length)SV.ii++;else{SV.gi++;SV.ii=0;if(SV.gi>=SV.play.length){svClose();return}}svShow()}
-function svPrev(){if(SV.ii>0)SV.ii--;else if(SV.gi>0){SV.gi--;SV.ii=0}else{try{$("svVid").currentTime=0}catch(e){}return}svShow()}
-function svPre(g){const nx=g.items[SV.ii+1]||(SV.play[SV.gi+1]&&SV.play[SV.gi+1].items[0]);if(nx)svUrl(nx).catch(()=>{})}
-function svImgStart(tok){const IMS=5000;SV.ie=0;SV.ip=false;SV.il=Date.now();clearInterval(SV.itv);SV.itv=setInterval(()=>{if(tok!==SV.tok){clearInterval(SV.itv);return}const n=Date.now();if(!SV.ip)SV.ie+=n-SV.il;SV.il=n;const bar=$("svBars").children[SV.ii];if(bar)bar.firstChild.style.width=Math.min(100,SV.ie/IMS*100)+"%";if(SV.ie>=IMS){clearInterval(SV.itv);svNext()}},50)}
-function svHold(on){const g=SV.play[SV.gi],it=g&&g.items[SV.ii];if(it&&it.kind==="image"){SV.ip=on;return}const v=$("svVid");if(on){try{v.pause()}catch(e){}}else v.play().catch(()=>{})}
-async function svShow(){const g=SV.play[SV.gi];if(!g){svClose();return}const it=g.items[SV.ii];if(!it){svNext();return}
- if(!svAlive(it)){svNext();return}
- const tok=++SV.tok,v=$("svVid"),isI=it.kind==="image";try{v.pause()}catch(e){}clearInterval(SV.itv);$("svImg").classList.toggle("hide",!isI);v.classList.toggle("hide",isI);$("svMute").classList.toggle("hide",isI);
- const bars=$("svBars");bars.textContent="";g.items.forEach((x,i)=>{const s=mk("span"),b=mk("b");b.style.width=i<SV.ii?"100%":"0";s.appendChild(b);bars.appendChild(s)});
- const av=$("svAv");av.style.backgroundImage=it.poster?"url("+it.poster+")":"";av.textContent=it.poster?"":(it.by||"?").charAt(0).toUpperCase();
- $("svWho").textContent=g.mine?"Kamu":(it.by||"Tamu");$("svWhen").textContent=svAgo(it.ts)+" · sisa "+svLeft(it);
- const cp=$("svCapT");cp.textContent=it.cap||"";cp.classList.toggle("hide",!it.cap);$("svDel").classList.toggle("hide",!isMine(it));svMuteIcon();svEyeShow(it);
- $("svLoad").textContent="⏳ Memuat video...";
- try{const u=await svUrl(it);if(tok!==SV.tok)return;
-  if(isI){const im=$("svImg");im.src=u;try{await im.decode()}catch(e){}if(tok!==SV.tok)return;v.removeAttribute("src");$("svLoad").textContent="";SV.seen.add(it.id);svSaveSeen();svMark(it);svImgStart(tok);svPre(g);return}
-  v.src=u;v.muted=SV.muted;v.currentTime=0;
-  try{await v.play()}catch(e){if(tok!==SV.tok)return;v.muted=true;SV.muted=true;svMuteIcon();try{await v.play()}catch(e2){}}
-  if(tok!==SV.tok)return;$("svLoad").textContent="";SV.seen.add(it.id);svSaveSeen();svMark(it);
-  svPre(g)
- }catch(e){if(tok===SV.tok)$("svLoad").textContent="Gagal memuat video. Ketuk untuk lanjut."}}
-async function svDelete(it){SV.items=SV.items.filter(x=>x.id!==it.id);const g=SV.play[SV.gi];g.items=g.items.filter(x=>x.id!==it.id);SV.cleaned.add(it.id);
- const u=SV.urls.get(it.id);if(u){try{URL.revokeObjectURL(u)}catch(e){}SV.urls.delete(it.id)}
- if(db){try{for(const v of (SV.vw[it.id]||[]))db.collection("story_views").doc(v.id).delete().catch(()=>{});await db.collection("story_items").doc(it.id).delete();for(let i=0;i<(it.chunks||0);i++)db.collection("story_chunks").doc(it.id+"_"+i).delete().catch(()=>{})}catch(e){toast("Gagal menghapus di server")}}
- else{for(let i=0;i<(it.chunks||0);i++)try{localStorage.removeItem("kmSv_c_"+it.id+"_"+i)}catch(e){}lsSet("kmSv_items",JSON.stringify(SV.items))}
- toast("Story dihapus");
- if(!g.items.length){SV.play.splice(SV.gi,1);SV.ii=0;if(SV.gi>=SV.play.length){svClose();return}}else if(SV.ii>=g.items.length)SV.ii=g.items.length-1;
- svShow()}
-
-/* ---- dilihat oleh ---- */
-function svMark(it){if(!db||isMine(it))return;const k=it.id+"_"+uid;if(SV.marked.has(k))return;SV.marked.add(k);
- db.collection("story_views").doc(k).set({item:it.id,uid,name:name||"Tamu",photo:store.get("kmThumb")||"",ts:Date.now()}).catch(()=>SV.marked.delete(k))}
-function svCurIt(){const g=SV.play[SV.gi];return g&&g.items[SV.ii]}
-function svViewers(it){return (SV.vw[it.id]||[]).filter(v=>v.uid!==uid&&v.uid!==localUid).sort((a,b)=>(b.ts||0)-(a.ts||0))}
-function svEyeShow(it){svVwClose(false);const own=isMine(it);$("svView").classList.toggle("mine",own);$("svEye").classList.toggle("hide",!own);if(own)svEyeRefresh()}
-function svEyeRefresh(){const it=svCurIt();if(!it||!isMine(it))return;$("svEyeN").textContent=svViewers(it).length;if(!$("svVw").classList.contains("hide"))svVwDraw(it)}
-function svVwDraw(it){const arr=svViewers(it),L=$("svVwL");$("svVwN").textContent=arr.length?"("+arr.length+")":"";L.textContent="";
- if(!arr.length){L.appendChild(mk("div","empty",db?"Belum ada yang melihat story ini.":"Mode lokal: tidak bisa melihat siapa yang membuka story."));return}
- for(const v of arr){const r=mk("div","svvr"),av=mk("span","svvav"),ph=v.photo;if(ph&&/^data:image\/(jpeg|png);base64,[A-Za-z0-9+\/=]+$/.test(ph)){av.style.backgroundImage="url("+ph+")"}else av.textContent=(v.name||"?").charAt(0).toUpperCase();
-  const w=mk("div");w.append(mk("b","",v.name||"Tamu"),mk("small","",svAgo(v.ts||Date.now())));r.append(av,w);L.appendChild(r)}}
-function svVwOpen(){const it=svCurIt();if(!it||!isMine(it))return;svVwDraw(it);$("svVw").classList.remove("hide");svHold(true)}
-function svVwClose(resume){if($("svVw").classList.contains("hide"))return;$("svVw").classList.add("hide");if(resume)svHold(false)}
-$("svEye").onclick=e=>{e.stopPropagation();svVwOpen()};$("svVwX").onclick=e=>{e.stopPropagation();svVwClose(true)};
-/* ---- unggah ---- */
-function svErr(t){const e=$("svErr");if(!t){e.className="chk bad hide";return}e.textContent="⚠️ "+t;e.className="chk bad"}
-function svPgSet(p,t){$("svPg").classList.remove("hide");$("svPgt").classList.toggle("hide",!t);$("svPgb").style.width=Math.round(p*100)+"%";$("svPgt").textContent=t||""}
-function svOpenUp(){SV.file=null;SV.meta=null;SV.busy=false;$("svCap").value="";$("svInfo").textContent="";svErr("");$("svPrev").classList.add("hide");$("svPrevI").classList.add("hide");try{$("svPrev").removeAttribute("src")}catch(e){}$("svPg").classList.add("hide");$("svPgt").classList.add("hide");$("svOk").disabled=true;$("svOk").textContent="Posting story";$("svUp").classList.remove("hide")}
-function svMeta(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";let done=false,info=null;
- const fin=(ok,val)=>{if(done)return;done=true;clearTimeout(t);URL.revokeObjectURL(u);ok?res(val):rej(val)};
- const t=setTimeout(()=>info?fin(true,Object.assign(info,{poster:""})):fin(false,new Error("t")),12000);
- v.onerror=()=>fin(false,new Error("e"));
- v.onloadedmetadata=()=>{const dur=v.duration,w=v.videoWidth,h=v.videoHeight;if(!isFinite(dur)||!w){fin(false,new Error("m"));return}info={dur,w,h};v.currentTime=Math.min(1,dur/2)};
- v.onseeked=()=>{try{const k=Math.min(1,180/w0(v)),c=document.createElement("canvas");c.width=Math.max(2,Math.round(v.videoWidth*k));c.height=Math.max(2,Math.round(v.videoHeight*k));c.getContext("2d").drawImage(v,0,0,c.width,c.height);fin(true,Object.assign(info,{poster:c.toDataURL("image/jpeg",.6)}))}catch(e){fin(true,Object.assign(info||{dur:v.duration,w:0,h:0},{poster:""}))}};
- function w0(x){return x.videoWidth||180}
- v.src=u})}
-async function svPicked(f){svErr("");SV.file=null;SV.meta=null;$("svOk").disabled=true;$("svPrev").classList.add("hide");$("svPrevI").classList.add("hide");if(!f)return;
- const isImg=/^image\//.test(f.type)||/\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name);
- if(isImg){$("svInfo").textContent="Menyiapkan foto...";try{const m=await svImgPrep(f);SV.file=f;SV.meta=m;SV.blob=m.blob;$("svInfo").textContent=f.name+" · foto · "+fmtSize(m.blob.size);if(SV.pu)try{URL.revokeObjectURL(SV.pu)}catch(e){}SV.pu=URL.createObjectURL(m.blob);const pi=$("svPrevI");pi.src=SV.pu;pi.classList.remove("hide");$("svOk").disabled=false}catch(e){$("svInfo").textContent="";svErr("Foto tidak bisa dibaca di browser ini. Coba JPG atau PNG.")}return}
- if(!/^video\//.test(f.type)&&!/\.(mp4|mov|webm|m4v|3gp|mkv)$/i.test(f.name)){svErr("File harus berupa foto atau video.");return}
- $("svInfo").textContent="Memeriksa video...";
- try{const m=await svMeta(f);
-  if(m.dur>SV.MAXS+.5){$("svInfo").textContent="";svErr("Video terlalu panjang ("+Math.round(m.dur)+" detik). Maksimal "+SV.MAXS+" detik.");return}
-  SV.file=f;SV.meta=m;$("svInfo").textContent=f.name+" · "+m.dur.toFixed(1)+" dtk · "+fmtSize(f.size);
-  if(SV.pu)try{URL.revokeObjectURL(SV.pu)}catch(e){}SV.pu=URL.createObjectURL(f);const pv=$("svPrev");pv.src=SV.pu;pv.classList.remove("hide");$("svOk").disabled=false
- }catch(e){$("svInfo").textContent="";svErr("Video tidak bisa dibaca di browser ini. Coba video MP4.")}}
-function svImgPrep(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),im=new Image();
- im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("e"))};
- im.onload=async()=>{try{const w=im.naturalWidth,h=im.naturalHeight;if(!w||!h)throw new Error("e");
-  const enc=(side,q)=>new Promise(r=>{const k=Math.min(1,side/Math.max(w,h)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));const x=c.getContext("2d");x.fillStyle="#000";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>r(b),"image/jpeg",q)});
-  let b=await enc(1080,.82);if(b&&b.size>700*1024)b=await enc(1080,.65);if(b&&b.size>700*1024)b=await enc(800,.55);if(!b)throw new Error("e");
-  const k=Math.min(1,180/w),c=document.createElement("canvas");c.width=Math.max(2,Math.round(w*k));c.height=Math.max(2,Math.round(h*k));c.getContext("2d").drawImage(im,0,0,c.width,c.height);
-  URL.revokeObjectURL(u);res({kind:"image",dur:0,w,h,blob:b,poster:c.toDataURL("image/jpeg",.6)})}catch(e){URL.revokeObjectURL(u);rej(e)}};
- im.src=u})}
-function svEncode(file,meta,onP){return new Promise(async(res,rej)=>{
- const url=URL.createObjectURL(file),v=document.createElement("video");v.playsInline=true;v.preload="auto";v.src=url;
- let ac=null,raf=0,rec=null,stopped=false,guard=0;const parts=[];
- const clean=()=>{cancelAnimationFrame(raf);clearTimeout(guard);try{v.pause()}catch(e){}URL.revokeObjectURL(url);try{ac&&ac.close()}catch(e){}};
- const fail=e=>{if(stopped)return;stopped=true;clean();try{if(rec&&rec.state!=="inactive")rec.stop()}catch(x){}rej(e)};
- try{
-  await new Promise((ok,no)=>{v.onloadeddata=ok;v.onerror=()=>no(new Error("e"))});
-  const w=v.videoWidth,h=v.videoHeight,k=Math.min(1,480/Math.min(w,h)),W=Math.max(2,Math.round(w*k/2)*2),H=Math.max(2,Math.round(h*k/2)*2);
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d"),cs=cv.captureStream(30);
-  try{ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();const s=ac.createMediaElementSource(v),d=ac.createMediaStreamDestination();s.connect(d);d.stream.getAudioTracks().forEach(t=>cs.addTrack(t))}catch(e){ac=null}
-  const dur=Math.min(meta.dur,SV.MAXS+.5),vbps=Math.max(250000,Math.min(1200000,Math.floor(2.7*1024*1024*8/dur)-(ac?64000:0)));
-  const mt=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp8,opus","video/webm"].find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(e){return false}})||"";
-  rec=new MediaRecorder(cs,Object.assign(mt?{mimeType:mt}:{},{videoBitsPerSecond:vbps,audioBitsPerSecond:64000}));
-  rec.ondataavailable=e=>{if(e.data&&e.data.size)parts.push(e.data)};
-  rec.onstop=()=>{if(stopped)return;stopped=true;clean();res(new Blob(parts,{type:(rec.mimeType||mt||"video/webm").split(";")[0]}))};
-  rec.onerror=()=>fail(new Error("rec"));
-  const draw=()=>{if(stopped)return;cx.drawImage(v,0,0,W,H);onP(Math.min(1,v.currentTime/dur));if(v.ended||v.currentTime>=dur-.05){if(rec.state!=="inactive")rec.stop();return}raf=requestAnimationFrame(draw)};
-  rec.start(500);v.muted=false;
-  try{await v.play()}catch(e){v.muted=true;await v.play()}
-  guard=setTimeout(()=>{if(rec.state!=="inactive")rec.stop()},(dur+6)*1000);draw()
- }catch(e){fail(e)}})}
-async function svPost(){if(SV.busy||!SV.file)return;const cap=$("svCap").value.trim();svErr("");
- if(kasar(cap)){svErr("Keterangan mengandung kata kasar.");return}
- SV.busy=true;$("svOk").disabled=true;$("svOk").textContent="⏳ Memproses...";
- const isImg=!!(SV.meta&&SV.meta.kind==="image");let blob=isImg?SV.blob:SV.file,mime=isImg?"image/jpeg":(SV.file.type||"video/mp4");
- try{
-  const f=SV.file,pass=/^video\/(mp4|webm)$/.test(f.type)&&f.size<=2.5*1024*1024;
-  if(!pass&&!isImg){
-   if(typeof MediaRecorder==="undefined"||!HTMLCanvasElement.prototype.captureStream){if(f.size>SV.MAXV)throw new Error("norec")}
-   else{svPgSet(0,"Memproses video… jangan tutup atau pindah tab");blob=await svEncode(f,SV.meta,p=>svPgSet(p,"Memproses video… "+Math.round(p*100)+"% (jangan tutup atau pindah tab)"));mime=blob.type||"video/webm"}}
-  if(blob.size>SV.MAXV)throw new Error("big")
- }catch(e){svErr(e&&e.message==="big"?"Video masih terlalu besar setelah diperkecil. Coba video yang lebih pendek.":e&&e.message==="norec"?"Browser ini tidak bisa memperkecil video. Pilih video di bawah 3 MB.":"Gagal memproses video. Coba video lain.");$("svPg").classList.add("hide");$("svPgt").classList.add("hide");SV.busy=false;$("svOk").disabled=false;$("svOk").textContent="Posting story";return}
- let chunks=[];const now=Date.now();
- const it={id:now+"-"+Math.random().toString(36).slice(2,7),kind:isImg?"image":"video",uid,by:name,ts:now,exp:now+SV.TTL,cap,dur:+SV.meta.dur.toFixed(1),mime,poster:SV.meta.poster||""};
- try{const u=await readBytes(blob);it.size=u.length;chunks=toChunks(u)}catch(e){svErr("Gagal membaca video.");SV.busy=false;$("svOk").disabled=false;$("svOk").textContent="Posting story";return}
- it.chunks=chunks.length;$("svOk").textContent="⏳ Mengunggah...";
- try{
-  if(db){for(let i=0;i<chunks.length;i++){svPgSet((i+1)/chunks.length,"Mengunggah "+(i+1)+"/"+chunks.length);await db.collection("story_chunks").doc(it.id+"_"+i).set({item:it.id,i,d:chunks[i]})}await db.collection("story_items").doc(it.id).set(it)}
-  else{for(let i=0;i<chunks.length;i++){if(!lsSet("kmSv_c_"+it.id+"_"+i,chunks[i]))throw new Error("quota")}SV.items.push(it);if(!lsSet("kmSv_items",JSON.stringify(SV.items))){SV.items.pop();throw new Error("quota")}svDraw()}
-  $("svUp").classList.add("hide");toast("Story diposting · aktif 24 jam");
- }catch(e){if(!db)for(let i=0;i<chunks.length;i++)try{localStorage.removeItem("kmSv_c_"+it.id+"_"+i)}catch(x){}svErr(e&&e.message==="quota"?"Penyimpanan perangkat penuh.":"Gagal mengunggah ke server. Coba lagi.");$("svOk").disabled=false;$("svOk").textContent="Posting story"}
- SV.busy=false;if(!$("svUp").classList.contains("hide")){$("svOk").disabled=false;$("svOk").textContent="Posting story"}}
-$("svBack").onclick=closeStory;$("svAdd").onclick=svOpenUp;$("svUpX").onclick=()=>{if(!SV.busy)$("svUp").classList.add("hide")};$("svOk").onclick=svPost;
-$("svPick").onclick=()=>$("svF").click();$("svRec").onclick=()=>$("svC").click();
-$("svF").onchange=e=>{const f=e.target.files[0];e.target.value="";svPicked(f)};$("svC").onchange=e=>{const f=e.target.files[0];e.target.value="";svPicked(f)};
-$("svX").onclick=svClose;
-$("svMute").onclick=()=>{SV.muted=!SV.muted;$("svVid").muted=SV.muted;svMuteIcon()};
-$("svDel").onclick=()=>{const b=$("svDel");const g=SV.play[SV.gi],it=g&&g.items[SV.ii];if(!it)return;if(!b.dataset.arm){b.dataset.arm="1";b.textContent="❓";setTimeout(()=>{b.dataset.arm="";b.textContent="🗑"},3000);return}b.dataset.arm="";b.textContent="🗑";svDelete(it)};
-{const vid=$("svVid");vid.addEventListener("ended",svNext);vid.addEventListener("timeupdate",()=>{const g=SV.play[SV.gi],it=g&&g.items[SV.ii],bar=$("svBars").children[SV.ii];const d=isFinite(vid.duration)&&vid.duration>0?vid.duration:(it&&it.dur)||SV.MAXS;if(bar)bar.firstChild.style.width=Math.min(100,vid.currentTime/d*100)+"%"});
- const z=$("svZone");let held=false,hT=0;
- z.onpointerdown=()=>{held=false;clearTimeout(hT);hT=setTimeout(()=>{held=true;svHold(true)},220)};
- z.onpointerup=e=>{clearTimeout(hT);if(held){held=false;svHold(false);return}const r=z.getBoundingClientRect();(e.clientX-r.left)<r.width*.3?svPrev():svNext()};
- z.onpointercancel=z.onpointerleave=()=>{clearTimeout(hT);if(held){held=false;svHold(false)}}}
-document.addEventListener("keydown",e=>{if($("svView").classList.contains("hide"))return;if(e.key==="Escape")svClose();else if(e.key==="ArrowRight")svNext();else if(e.key==="ArrowLeft")svPrev()});
-
-/* ===== BERBINTANG ===== */
-let STAR=[];try{STAR=JSON.parse(store.get("kmStar")||"[]")}catch(e){}
-let armedId="",armTm=0;
-function saveStar(){store.set("kmStar",JSON.stringify(STAR))}
-function isStar(id){return STAR.some(s=>s.id===id)}
-function armMsg(el,id){document.querySelectorAll(".msg.arm").forEach(x=>x.classList.remove("arm"));el.classList.add("arm");armedId=id;clearTimeout(armTm);armTm=setTimeout(()=>{if(armedId===id){armedId="";el.classList.remove("arm")}},6000);try{getSelection().removeAllRanges()}catch(e){}toast("Tekan ⭐ di pojok atas pesan untuk menyimpan")}
-function toggleStar(m){armedId="";const was=isStar(m.id);if(was)STAR=STAR.filter(s=>s.id!==m.id);else STAR.push({id:m.id,ch:cur,t:m.t,lang:m.lang||"",body:m.body||"",name:m.name||"Tamu",ts:m.ts||Date.now(),st:Date.now()});saveStar();render();toast(was?"Bintang dihapus":"Disimpan ke Berbintang ⭐")}
-function chTitle(ch){const c=CH.find(x=>x[0]===ch);if(c)return c[2];const g=groups.find(x=>"grp_"+x.id===ch);if(g)return g.name;const f=friends.find(x=>dmId(x.code)===ch);return f?(f.name||"Teman"):"Chat"}
-function starDraw(){const L=$("starList");L.textContent="";$("starCt").textContent=STAR.length+" tersimpan";
- if(!STAR.length){L.appendChild(mk("div","empty","Belum ada pesan berbintang. Ketuk pesan 2 kali, lalu tekan ⭐ di pojok atas pesan."));return}
- for(const s of STAR.slice().sort((a,b)=>b.st-a.st)){const c=mk("div","stcard starcard"),h=mk("div","starhead"),isC=s.t==="code",first=(s.body||"").trim().split("\n")[0].slice(0,56)||"(kosong)";
-  h.tabIndex=0;h.setAttribute("role","button");const w=mk("div");w.append(mk("b","",(isC?(s.lang||"Kode")+" · ":"")+first),mk("small","","dari "+s.name+" · "+chTitle(s.ch)+" · "+new Date(s.ts).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})));
-  h.append(mk("span","",isC?"💻":"💬"),w,mk("span","chev","▾"));
-  const bd=mk("div","starbody hide");bd.appendChild(isC?mk("pre","stpre",s.body):mk("div","stdesc",s.body));
-  const a=mk("div","stacts"),cp=mk("button","stbtn","📋 Salin"),rm=mk("button","stbtn sec","⭐ Hapus bintang");
-  cp.onclick=async()=>{try{await copyTxt(s.body||"");toast("Disalin")}catch(e){toast("Gagal menyalin")}};
-  rm.onclick=()=>{STAR=STAR.filter(x=>x.id!==s.id);saveStar();starDraw();render();toast("Bintang dihapus")};
-  a.append(cp,rm);bd.appendChild(a);
-  const tg=()=>{bd.classList.toggle("hide");c.classList.toggle("open")};h.onclick=tg;h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tg()}};
-  c.append(h,bd);L.appendChild(c)}}
-function openStar(){$("side").classList.remove("open");$("starP").classList.remove("hide");starDraw()}
-$("starBack").onclick=()=>$("starP").classList.add("hide");
-
-/* ===== PERANGKAT TERTAUT (kode 8 angka, dienkripsi di perangkat sebelum masuk database) ===== */
-const LKK=["kmName","kmPw","kmAbout","kmUser","kmLink","kmCode","kmPhoto","kmThumb","kmUid","kmFriends","kmGroups","kmStar"];
-const LK={it:120000,CH:180000,busy:false,fails:0,until:0,arm:0,lock:false,tm:0,syncing:false};
-const _te=new TextEncoder(),_td=new TextDecoder();
-const hexOf=u=>[...new Uint8Array(u)].map(b=>b.toString(16).padStart(2,"0")).join("");
-async function pbk(secret,salt,bits){const k=await crypto.subtle.importKey("raw",_te.encode(secret),"PBKDF2",false,["deriveBits"]);return crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:_te.encode(salt),iterations:LK.it},k,bits)}
-async function aesKey(secret,salt){return crypto.subtle.importKey("raw",await pbk(secret,salt,256),"AES-GCM",false,["encrypt","decrypt"])}
-async function seal(secret,salt,text){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},await aesKey(secret,salt),_te.encode(text));return{iv:bytesToB64(iv),d:bytesToB64(new Uint8Array(ct))}}
-async function unseal(secret,salt,o){return _td.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64ToBytes(o.iv)},await aesKey(secret,salt),b64ToBytes(o.d)))}
-const lkId=async c=>"L"+hexOf(await pbk(c,"wc-id-1",128));
-const lkRid=async s=>"R"+hexOf(await pbk(s,"wc-rid-1",128));
-function lkNewCode(){const r=new Uint32Array(1);crypto.getRandomValues(r);return String(r[0]%1e8).padStart(8,"0")}
-function normName(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^\p{L}\s]/gu," ").replace(/\s+/g," ").trim()}
-function validDob(v){if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const d=new Date(v+"T00:00:00");return !isNaN(d)&&d.getFullYear()>=1900&&d<=new Date()}
-function lkM(id,cls,t){const e=$(id);if(!t){e.className="chk hide";return}e.className="chk "+cls;e.textContent=t}
-function lkSecure(){if(!db){return "Butuh koneksi server. Di mode lokal, akun tidak bisa dipindahkan antar perangkat."}if(!(window.crypto&&crypto.subtle))return "Browser ini tidak mendukung enkripsi. Buka lewat alamat https.";return ""}
-async function lkPut(code){const snap={};for(const k of LKK){const v=store.get(k);if(v!=null)snap[k]=v}snap._ts=Date.now();
- const sl=await seal(code,"wc-key-1",JSON.stringify(snap)),id=await lkId(code),n=Math.max(1,Math.ceil(sl.d.length/LK.CH));
- for(let i=0;i<n;i++)await db.collection("link_parts").doc(id+"_"+i).set({d:sl.d.slice(i*LK.CH,(i+1)*LK.CH)});
- await db.collection("links").doc(id).set({iv:sl.iv,n,ts:Date.now()});return snap._ts}
-async function lkGet(code){const id=await lkId(code),m=await db.collection("links").doc(id).get();if(!m.exists)return null;const h=m.data();let d="";
- for(let i=0;i<h.n;i++){const p=await db.collection("link_parts").doc(id+"_"+i).get();if(!p.exists)throw new Error("part");d+=p.data().d}
- return JSON.parse(await unseal(code,"wc-key-1",{iv:h.iv,d}))}
-async function lkSync(manual){const code=store.get("kmLinkCode");if(!code||!db||LK.syncing||LK.lock)return;LK.syncing=true;
- try{const t=await lkPut(code);store.set("kmLinkAt",String(t));lkDrawT();if(manual)toast("Tersinkron ✓")}catch(e){if(manual)toast("Gagal menyinkronkan")}LK.syncing=false}
-lkSoonFn=()=>{if(!db||LK.lock||!store.get("kmLinkCode"))return;clearTimeout(LK.tm);LK.tm=setTimeout(()=>lkSync(false),4000)};
-function lkInit(){if(store.get("kmLinkCode")){clearTimeout(LK.tm);LK.tm=setTimeout(()=>lkSync(false),3000)}}
-function lkDrawT(){const t=+store.get("kmLinkAt")||0;$("lkSyncT").textContent=t?"Terakhir disinkronkan: "+new Date(t).toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):""}
-let lkShow=false;
-function lkDraw(){const code=store.get("kmLinkCode");$("lkNew").classList.toggle("hide",!!code);$("lkHave").classList.toggle("hide",!code);
- $("lkStat").innerHTML=db?'<span class="dot"></span>Terhubung · data akun dienkripsi sebelum disimpan':'<span class="dot off"></span>Mode lokal · butuh server untuk menautkan perangkat';
- $("lkCodeV").textContent=code?(lkShow?code:"••••••••"):"";$("lkEye").textContent=lkShow?"🙈 Sembunyikan":"👁️ Tampilkan";lkDrawT();
- $("lkDob").max=$("lkDob2").max=new Date().toISOString().slice(0,10)}
-function openLink(){$("side").classList.remove("open");lkShow=false;$("linkP").classList.remove("hide");lkM("lkErr","");lkM("lkMsg","");lkM("lkMsg2","");$("lkRes").classList.add("hide");lkDraw();if(store.get("kmLinkCode"))lkSync(false)}
-$("lkBack").onclick=()=>{$("linkP").classList.add("hide");if(!named)showAuth()};
-$("authLink").onclick=()=>{$("nameOv").classList.add("hide");openLink()};
-$("lkEye").onclick=()=>{lkShow=!lkShow;lkDraw()};
-$("lkCopy").onclick=()=>copyTxt(store.get("kmLinkCode")||"").then(()=>toast("Kode disalin"),()=>toast("Gagal menyalin"));
-$("lkSync").onclick=()=>{const e=lkSecure();if(e){toast(e);return}lkSync(true)};
-for(const i of ["lkIn"])$(i).oninput=()=>{$(i).value=$(i).value.replace(/\D/g,"").slice(0,8)};
-$("lkCreate").onclick=async()=>{if(LK.busy)return;const e=lkSecure();if(e){lkM("lkErr","bad","⚠️ "+e);return}
- const full=normName($("lkFull").value),dob=$("lkDob").value;
- if(full.split(" ").filter(Boolean).length<2){lkM("lkErr","bad","⚠️ Isi nama lengkap (minimal 2 kata).");return}
- if(!validDob(dob)){lkM("lkErr","bad","⚠️ Isi tanggal lahir yang valid.");return}
- LK.busy=true;$("lkCreate").disabled=true;lkM("lkErr","load","⏳ Membuat kode aman...");
- try{const sec=full+"|"+dob,rid=await lkRid(sec),ref=db.collection("link_rec").doc(rid),ex=await ref.get();
-  if(ex.exists){let c0="";try{c0=await unseal(sec,"wc-rkey-1",ex.data())}catch(x){}if(/^\d{8}$/.test(c0)&&c0!==store.get("kmLinkCode")){lkM("lkErr","bad","⚠️ Nama lengkap dan tanggal lahir ini sudah terdaftar di akun lain. Kalau itu akunmu, pakai Lupa kode di bawah.");LK.busy=false;$("lkCreate").disabled=false;return}}
-  let code="",tr=0;do{code=lkNewCode();const q=await db.collection("links").doc(await lkId(code)).get();if(!q.exists)break}while(++tr<6);
-  await ref.set(await seal(sec,"wc-rkey-1",code));store.set("kmLinkCode",code);await lkPut(code);store.set("kmLinkAt",String(Date.now()));
-  lkM("lkErr","");lkShow=true;lkDraw();toast("Kode tautan dibuat. Simpan dengan aman!")
- }catch(x){store.set("kmLinkCode","");lkM("lkErr","bad","⚠️ Gagal membuat kode. Coba lagi.")}
- LK.busy=false;$("lkCreate").disabled=false};
-$("lkGo").onclick=async()=>{if(LK.busy)return;const code=$("lkIn").value.trim(),e=lkSecure();
- if(e){lkM("lkMsg","bad","⚠️ "+e);return}
- if(!/^\d{8}$/.test(code)){lkM("lkMsg","bad","⚠️ Kode harus 8 angka, contoh: 00100871.");return}
- if(store.get("kmPw")&&store.get("kmLinkCode")!==code&&!LK.arm){LK.arm=1;$("lkGo").textContent="Akun di perangkat ini akan diganti. Tekan lagi";setTimeout(()=>{LK.arm=0;$("lkGo").textContent="Tautkan"},6000);return}
- LK.arm=0;$("lkGo").textContent="Tautkan";LK.busy=true;$("lkGo").disabled=true;lkM("lkMsg","load","⏳ Memeriksa kode...");
- try{const snap=await lkGet(code);
-  if(!snap){lkM("lkMsg","bad","❌ Kode tidak ditemukan. Periksa lagi kodenya.")}
-  else{LK.lock=true;for(const k of LKK){if(snap[k]!=null)store.set(k,snap[k]);else try{localStorage.removeItem(k)}catch(x){}}
-   store.set("kmLinkCode",code);store.set("kmLinkAt",String(snap._ts||Date.now()));store.set("kmAuto","1");lkM("lkMsg","ok","✅ Berhasil! Memuat akunmu...");
-   setTimeout(()=>{try{location.reload()}catch(x){LK.lock=false;lkM("lkMsg","ok","✅ Tertaut. Muat ulang halaman ini.")}},700)}
- }catch(x){lkM("lkMsg","bad","❌ Kode salah atau data tidak bisa dibuka.")}
- LK.busy=false;$("lkGo").disabled=false};
-$("lkRec").onclick=async()=>{if(LK.busy)return;const e=lkSecure();if(e){lkM("lkMsg2","bad","⚠️ "+e);return}
- if(Date.now()<LK.until){lkM("lkMsg2","bad","⚠️ Terlalu banyak percobaan. Tunggu "+Math.ceil((LK.until-Date.now())/1000)+" detik.");return}
- const full=normName($("lkFull2").value),dob=$("lkDob2").value;
- if(full.split(" ").filter(Boolean).length<2||!validDob(dob)){lkM("lkMsg2","bad","⚠️ Isi nama lengkap dan tanggal lahir dengan benar.");return}
- LK.busy=true;$("lkRec").disabled=true;$("lkRes").classList.add("hide");lkM("lkMsg2","load","⏳ Memverifikasi...");
- try{const sec=full+"|"+dob,s=await db.collection("link_rec").doc(await lkRid(sec)).get();let code="";if(s.exists){try{code=await unseal(sec,"wc-rkey-1",s.data())}catch(x){}}
-  let ok=/^\d{8}$/.test(code);if(ok){const q=await db.collection("links").doc(await lkId(code)).get();if(!q.exists)ok=false}
-  if(!ok){if(++LK.fails>=5){LK.fails=0;LK.until=Date.now()+60000}lkM("lkMsg2","bad","❌ Nama lengkap atau tanggal lahir tidak cocok.")}
-  else{LK.fails=0;lkM("lkMsg2","ok","✅ Verifikasi benar. Ini kodemu, salin lalu isi di kolom tautan.");$("lkResCode").textContent=code;$("lkRes").classList.remove("hide")}
- }catch(x){lkM("lkMsg2","bad","⚠️ Gagal memverifikasi. Coba lagi.")}
- LK.busy=false;$("lkRec").disabled=false};
-$("lkResCopy").onclick=()=>copyTxt($("lkResCode").textContent).then(()=>toast("Kode disalin"),()=>toast("Gagal menyalin"));
-$("lkResUse").onclick=()=>{$("lkIn").value=$("lkResCode").textContent;$("lkIn").scrollIntoView({block:"center"});$("lkIn").focus()};
-
-name="Tamu";drawMe();
-if(store.get("kmAuto")==="1"&&store.get("kmName")&&store.get("kmPw")){store.set("kmAuto","");setName(store.get("kmName"));toast("Perangkat berhasil ditautkan")}else showAuth();
-window.addEventListener("online",()=>flush(cur));setInterval(()=>{if(db)flush(cur)},20000);
-drawChs();subscribe();
-(()=>{try{const c=window.FIREBASE_CONFIG;if(!c||!c.apiKey||/ISI_/.test(c.apiKey)||!window.firebase)return;
- if(!firebase.apps.length)firebase.initializeApp(c);const d=firebase.firestore();db=d;stat();subscribe();registerMe();lkInit();try{watchSync()}catch(e){}}catch(e){console.error("Firebase gagal:",e)}})();
-(async()=>{try{if(!window.claude||db)return;const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);if(u)try{uid=await u.id()}catch(e){}if(d){db=d;stat();subscribe();registerMe();lkInit();try{watchSync()}catch(e){}}}catch(e){}})();
-})();
+function toast(n,s,id){clearTimeout(tt);$("tAv").textContent=ini(n);$("tB").textContent=n;$("tS").textContent=s;const t=$("toast");t.onclick=()=>{t.classList.remove("show");if(id)open(id)};t.classList.add("show");tt=setTimeout(()=>t.classList.remove("show"),4000)}
+function render(){
+ const arch=view=="arsip",q=$("q").value.toLowerCase();
+ let L=S.chats.filter(c=>!!c.arch==arch&&c.name.toLowerCase().includes(q));
+ if(view=="ai")L=S.chats.filter(c=>c.ai);
+ if(flt=="unread")L=L.filter(c=>c.unread);if(flt=="fav")L=L.filter(c=>c.fav);if(flt=="group")L=L.filter(c=>c.group);
+ L.sort((a,b)=>(b.ai?1:0)-(a.ai?1:0)||(b.ts||0)-(a.ts||0));
+ $("list").innerHTML=L.length?L.map(c=>{const m=c.msgs[c.msgs.length-1];return `<button class="ch ${cur==c.id?"on":""}" data-id="${c.id}"><div class="av ${c.ai?"ai":""}">${c.ai?"✦":ini(c.name)}</div><div class="mid"><div class="r1"><b>${esc(c.name)}</b><small>${m?m.time:""}</small></div><div class="r2"><span>${m?(m.me?"Anda: ":"")+esc(m.t):""}</span>${c.unread?`<i class="bd">${c.unread}</i>`:""}</div></div>${c.ai?"":`<span class="act"><span data-ar="${c.id}">${c.arch?"Keluarkan":"Arsipkan"}</span></span>`}</button>`}).join(""):`<div class="empty">${arch?"Belum ada chat yang diarsipkan. Arsipkan chat saat kamu sedang malas membalas.":"Belum ada teman. Ketuk + lalu masukkan kode teman untuk mulai DM."}</div>`;
+ const n=S.chats.filter(c=>c.arch).length;$("ac").textContent=n||"";$("arc").classList.toggle("hide",arch||view=="ai");
+ $("arc").querySelector("span").textContent="Diarsipkan";
+ document.querySelectorAll("[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f==flt));
+ document.querySelectorAll("[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v==view));
+ $("stp").classList.toggle("hide",view!="story");document.body.classList.toggle("stv",view=="story");$("rdstory").classList.toggle("hide",!unseenAny());if(view=="story")storyDraw();
+ const u=S.chats.some(c=>c.unread&&!c.arch);$("rdchat").classList.toggle("hide",!u);
+ save();
+}
+function open(id){const c=S.chats.find(x=>x.id==id);if(!c)return;cur=id;c.unread=0;
+ $("cA").textContent=c.ai?"✦":ini(c.name);$("cA").className="av"+(c.ai?" ai":"");$("cN").innerHTML=esc(c.name)+(c.ai?' <span class="vb">✓</span>':'');$("cS").textContent=c.ai?"Asisten AI · bisa menganalisis data":"Kode: "+(c.code||"-");
+ $("cv").classList.add("show");{const a=c.ai?1:0;$("aiK").classList.toggle("hide",!a);$("aiQ").classList.toggle("hide",!a);$("attB").classList.toggle("hide",!a);$("msgs").classList.toggle("aiw",!!a);$("aiPop").classList.add("hide")}document.querySelector(".home").classList.add("hide");$("main").classList.add("open");draw(c);render()}
+function draw(c){$("msgs").innerHTML=c.msgs.map(m=>`<div class="m ${m.me?"me":""}">${c.ai&&!m.me?md(m.t):esc(m.t)}<small>${m.time}</small></div>`).join("");$("msgs").scrollTop=1e9}
+function push(c,t,me){c.msgs.push({t,me,time:hm()});c.ts=Date.now();if(!me&&cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?t:"Pesan baru",c.id)}if(cur==c.id)draw(c);render()}
+function send(){const t=$("ta").value.trim(),c=S.chats.find(x=>x.id==cur);if(!t||!c)return;$("ta").value="";push(c,t,1);
+ if(c.ai)return askAI(c);setTimeout(()=>push(c,"Oke, pesanmu terkirim. 👍",0),900)}
+function addFriend(){const code=$("code").value.trim().toLowerCase();if(!/^[a-z0-9]{8}$/.test(code)){$("code").style.borderColor="#e11d2e";return}
+ if(code==S.me){toast("Kode ini milikmu","Masukkan kode teman, bukan kodemu.");return}
+ let c=S.chats.find(x=>x.code==code);
+ if(!c){c={id:code,code,name:$("nm").value.trim()||"Teman "+code.slice(0,4),msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
+ $("ov").classList.add("hide");$("code").value=$("nm").value="";view="chat";open(c.id);
+ setTimeout(()=>{push(c,"Hai! Kita sudah terhubung lewat kode "+code+".",0)},1800)}
+function act(a){$("pop").classList.add("hide");
+ if(a=="teman"){$("ov").classList.remove("hide");$("code").focus()}
+ else if(a=="arsip"){view="arsip";flt="all";render()}
+ else if(a=="ai"){view="ai";open("ai")}
+ else if(a=="baca"){S.chats.forEach(c=>c.unread=0);render()}
+ else if(a=="profil")settingsPage();
+ else if(a=="storage")storagePage();else if(a=="upd")updPage();
+ else if(a=="bintang")starPage();
+ else toast(menu.find(m=>m[0]==a)?.[1]||"Fitur","Segera hadir. Beri tahu aku detailnya dan kubuat berikutnya.")}
+document.addEventListener("click",e=>{const t=e.target;
+ const ar=t.closest("[data-ar]");if(ar){e.stopPropagation();const c=S.chats.find(x=>x.id==ar.dataset.ar);c.arch=!c.arch;if(cur==c.id&&c.arch)goBack();render();return}
+ const ch=t.closest(".ch");if(ch){open(ch.dataset.id);return}
+ const a=t.closest("[data-a]");if(a){act(a.dataset.a);return}
+ const f=t.closest("[data-f]");if(f){flt=f.dataset.f;render();return}
+ const v=t.closest("[data-v]");if(v){const k=v.dataset.v;if(k=="ai")return act("ai");if(k=="store")return act("storage");if(k=="me")return act("profil");view=k;render();return}
+ if(!t.closest("#pop")&&t.id!="kb")$("pop").classList.add("hide")});
+$("kb").onclick=()=>$("pop").classList.toggle("hide");$("arc").onclick=()=>act("arsip");
+$("add").onclick=$("h1").onclick=()=>act("teman");$("cl").onclick=()=>$("ov").classList.add("hide");$("go").onclick=addFriend;
+$("code").oninput=()=>$("code").style.borderColor="";$("q").oninput=render;
+function goBack(){cur=null;$("main").classList.remove("open");$("cv").classList.remove("show");document.querySelector(".home").classList.remove("hide");render()}
+$("bk").onclick=goBack;$("snd").onclick=send;
+$("ta").onkeydown=e=>{if(e.key=="Enter"&&!e.shiftKey&&innerWidth>760){e.preventDefault();send()}};
+const LG=["JavaScript","Python","HTML","CSS","PHP","Java","C++","SQL","Bash","JSON"];
+function page(t,h){$("pgT").textContent=t;$("pgB").innerHTML=h;$("pg").classList.remove("hide")}
+$("pgBk").onclick=()=>$("pg").classList.add("hide");
+function itemCard(i,full){const st=S.stars.includes(i.id),mine=i.code==S.me,body=full?i.body:i.body.split("\n").slice(0,4).join("\n");
+ return `<div class="it"><b>${esc(i.title)}</b><small>${esc(i.lang)} · oleh ${esc(i.by)}${mine?" (kamu)":""}</small><pre>${esc(body)}</pre><div class="ir"><button data-st="${i.id}" class="${st?"on":""}">${st?"★ Berbintang":"☆ Beri bintang"}</button><button data-cp="${i.id}" ${st||mine?"":"disabled"}>Salin kode</button>${mine?`<button data-del="${i.id}">Hapus</button>`:""}</div></div>`}
+function storagePage(){
+ page("Storage",`<p class="nt">Hanya kode yang bisa diunggah, dan isinya harus sesuai bahasa yang dipilih. Kode yang diunggah di sini bisa dilihat semua orang, tanpa harus berteman. Untuk mengambil (menyalin) kodenya, beri bintang ⭐ dulu. Hasilnya tersimpan di ⋮ → Berbintang.</p><div class="up"><input id="uT" maxlength="60" placeholder="Judul kode" autocomplete="off"><select id="uL">${LG.map(l=>`<option>${l}</option>`).join("")}</select><textarea id="uC" rows="5" placeholder="Tempel kode di sini..." spellcheck="false"></textarea><button class="btn" id="uOk">Unggah ke Storage</button></div><div id="uList"></div>`);
+ $("uOk").onclick=()=>{const t=$("uT").value.trim(),b=$("uC").value.trim();if(!t||!b){toast("Belum lengkap","Isi judul dan kodenya dulu.");return}
+  const er=chkCode($("uL").value,b);if(er){codeErr(er);return}
+  S.items.unshift({id:"i"+Date.now(),by:S.name,code:S.me,lang:$("uL").value,title:t,body:b,ts:Date.now()});save();storagePage();toast("Terunggah","Kodemu sekarang terlihat oleh semua orang.")};
+ $("uList").innerHTML=[...S.items].sort((a,b)=>b.ts-a.ts).map(i=>itemCard(i,0)).join("")}
+function starPage(){const L=S.items.filter(i=>S.stars.includes(i.id));
+ page("Berbintang",`<p class="nt">Kode yang kamu beri bintang tersimpan di sini dan bisa disalin kapan saja.</p>`+(L.length?L.map(i=>itemCard(i,1)).join(""):`<div class="empty">Belum ada yang berbintang. Buka Storage lalu beri bintang pada kode yang kamu mau.</div>`))}
+function profilePage(){
+ page("Pengaturan profil",`<div class="pf"><div class="av big">${esc(ini(S.name))}</div><input id="pN" maxlength="24" value="${esc(S.name)}" placeholder="Nama kamu" autocomplete="off"><div class="cd">Kodemu: <b>${S.me}</b></div><button class="btn" id="pCp" style="background:var(--p2);margin-bottom:8px">Salin kodeku</button><button class="btn" id="pSv">Simpan profil</button></div>`);
+ $("pCp").onclick=()=>{try{navigator.clipboard.writeText(S.me)}catch(e){}toast("Kode disalin",S.me)};
+ $("pSv").onclick=()=>{S.name=$("pN").value.trim()||"Tamu";save();profilePage();toast("Tersimpan","Namamu sekarang "+S.name)}}
+$("pgB").onclick=e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset,open=$("pgT").textContent;
+ if(d.st){const i=S.stars.indexOf(d.st);i<0?S.stars.push(d.st):S.stars.splice(i,1);save();open=="Storage"?(()=>{const y=$("uList").innerHTML;drawStore()})():starPage()}
+ else if(d.cp){const it=S.items.find(x=>x.id==d.cp);try{navigator.clipboard.writeText(it.body)}catch(e){}toast("Kode disalin",it.title)}
+ else if(d.del){S.items=S.items.filter(x=>x.id!=d.del);S.stars=S.stars.filter(x=>x!=d.del);save();open=="Storage"?drawStore():starPage()}};
+Object.assign(P,{key:"M8 14a4 4 0 1 1 3.9-5H21v3h-2v2h-3v-2h-4.1A4 4 0 0 1 8 14z",lock:"M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3",bell:"M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4",kbd:"M3 7h18v10H3zM7 11h1M11 11h1M15 11h1M8 14h8",help:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1",out:"M10 4H4v16h6M15 8l4 4-4 4M19 12H9"});
+const ROWS=[["profil","user","Profil","Nama, foto profil, nama pengguna"],["akun","key","Akun","Notifikasi keamanan, info akun"],["priv","lock","Privasi","Kontak diblokir, pesan sementara"],["chat","chat","Chat","Tema, wallpaper, pengaturan obrolan"],["notif","bell","Notifikasi","Pesan, grup, suara"],["kbd","kbd","Pintasan keyboard","Tindakan cepat"],["help","help","Bantuan dan masukan","Pusat Bantuan, hubungi kami, Kebijakan Privasi"]];
+const avt=()=>S.photo?`<img class="ph" src="${S.photo}" alt="Foto profil">`:esc(ini(S.name));
+function rail(){const b=$("rMe");if(b)b.innerHTML=S.photo?`<img class="ph" src="${S.photo}" alt="Profil">`:I("user")}
+function setPhoto(f){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),m=Math.min(im.width,im.height);c.width=c.height=256;c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,256,256);S.photo=c.toDataURL("image/jpeg",.8);save();rail();$("set").dataset.v=="p"?profileEdit():settingsPage()};im.src=r.result};r.readAsDataURL(f)}
+function avBlock(){return `<div class="pavw"><div class="av big2">${avt()}</div><button class="cam2" id="stCam" aria-label="Ganti foto">${I("cam")}</button><input type="file" id="stF" accept="image/*" class="hide"></div>`}
+function settingsPage(f){const s=$("set"),q=(f||"").toLowerCase();s.dataset.v="s";s.classList.remove("hide");
+ const rows=ROWS.filter(r=>(r[2]+" "+r[3]).toLowerCase().includes(q));
+ s.innerHTML=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>${esc(S.name)}</h2></div><div class="sr"><span>${I("search")}</span><input id="stQ" placeholder="Cari" value="${esc(f||"")}" autocomplete="off"></div><div class="stb">${avBlock()}${rows.map(r=>`<button class="srow" data-r="${r[0]}">${I(r[1])}<div><b>${r[2]}</b><small>${r[3]}</small></div></button>`).join("")}<button class="srow out" data-lo="1">${I("out")}<div><b>Logout</b></div></button></div>`;
+ if(f!=null){const i=$("stQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+function profileEdit(){const s=$("set");s.dataset.v="p";
+ s.innerHTML=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>Profil</h2></div><div class="stb">${avBlock()}<div class="pf2"><label>Nama</label><input id="pN" maxlength="24" value="${esc(S.name)}" autocomplete="off"><label>Tentang</label><input id="pA" maxlength="80" value="${esc(S.about||"")}" placeholder="Tulis sesuatu tentang kamu" autocomplete="off"><label>Kode teman (nama pengguna)</label><input value="${S.me}" readonly><button class="btn" id="pSv">Simpan profil</button></div></div>`}
+$("set").onclick=e=>{const t=e.target.closest("button");if(!t)return;const s=$("set");
+ if(t.id=="stBk"){s.dataset.v!="s"?settingsPage():s.classList.add("hide")}
+ else if(t.id=="stCam")$("stF").click();
+ else if(t.id=="pSv"){S.name=$("pN").value.trim()||"Tamu";S.about=$("pA").value.trim();save();settingsPage();toast("Tersimpan","Profilmu sudah diperbarui.")}
+ else if(t.dataset.r=="profil")profileEdit();
+ else if(t.dataset.r=="akun")subPage("akun");
+ else if(t.dataset.r=="priv")subPage("priv");
+ else if(t.dataset.r=="help")subPage2("help");
+ else if(t.dataset.r=="notif")subPage2("notif");
+ else if(t.dataset.nc){const n=nf();n[t.dataset.nc]=n[t.dataset.nc]?0:1;save();subPage2(t.dataset.pg,$("set").querySelector(".stb").scrollTop)}
+ else if(t.dataset.hl=="2"){$("set").classList.add("hide");act("ai")}
+ else if(t.dataset.hl)toast(t.querySelector("b").textContent,"Segera hadir.")
+ else if(t.dataset.test)testNotif();
+ else if(t.dataset.pv){const k=t.dataset.pv,o=OPT[k]||VIS,v=pvd();v[k]=o[(o.indexOf(v[k])+1)%o.length];save();subPage("priv",$("set").querySelector(".stb").scrollTop)}
+ else if(t.dataset.tg){const v=pvd();v[t.dataset.tg]=v[t.dataset.tg]?0:1;save();subPage("priv",$("set").querySelector(".stb").scrollTop)}
+ else if(t.dataset.r)toast(t.querySelector("b").textContent,"Segera hadir. Nanti bisa kamu atur di sini.");
+ else if(t.dataset.lo){if(t.dataset.ok){try{localStorage.removeItem("wsc")}catch(x){}location.reload()}else{t.dataset.ok=1;t.querySelector("b").textContent="Ketuk lagi untuk keluar"}}};
+$("set").oninput=e=>{if(e.target.id=="stQ")settingsPage(e.target.value)};
+$("set").onchange=e=>{if(e.target.id=="stF")setPhoto(e.target.files[0])};
+Object.assign(P,{shield:"M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z",info:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.1"});
+Object.assign(P,{phone:"M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",bug:"M9 9h6v7a3 3 0 0 1-6 0zM9 9a3 3 0 0 1 6 0M4 12h5M15 12h5M5 6l3 2M19 6l-3 2M5 19l3-2M19 19l-3-2",flag:"M5 21V4h12l-2 4 2 4H5",flask:"M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"});
+const nf=()=>S.nf||(S.nf={pesan:1,grup:1,status:1,tel:1,prev:1,suara:0,sync:0,beta:0});
+function testNotif(){toast("Notifikasi uji coba","Begini tampilan notifikasi pesan di atas layar.");
+ try{if("Notification" in window){if(Notification.permission=="granted")new Notification("Whatsschat",{body:"Notifikasi uji coba"});else if(Notification.permission!="denied")Notification.requestPermission()}}catch(e){}}
+function subPage2(k,y){const s=$("set"),n=nf();s.classList.remove("hide");s.dataset.v="n";
+ const sw=(key,pg)=>`<i class="sw ${n[key]?"on":""}"></i>`,hd=t=>`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>${t}</h2></div>`;let h;
+ if(k=="notif"){h=hd("Notifikasi")+`<div class="stb">${[["pesan","chat","Pesan"],["grup","user","Grup"],["status","story","Status"],["tel","phone","Telepon"]].map(r=>`<button class="prow" data-nc="${r[0]}" data-pg="notif">${I(r[1])}<div><b>${r[2]}</b><small>${n[r[0]]?"Aktif":"Nonaktif"}</small></div><span class="chev">›</span></button>`).join("")}<div class="psec"></div>`+[["prev","Tampilkan pratinjau","Pratinjau isi pesan teks di notifikasi pesan."],["suara","Putar suara untuk pesan keluar",""],["sync","Sinkronisasi latar belakang","Pesan lebih cepat masuk karena disinkronkan di latar belakang."]].map(r=>`<button class="prow" data-nc="${r[0]}" data-pg="notif"><div><b>${r[1]}</b>${r[2]?`<small>${r[2]}</small>`:""}</div>${sw(r[0])}</button>`).join("")+`<div class="prow"><div><b>Kirim notifikasi uji coba</b></div><button class="pill" data-test="1">Kirim</button></div><div class="nt" style="margin:14px 24px;font-size:12px">Agar notifikasi muncul, pastikan notifikasi diizinkan di pengaturan browser dan perangkatmu.</div></div>`}
+ else{h=hd("Bantuan dan masukan")+`<div class="stb">${[["help","Pusat Bantuan","Pertanyaan umum"],["chat","Hubungi kami","Ngobrol dengan AI Whatsschat untuk mendapat jawaban"],["bug","Kirim masukan","Masalah teknis, saran."],["doc","Ketentuan dan Kebijakan Privasi",""],["flag","Laporkan chat",""]].map((r,i)=>`<button class="srow" data-hl="${i}">${I(r[0])}<div><b>${r[1]}</b>${r[2]?`<small>${r[2]}</small>`:""}</div></button>`).join("")}<div class="psec"></div><button class="prow" data-nc="beta" data-pg="help">${I("flask")}<div><b>Gabung ke versi beta</b><small>Dapatkan fitur baru sebelum dirilis. Laporkan bug lewat Kirim masukan.</small></div>${sw("beta")}</button><div class="cd" style="text-align:center;color:var(--mu);font-size:12px;padding:16px">Versi 3.6.0</div></div>`}
+ s.innerHTML=h;if(y)s.querySelector(".stb").scrollTop=y}
+Object.assign(P,{pen:"M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"});
+const SC={},MEM={},SW=["#7a1520","#2a3b7a","#1f6b4a","#6b3a8a","#8a5a1a","#2b2b31"];
+const alive=x=>Date.now()-x.ts<864e5;
+function tf(ts){const d=new Date(ts),h=d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}).replace(":",".");return (d.toDateString()==new Date().toDateString()?"Hari ini pukul ":"Kemarin pukul ")+h}
+const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open("wsc",1);r.onupgradeneeded=()=>r.result.createObjectStore("m");r.onsuccess=()=>res(r.result);r.onerror=()=>rej()});
+async function mput(k,b){try{const d=await idb();d.transaction("m","readwrite").objectStore("m").put(b,k)}catch(e){}}
+async function mget(k){try{const d=await idb();return await new Promise(r=>{const q=d.transaction("m").objectStore("m").get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}}
+async function mdel(k){try{const d=await idb();d.transaction("m","readwrite").objectStore("m").delete(k)}catch(e){}}
+function purge(){const dead=S.st.filter(x=>!alive(x));if(dead.length){dead.forEach(x=>{mdel(x.id);delete MEM[x.id]});S.st=S.st.filter(alive);save()}}
+function seedSt(){const n=Date.now();if(!S.st.some(x=>x.demo&&alive(x))){S.st.push({id:"d"+n,demo:1,by:"Rina",code:"rina2026",type:"text",text:"Selamat pagi! Semangat ya hari ini ☀️",bg:"#7a1520",ts:n-72e5},{id:"e"+n,demo:1,by:"Dimas",code:"dimas777",type:"text",text:"Ada kode bagus? Cek Storage ya.",bg:"#2a3b7a",ts:n-324e5});save()}}
+S.st=S.st||[];S.seen=S.seen||[];purge();seedSt();
+function groups(){const m={};S.st.filter(alive).forEach(x=>{(m[x.code]=m[x.code]||{code:x.code,by:x.by,mine:x.code==S.me,l:[]}).l.push(x)});return Object.values(m).map(g=>{g.l.sort((a,b)=>a.ts-b.ts);g.last=g.l[g.l.length-1].ts;g.un=g.l.some(x=>!S.seen.includes(x.id));return g})}
+const unseenAny=()=>groups().some(g=>!g.mine&&g.un);
+const MAXLOG=3;/* Update baru: taruh di PALING ATAS array LOG dan ubah VER. Hanya 3 teratas yang tampil, yang paling bawah otomatis tergantikan. */
+const VER="3.6.0",LOG=[{v:"3.6.0",d:"23 November 2026",t:["Kode dipisah: index.html, css/style.css, dan js/script.js.","AI jalan di situs yang di-push lewat server Vercel (api/ai.js), kunci API aman di server.","Cache offline PWA diperbarui."]},{v:"3.5.0",d:"23 November 2026",t:["Fitur PWA: Whatsschat bisa dipasang ke layar utama HP lewat Chrome.","Bisa dibuka tanpa bar browser, dengan ikon aplikasi sendiri.","Tampilan dasar tetap bisa dibuka saat offline."]},{v:"3.4.0",d:"23 November 2026",t:["Storage: kode yang bukan kode ditolak, pesan peringatan muncul di tengah layar lalu coba lagi.","Storage: isi kode harus sesuai bahasa yang dipilih (HTML hanya HTML, Python hanya Python).","Menu Daftar siaran diganti menjadi Detail update.","Tab Pembaruan diganti nama menjadi Update dan punya detail update.","Nomor versi aplikasi menjadi 3.4.0."]}];
+function updPage(){page("Detail update",`<p class="nt">Versi aplikasi saat ini: <b>${VER}</b>. Catatan perubahan dimulai dari versi 3.4.0.</p>`+LOG.slice(0,MAXLOG).map(l=>`<div class="it"><b>Versi ${l.v}</b><small>${l.d}</small><ul style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.6">${l.t.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""))}
+function storyDraw(){purge();seedSt();const G=groups(),me=G.find(g=>g.mine),oth=G.filter(g=>!g.mine).sort((a,b)=>b.last-a.last),nw=oth.filter(g=>g.un),sn=oth.filter(g=>!g.un);
+ const row=g=>`<button class="ch" data-sv="${g.code}"><div class="av ring ${g.un?"":"seen"}">${esc(ini(g.by))}</div><div class="mid"><div class="r1"><b>${esc(g.by)}</b></div><div class="r2"><span>${tf(g.last)}</span></div></div></button>`;
+ $("stp").innerHTML=`<div class="sth"><h2 style="flex:1;padding-left:8px">Story</h2><button class="ib" data-sa="menu" aria-label="Tambah story">${I("plus")}</button></div><div class="pop hide" id="stMenu"><button data-sa="t">Story teks</button><button data-sa="m">Foto dan video</button></div><div class="stb"><button class="ch" data-upd="1"><div class="av">✦</div><div class="mid"><div class="r1"><b>Detail update</b></div><div class="r2"><span>Versi ${VER} · lihat fitur baru</span></div></div></button><button class="ch" data-sv="${S.me}"><div class="av ${me?"ring":""}" style="position:relative;overflow:visible"><span style="width:100%;height:100%;border-radius:50%;overflow:hidden;display:grid;place-items:center">${avt()}</span><i class="pb" data-sa="menu">+</i></div><div class="mid"><div class="r1"><b>Story saya</b></div><div class="r2"><span>${me?tf(me.last):"Ketuk untuk menambah story"}</span></div></div></button>${nw.length?`<div class="psec">Terbaru</div>`+nw.map(row).join(""):""}${sn.length?`<div class="psec">Telah dilihat</div>`+sn.map(row).join(""):""}${oth.length?"":`<div class="empty">Belum ada story dari orang lain.</div>`}</div>`;
+ $("rdstory").classList.toggle("hide",!unseenAny())}
+setInterval(()=>{if(view=="story"&&$("sv").classList.contains("hide"))storyDraw()},60000);
+$("sh1").innerHTML=I("pen");$("sh2").innerHTML=I("cam");
+function compose(m){SC.mode=m;SC.file=null;SC.bg=SW[0];$("scT").textContent=m=="text"?"Story teks":"Foto dan video";$("scTx").classList.toggle("hide",m!="text");$("scMd").classList.toggle("hide",m=="text");$("scTa").value="";$("scCap").value="";$("scPv").innerHTML="";$("scF").value="";$("scE").textContent="";swDraw();$("sc").classList.remove("hide")}
+function swDraw(){$("scTa").style.background=SC.bg;$("scSw").innerHTML=SW.map(c=>`<button data-bg="${c}" style="background:${c};${c==SC.bg?"outline:2px solid #fff":""}" aria-label="Warna"></button>`).join("")}
+const err=t=>{$("scE").textContent=t};
+$("scSw").onclick=e=>{const b=e.target.closest("button");if(b){SC.bg=b.dataset.bg;swDraw()}};
+$("scPick").onclick=()=>$("scF").click();$("scX").onclick=()=>$("sc").classList.add("hide");$("scOk").onclick=scPost;
+$("scF").onchange=e=>{const f=e.target.files[0];if(!f)return;err("");SC.file=null;$("scPv").innerHTML="";
+ if(f.type.startsWith("image/")){const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),k=Math.min(1,960/Math.max(im.width,im.height));c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);SC.data=c.toDataURL("image/jpeg",.8);SC.kind="img";SC.file=f;$("scPv").innerHTML=`<img class="scp" src="${SC.data}" alt="Pratinjau">`};im.onerror=()=>err("Foto tidak bisa dibaca.");im.src=URL.createObjectURL(f)}
+ else if(f.type.startsWith("video/")){const u=URL.createObjectURL(f),v=document.createElement("video");v.preload="metadata";v.onloadedmetadata=()=>{if(v.duration>20.5)err("Video terlalu panjang ("+Math.round(v.duration)+" detik). Maksimal 20 detik.");else{SC.kind="vid";SC.file=f;$("scPv").innerHTML=`<video class="scp" src="${u}" controls playsinline muted></video>`}};v.onerror=()=>err("Video tidak bisa dibaca.");v.src=u}
+ else err("Pilih file foto atau video.")};
+async function scPost(){if(S.st.filter(x=>x.code==S.me&&alive(x)).length>=30)return err("Maksimal 30 story aktif. Hapus salah satu dulu.");const id="st"+Date.now(),b={id,by:S.name,code:S.me,ts:Date.now()};
+ if(SC.mode=="text"){const t=$("scTa").value.trim();if(!t)return err("Tulis sesuatu dulu.");b.type="text";b.text=t;b.bg=SC.bg}
+ else{if(!SC.file)return err("Pilih foto atau video dulu.");b.cap=$("scCap").value.trim();if(SC.kind=="img"){b.type="img";b.img=SC.data}else{b.type="vid";MEM[id]=SC.file;await mput(id,SC.file)}}
+ S.st.push(b);simViews(id);save();$("sc").classList.add("hide");view="story";render();toast("Story diposting","Hilang otomatis setelah 24 jam.")}
+let VQ=[],VI=0,VT,VURL;
+function openV_unused(){}
+function closeV(){clearTimeout(VT);if(VURL){URL.revokeObjectURL(VURL);VURL=null}$("svBody").innerHTML="";$("sv").classList.add("hide");render()}
+async function showV(i){clearTimeout(VT);if(i<0)return nextU(-1);if(i>=VQ.length)return nextU(1);VI=i;const x=VQ[i];$("svVw").classList.add("hide");
+ if(!S.seen.includes(x.id)){S.seen.push(x.id);save()}
+ $("svB").innerHTML=VQ.map((_,k)=>`<span><i style="width:${k<i?100:0}%"></i></span>`).join("");const bar=$("svB").children[i].firstChild;
+ $("svN").textContent=x.code==S.me?"Story saya":x.by;$("svM").textContent=tf(x.ts);$("svA").innerHTML=x.code==S.me?avt():esc(ini(x.by));$("svD").classList.toggle("hide",x.code!=S.me);$("svE").classList.toggle("hide",x.code!=S.me);$("svEN").textContent=(x.views||[]).length;
+ const go=ms=>{bar.style.transition="width "+ms+"ms linear";requestAnimationFrame(()=>requestAnimationFrame(()=>bar.style.width="100%"));VT=setTimeout(()=>showV(VI+1),ms)},body=$("svBody");
+ if(x.type=="text"){body.innerHTML=`<div class="svtx" style="background:${x.bg}"><p>${esc(x.text)}</p></div>`;go(5000)}
+ else if(x.type=="img"){body.innerHTML=`<img src="${x.img}" alt="Story">${x.cap?`<div class="svcap">${esc(x.cap)}</div>`:""}`;go(5000)}
+ else{body.innerHTML="";const b=MEM[x.id]||await mget(x.id);if(VQ[VI]!==x)return;if(!b){body.innerHTML=`<div class="svtx"><p>Video tidak tersedia.</p></div>`;go(3000);return}
+  if(VURL)URL.revokeObjectURL(VURL);VURL=URL.createObjectURL(b);const v=document.createElement("video");v.src=VURL;v.playsInline=true;body.appendChild(v);
+  if(x.cap){const c=document.createElement("div");c.className="svcap";c.textContent=x.cap;body.appendChild(c)}
+  v.ontimeupdate=()=>{if(v.duration)bar.style.width=(v.currentTime/v.duration*100)+"%"};v.onended=()=>showV(VI+1);v.onerror=()=>showV(VI+1);
+  v.play().catch(()=>{v.muted=true;v.play().catch(()=>{})})}}
+function openV(code){purge();const G=groups(),by=(a,b)=>b.last-a.last;VU=[...G.filter(g=>g.mine),...G.filter(g=>!g.mine&&g.un).sort(by),...G.filter(g=>!g.mine&&!g.un).sort(by)].map(g=>g.code);
+ VQ=S.st.filter(x=>x.code==code&&alive(x)).sort((a,b)=>a.ts-b.ts);if(!VQ.length)return;const un=VQ.findIndex(x=>!S.seen.includes(x.id));$("sv").classList.remove("hide");showV(code==S.me||un<0?0:un)}
+let VU=[];
+function nextU(d){const c=VQ[0]?VQ[0].code:S.me,k=VU.indexOf(c)+d;if(k>=VU.length)return closeV();if(k<0)return showV(0);const q=S.st.filter(x=>x.code==VU[k]&&alive(x)).sort((a,b)=>a.ts-b.ts);if(!q.length)return closeV();VQ=q;showV(0)}
+function simViews(id){const names=[...new Set(["Rina","Dimas",...S.chats.filter(c=>!c.ai).map(c=>c.name)])];names.forEach((n,i)=>setTimeout(()=>{const x=S.st.find(s=>s.id==id);if(!x)return;x.views=x.views||[];if(x.views.some(v=>v.n==n))return;x.views.push({n,ts:Date.now()});save();if(VQ[VI]&&VQ[VI].id==id)$("svEN").textContent=x.views.length},4000+i*6000+Math.random()*4000))}
+$("svE").onclick=()=>{clearTimeout(VT);const v=$("svBody").querySelector("video");if(v)v.pause();const x=VQ[VI],L=x.views||[];$("svVn").textContent="Dilihat oleh "+L.length;
+ $("svVl").innerHTML=L.length?L.map(w=>`<div class="vr"><div class="av" style="width:40px;height:40px;font-size:15px">${esc(ini(w.n))}</div><div><b>${esc(w.n)}</b><small>${tf(w.ts)}</small></div></div>`).join(""):`<div class="empty">Belum ada yang melihat story ini.</div>`;$("svVw").classList.remove("hide")};
+$("svVx").onclick=()=>{$("svVw").classList.add("hide");showV(VI)};
+$("svZ").onclick=e=>{const d=e.target.dataset.d;if(d)showV(VI+ +d)};$("svC").onclick=closeV;
+$("svD").onclick=()=>{const x=VQ[VI];S.st=S.st.filter(s=>s.id!=x.id);mdel(x.id);delete MEM[x.id];save();VQ.splice(VI,1);VQ.length?showV(Math.min(VI,VQ.length-1)):closeV()};
+document.addEventListener("click",e=>{if(e.target.closest("[data-upd]"))return updPage();const t=e.target.closest("[data-sa],[data-sv]"),mn=$("stMenu");
+ if(!t){if(mn&&!e.target.closest("#stMenu"))mn.classList.add("hide");return}
+ if(t.dataset.sa=="menu"){mn.classList.toggle("hide");return}
+ if(mn)mn.classList.add("hide");
+ if(t.dataset.sa)return compose(t.dataset.sa=="t"?"text":"media");
+ const c=t.dataset.sv;if(c==S.me&&!S.st.some(x=>x.code==S.me&&alive(x)))return mn.classList.remove("hide");openV(c)});
+const WEL='Halo! Aku AI Whatsschat. Kirim data, soal, atau ceritamu, nanti kubantu bedah, kasih solusi langkah demi langkah, sampai bikinin kode web. Ketuk 📎 untuk kirim file data (CSV, TXT, JSON).';
+const ai=()=>S.ai||(S.ai={name:'AI Whatsschat',persona:'santai dan akrab seperti teman. Boleh pakai bahasa gaul atau Jawa kalau pengguna memakainya, tetap sopan dan tidak kasar.'});
+{const a=S.chats.find(c=>c.ai);if(a){a.msgs=a.msgs.filter(m=>!m.pending&&!/belum tersambung|belum aktif/.test(m.t));if(!a.msgs.length)a.msgs.push({t:WEL,me:0,time:hm()});a.name=ai().name}}
+const SYS=()=>`Kamu adalah ${ai().name}, asisten AI di aplikasi chat Whatsschat. Gaya bicara: ${ai().persona}\nBalas dalam bahasa yang dipakai pengguna (default bahasa Indonesia). Jawaban ringan cukup singkat; jawaban teknis boleh lebih panjang tapi rapi.\nKemampuanmu: (1) menganalisis data yang dikirim pengguna (nilai, absen, penjualan, data grup, isi file): tulis temuan dengan angka nyata dari data, masalah utama, penyebab yang mungkin, lalu solusi langkah demi langkah; jangan mengarang angka, dan kalau data kurang jelas tanyakan satu hal. (2) memberi solusi praktis, bukan hanya jawaban, misalnya masalah motor, masalah di grup, atau error kode. (3) membuat kode web lengkap dalam satu blok kode yang bisa langsung dijalankan, dan menjelaskan cara mengubahnya jadi APK (WebView, Capacitor, atau Kodular). (4) menjelaskan pelajaran TKJ dan membuat caption story. Untuk masalah antar teman, beri saran yang menenangkan dan tidak memanas-manasi. Format: **tebal** untuk poin penting, daftar bernomor atau bertanda -, kode di dalam blok kode. Kamu hanya melihat obrolan di chat ini dan file yang dikirim.`;
+function md(s){const B=[];s=s.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g,(_,l,c)=>{B.push(c);return '\u0000'+(B.length-1)+'\u0000'});s=esc(s);
+ const inl=t=>t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');let o='',li=null;const end=()=>{if(li){o+='</'+li+'>';li=null}};
+ s.split('\n').forEach(L=>{let m;
+  if(m=L.match(/^\u0000(\d+)\u0000$/)){end();const c=B[m[1]].replace(/\n$/,'');o+=`<div class='cb'><button class='cpb' data-c='${esc(c)}'>Salin</button><pre>${esc(c)}</pre></div>`}
+  else if(m=L.match(/^\s*\d+\.\s+(.*)/)){if(li!='ol'){end();o+='<ol>';li='ol'}o+=`<li>${inl(m[1])}</li>`}
+  else if(m=L.match(/^\s*[-*]\s+(.*)/)){if(li!='ul'){end();o+='<ul>';li='ul'}o+=`<li>${inl(m[1])}</li>`}
+  else if(m=L.match(/^&gt;\s?(.*)/)){end();o+=`<blockquote>${inl(m[1])}</blockquote>`}
+  else if(m=L.match(/^#{1,3}\s+(.*)/)){end();o+=`<p><b>${inl(m[1])}</b></p>`}
+  else if(!L.trim())end();else{end();o+=`<p>${inl(L)}</p>`}});end();return `<div class='md'>${o}</div>`}
+let AIP=0;
+const AI_EP=window.AI_ENDPOINT||"api/ai";
+async function srvAsk(raw){let r;try{r=await fetch(AI_EP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:raw,persona:ai().persona})})}catch(e){throw{msg:"Tidak bisa terhubung ke server AI. Cek koneksi internetmu."}}
+ const j=await r.json().catch(()=>({}));if(r.ok&&j.text)return{text:j.text};
+ throw r.status==429?{code:"rate_limited"}:{msg:r.status==404||r.status==405?"Server AI belum dipasang. Deploy di Vercel dan isi ANTHROPIC_API_KEY (lihat README).":r.status==500?"Server AI belum punya kunci API. Isi ANTHROPIC_API_KEY di Vercel lalu redeploy.":r.status==413?"Pesan atau file terlalu besar. Potong dulu.":"AI sedang bermasalah. Coba kirim ulang."}}
+async function askAI(c){if(AIP)return;const sm=window.claude?await Promise.race([window.claude.use('sample').catch(()=>null),new Promise(r=>setTimeout(()=>r(null),8000))]):null;
+ const msgs=[];c.msgs.slice(-16).forEach(m=>{let t=m.t;if(m.data)t+='\n\n[Isi file '+m.fname+']\n'+m.data;const r=m.me?'user':'assistant',l=msgs[msgs.length-1];if(l&&l.role==r)l.content+='\n\n'+t;else msgs.push({role:r,content:t})});
+ while(msgs.length&&msgs[0].role!='user')msgs.shift();if(!msgs.length)return;const raw=msgs.map(m=>({role:m.role,content:m.content}));msgs[0].content=SYS()+'\n\n---\n\n'+msgs[0].content;
+ const ph={t:'Sedang mengetik...',me:0,time:hm(),pending:1};c.msgs.push(ph);draw(c);AIP=1;
+ try{const r=sm?await sm(msgs,{cache:false,onText:({text})=>{ph.t=text;if(cur==c.id)draw(c)}}):await srvAsk(raw);ph.t=r.text||'(kosong)'}
+ catch(e){ph.t=e&&e.msg?e.msg:e&&e.code=='not_granted'?'Izin AI belum diberikan. Kirim pesan lagi dan pilih Izinkan.':e&&e.code=='rate_limited'?'Terlalu cepat. Tunggu sebentar lalu coba lagi.':'AI sedang bermasalah. Coba kirim ulang.'}
+ delete ph.pending;ph.time=hm();AIP=0;c.ts=Date.now();if(cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?ph.t.slice(0,80):'Pesan baru',c.id)}
+ if(cur==c.id)draw(c);render()}
+$('attB').onclick=()=>$('attF').click();
+$('attF').onchange=async e=>{const f=e.target.files[0];e.target.value='';const c=S.chats.find(x=>x.id==cur);if(!f||!c||!c.ai)return;
+ if(f.size>2e5){toast('File terlalu besar','Maksimal 200 KB. Potong datanya dulu.');return}
+ const tx=(await f.text()).slice(0,30000);push(c,'📎 '+f.name+' ('+tx.split('\n').length+' baris)',1);const m=c.msgs[c.msgs.length-1];m.data=tx;m.fname=f.name;askAI(c)};
+$('aiS').onclick=()=>{const a=ai();a.name=$('aiN').value.trim()||'AI Whatsschat';a.persona=$('aiP').value.trim()||a.persona;S.chats.find(x=>x.ai).name=a.name;save();$('aiOv').classList.add('hide');if(cur=='ai')$('cN').innerHTML=esc(a.name)+' <span class="vb">✓</span>';render();toast('Tersimpan','Kepribadian AI diperbarui.')};
+$('aiX').onclick=()=>$('aiOv').classList.add('hide');
+document.addEventListener('click',e=>{const t=e.target,ap=$('aiPop');
+ if(t.closest('#aiK')){ap.classList.toggle('hide');return}
+ if(!t.closest('#aiPop'))ap.classList.add('hide');
+ const b=t.closest('[data-ai],[data-q],[data-c]');if(!b)return;
+ if(b.hasAttribute('data-c')){try{navigator.clipboard.writeText(b.dataset.c)}catch(x){}b.textContent='Disalin';setTimeout(()=>{b.textContent='Salin'},1400)}
+ else if(b.dataset.q){$('ta').value=b.dataset.q;$('ta').focus()}
+ else if(b.dataset.ai=='persona'){$('aiN').value=ai().name;$('aiP').value=ai().persona;$('aiOv').classList.remove('hide')}
+ else if(b.dataset.ai=='clear'){const c=S.chats.find(x=>x.ai);c.msgs=[{t:WEL,me:0,time:hm()}];if(cur=='ai')draw(c);render();toast('Riwayat dihapus','Chat AI dimulai dari awal.')}});
+const LGX={
+ HTML:t=>/^\s*(<!doctype\s+html|<!--|<[a-z][\w-]*(\s|>|\/))/i.test(t),
+ CSS:t=>{t=t.replace(/\/\*[\s\S]*?\*\//g,'');return !/^\s*</.test(t)&&/(^|[{}])\s*[.#@*\w:](?:[^{};=\[]|\[[^\]]*\])*\{\s*[\w-]+\s*:[^{}]*\}/.test(t)},
+ JavaScript:t=>!/^\s*</.test(t)&&!/<\?php/.test(t)&&/\b(function\s*\*?\s*[\w$]*\s*\(|(const|let|var)\s+[\w$]+\s*=|console\.\w+\(|document\.\w+|window\.\w+|require\(|module\.exports|addEventListener)|=>|\bexport\s+(default|const|function)\b|\bimport\s+.+\s+from\s+['"]/.test(t),
+ Python:t=>!/(<\?php|#include|\bfunction\b|console\.|System\.out|\b(const|let|var)\b)/.test(t)&&/^\s*(def\s+\w+\s*\(.*\)\s*(->\s*[^:]+)?:|class\s+\w+\s*(\(.*\))?\s*:|from\s+[\w.]+\s+import\s+\w|import\s+[\w.]+(\s+as\s+\w+)?\s*$|print\s*\(|elif\s+.+:\s*$|else\s*:\s*$|try\s*:\s*$|except\b.*:\s*$|for\s+\w+\s+in\s+.+:\s*$|if\s+__name__\s*==|@\w+\s*$)/m.test(t),
+ PHP:t=>/<\?php|<\?=|\$\w+\s*=\s*[^;\n]+;|\becho\s+["'$]/.test(t),
+ Java:t=>/\b(public|private|protected)\s+(static\s+)?(final\s+)?(class|void|int|String)\b|System\.out\.print|\bimport\s+java\./.test(t),
+ 'C++':t=>/#include\s*[<"]|\bstd::|\bcout\s*<<|\bcin\s*>>|\bint\s+main\s*\(|using\s+namespace\s+std/.test(t),
+ SQL:t=>/\b(SELECT[\s\S]+?FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|CREATE\s+(TABLE|DATABASE|VIEW|INDEX)|ALTER\s+TABLE|DROP\s+(TABLE|DATABASE))\b/.test(t)||(/;\s*$/m.test(t)&&/\b(select\b[\s\S]+?\bfrom|insert\s+into|update\s+\w+\s+set|delete\s+from|create\s+table|alter\s+table|drop\s+table)\b/i.test(t)),
+ Bash:t=>/^#!.*\b(ba|z)?sh\b/.test(t)||/^\s*(sudo|apt-get|apt|npm|npx|pip3?|git|chmod|chown|curl|wget)\s+\w/m.test(t)||/^\s*(echo|cd|ls|mkdir|rm|cp|mv|cat|export|source|grep)\s+\S*[-.\/~$"'=]\S*/m.test(t),
+ JSON:t=>{try{const v=JSON.parse(t);return !!v&&typeof v=='object'}catch(e){return false}}
+};
+function chkCode(l,t){const ok=k=>{try{return LGX[k](t)}catch(e){return false}};if(ok(l))return null;const f=Object.keys(LGX).filter(ok);
+ if(!f.length)return{t:'Itu bukan kode',m:'Storage hanya menerima kode. Tempel kode '+l+' yang asli, lalu coba lagi.'};
+ return{t:'Bukan kode '+l,m:'Isi yang kamu tempel terdeteksi sebagai '+f.join(' / ')+', bukan '+l+'. Ganti bahasanya atau tempel kode '+l+', lalu coba lagi.'}}
+function codeErr(e){$('seT').textContent=e.t;$('seM').textContent=e.m;$('stErr').classList.remove('hide')}
+$('seOk').onclick=()=>{$('stErr').classList.add('hide');const a=$('uC');if(a)a.focus()};
+const VIS=["Semua orang","Kontak saya","Tidak ada"],OPT={timer:["Mati","24 jam","7 hari","90 hari"]};
+const pvd=()=>S.pv||(S.pv={last:"Semua orang",foto:"Semua orang",about:"Kontak saya",status:"Kontak saya",read:1,timer:"Mati",grup:"Kontak saya",tel:"Semua orang",lock:0,block:0,ip:0,prev:0});
+const PRIV=[["h","Siapa yang bisa melihat informasi pribadi saya"],["o","last","Terakhir dilihat dan online"],["o","foto","Foto profil"],["o","about","Tentang"],["o","status","Status"],["t","read","Tanda dibaca","Jika dimatikan, kamu tidak mengirim atau menerima tanda dibaca. Di chat grup, tanda dibaca tetap dikirim."],["h","Pesan sementara"],["o","timer","Timer pesan default"],["h","Interaksi"],["o","grup","Grup"],["o","tel","Telepon"],["t","lock","Kunci aplikasi","Minta kata sandi untuk membuka Whatsschat."],["h","Tingkat lanjut"],["t","block","Blokir pesan dari akun tak dikenal","Melindungi akunmu dengan memblokir pesan dari akun tak dikenal jika jumlahnya melewati batas tertentu."],["t","ip","Lindungi alamat IP saat menelepon","Panggilan diteruskan lewat server agar lokasimu tidak terlihat. Kualitas panggilan bisa berkurang."],["t","prev","Nonaktifkan pratinjau tautan","Pratinjau tautan di chat tidak dibuat, supaya alamat IP-mu tidak terdeteksi situs pihak ketiga."]];
+function subPage(k,y){const s=$("set"),v=pvd();s.classList.remove("hide");let h;
+ if(k=="akun"){s.dataset.v="a";h=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>Akun</h2></div><div class="stb">${[["shield","Notifikasi keamanan"],["doc","Minta info akun"],["info","Cara menghapus permanen akun saya"]].map((r,i)=>`<button class="srow" data-r="ak${i}">${I(r[0])}<div><b>${r[1]}</b></div></button>`).join("")}</div>`}
+ else{s.dataset.v="v";h=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>Privasi</h2></div><div class="stb">${PRIV.map(r=>r[0]=="h"?`<div class="psec">${r[1]}</div>`:r[0]=="o"?`<button class="prow" data-pv="${r[1]}"><div><b>${r[2]}</b><small>${v[r[1]]}</small></div><span class="chev">›</span></button>`:`<button class="prow" data-tg="${r[1]}"><div><b>${r[2]}</b><small>${r[3]}</small></div><i class="sw ${v[r[1]]?"on":""}"></i></button>`).join("")}</div>`}
+ s.innerHTML=h;if(y)s.querySelector(".stb").scrollTop=y}
+rail();
+render();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));

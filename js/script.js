@@ -4,11 +4,12 @@ function copyTxt(t){t=String(t==null?"":t);
 
 (()=>{
 const $=id=>document.getElementById(id);
-const CH=[["umum","#","Umum","Bebas bahas apa saja, tanpa kata kasar"],["kode","</>","Kode","Khusus kirim kode saja"],["bantuan","?","Bantuan","Kode rusak? Minta bantuan di sini!"],["santai","@minus","Santai","Bebas ngobrol, tanpa filter"]];
+const CH=[["umum","#","Umum","Bebas bahas apa saja, tanpa kata kasar"],["kode","</>","Kode","Khusus kirim kode saja"]];
 const ICONS={"@doc":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#ff3347" d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#8a0d1b" d="M14 2l6 6h-4a2 2 0 0 1-2-2z"/><rect x="8" y="14" width="8" height="2" rx="1" fill="#2a0408"/></svg>',"@clap":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#ff3347" d="M4 10h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path fill="#ff3347" d="M3.5 4.2l15.2-2.6.9 4.8L4.4 9z"/><path d="M8 3.6l2.2 3.6M12.6 2.8l2.2 3.6" stroke="#2a0408" stroke-width="1.6"/></svg>',"@minus":'<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="5" y="10" width="14" height="4" rx="2" fill="#ff3347"/></svg>'};
 const PERSON='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="#ff3347"/><path fill="#ff3347" d="M3.8 21c.4-4.6 3.8-7.2 8.2-7.2s7.8 2.6 8.2 7.2z"/></svg>';
 function setIc(el,ic){if(ICONS[ic])el.innerHTML=ICONS[ic];else el.textContent=ic}
-const RULES={umum:"🛡️ Chat Umum: bebas membahas apa saja, tapi tanpa kata kasar. Pesan yang mengandung kata kasar otomatis dihapus.",kode:"💻 Chat Kode: khusus untuk mengirim kode saja. Pesan tanpa kode akan ditolak.",bantuan:"🆘 Bantuan: kodemu rusak atau error? Kirim di sini (boleh teks dan kode) supaya yang lain bisa membantu. Pakai tombol Salin di bawah tiap pesan.",santai:"😎 Santai: ngobrol bebas, tidak ada filter kata."};
+try{for(const k of ["kmMsgs_bantuan","kmMsgs_santai","kmSeen_bantuan","kmSeen_santai"])localStorage.removeItem(k)}catch(e){}
+const RULES={umum:"🛡️ Chat Umum: bebas membahas apa saja, tapi tanpa kata kasar. Pesan yang mengandung kata kasar otomatis dihapus.",kode:"💻 Chat Kode: khusus untuk mengirim kode saja. Pesan tanpa kode akan ditolak."};
 const BAD_EXACT=new Set(["babi","asu","puki","anj","anjg","anjk"]);
 const BAD_STEM=["kontol","memek","ngentot","bangsat","bajingan","goblok","tolol","jancok","jancuk","pepek","brengsek","anjing","pukimak"];
 const LEET={"0":"o","1":"i","3":"e","4":"a","5":"s","7":"t","@":"a","$":"s","!":"i"};
@@ -30,12 +31,16 @@ function drawChs(){const box=$("chs");box.textContent="";for(const [id,ic,n,d] o
  {const b=document.createElement("button");b.className="ch";b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setIc(b.querySelector(".av"),"@doc");b.querySelector("b").textContent="Storage";b.querySelector("small").textContent="Kode & file untuk semua orang";b.onclick=()=>{$("side").classList.remove("open");openStore()};box.appendChild(b)}
  {const b=document.createElement("button");b.className="ch";b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setIc(b.querySelector(".av"),"@clap");b.querySelector("b").textContent="Story";b.querySelector("small").textContent="Foto & video 23 detik - hilang 24 jam";b.onclick=()=>{$("side").classList.remove("open");openStory()};box.appendChild(b)}
  if(groups.length){const h=document.createElement("div");h.className="sech";h.textContent="GRUP";box.appendChild(h)}
- for(const g of groups){const id="grp_"+g.id,b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';b.querySelector(".av").textContent="👥";b.querySelector("b").textContent=g.name;b.querySelector("small").textContent="Grup";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
+ for(const g of groups){const id="grp_"+g.id,b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.dataset.id=id;b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';b.querySelector(".av").textContent="👥";b.querySelector("b").textContent=g.name;b.querySelector("small").textContent="Grup";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
  if(friends.length){const h=document.createElement("div");h.className="sech";h.textContent="KONTAK";box.appendChild(h)}
- for(const f of friends){const id=dmId(f.code),b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setAv(b.querySelector(".av"),f);b.querySelector("b").textContent=f.name||"Teman";b.querySelector("small").textContent="Chat pribadi";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
- const c=CH.find(x=>x[0]===cur)||(()=>{const g=grpOf(cur);if(g)return["","👥",g.name,""];const f=friends.find(x=>dmId(x.code)===cur);return f?["",(f.name||"?").charAt(0).toUpperCase(),f.name||"Teman","",f.photo||""]:CH[0]})();{const av=$("chAv");av.style.backgroundImage=c[4]?"url("+c[4]+")":"";av.style.backgroundSize="cover";av.style.backgroundPosition="center";if(c[4])av.textContent="";else setIc(av,c[1])}$("chName").textContent=c[2];stat();applyChannel()}
+ for(const f of friends){const id=dmId(f.code),b=document.createElement("button");b.className="ch"+(id===cur?" on":"");b.dataset.id=id;b.innerHTML='<div class="av"></div><div><b></b><small></small></div>';setAv(b.querySelector(".av"),f);b.querySelector("b").textContent=f.name||"Teman";b.querySelector("small").textContent="Chat pribadi";b.onclick=()=>{cur=id;$("side").classList.remove("open");drawChs();subscribe()};box.appendChild(b)}
+ const c=CH.find(x=>x[0]===cur)||(()=>{const g=grpOf(cur);if(g)return["","👥",g.name,""];const f=friends.find(x=>dmId(x.code)===cur);return f?["",(f.name||"?").charAt(0).toUpperCase(),f.name||"Teman","",f.photo||""]:CH[0]})();{const av=$("chAv");av.style.backgroundImage=c[4]?"url("+c[4]+")":"";av.style.backgroundSize="cover";av.style.backgroundPosition="center";if(c[4])av.textContent="";else setIc(av,c[1])}$("chName").textContent=c[2];stat();applyChannel();try{watchSync();updBadges()}catch(e){}}
 function setAv(el,f){const ph=f&&f.photo;el.style.backgroundImage=ph?"url("+ph+")":"";el.style.backgroundSize="cover";el.style.backgroundPosition="center";el.textContent=ph?"":((f&&f.name)||"?").charAt(0).toUpperCase()}
-function mkThumb(src){return new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=c.height=96;c.getContext("2d").drawImage(im,0,0,96,96);res(c.toDataURL("image/jpeg",.7))}catch(e){res("")}};im.onerror=()=>res("");im.src=src})}
+function sqScale(im,size){const W=im.naturalWidth||im.width,H=im.naturalHeight||im.height,s=Math.min(W,H),sx=(W-s)/2,sy=(H-s)/2,t=Math.min(s,2048);
+ let cv=document.createElement("canvas");cv.width=cv.height=t;let x=cv.getContext("2d");x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";x.drawImage(im,sx,sy,s,s,0,0,t,t);
+ while(cv.width/2>=size){const n=document.createElement("canvas");n.width=n.height=Math.round(cv.width/2);const nx=n.getContext("2d");nx.imageSmoothingQuality="high";nx.drawImage(cv,0,0,n.width,n.height);cv=n}
+ const o=document.createElement("canvas");o.width=o.height=size;const ox=o.getContext("2d");ox.imageSmoothingQuality="high";ox.drawImage(cv,0,0,size,size);return o}
+function mkThumb(src){return new Promise(res=>{const im=new Image();im.onload=()=>{try{res(sqScale(im,192).toDataURL("image/jpeg",.86))}catch(e){res("")}};im.onerror=()=>res("");im.src=src})}
 function stat(){$("chStat").innerHTML=db?'<span class="dot"></span>Terhubung • dibagikan ke semua yang membuka halaman ini':'<span class="dot off"></span>Mode lokal • pesan tersimpan di perangkat ini'}
 function render(){const L=$("list"),near=L.scrollHeight-L.scrollTop-L.clientHeight<120;L.textContent="";
  if(!msgs.length){const e=document.createElement("div");e.className="empty";e.textContent="Belum ada pesan di sini. Kirim pesan pertama atau tempel kode kamu!";L.appendChild(e)}
@@ -43,7 +48,6 @@ function render(){const L=$("list"),near=L.scrollHeight-L.scrollTop-L.clientHeig
   const w=document.createElement("div");w.className="who";w.style.color=own?"#ffd0d4":hue(m.name||"?");w.textContent=own?"Kamu":(m.name||"Tamu");el.appendChild(w);
   if(m.t==="code"){const c=document.createElement("div");c.className="code";const h=document.createElement("header");const s=document.createElement("span");s.textContent=m.lang||"Kode";const b=document.createElement("button");b.textContent="Salin";b.onclick=async()=>{try{await copyTxt(m.body);toast("Kode disalin")}catch(e){toast("Gagal menyalin")}};h.append(s,b);const p=document.createElement("pre"),cd=document.createElement("code");cd.textContent=m.body;p.appendChild(cd);c.append(h,p);el.appendChild(c)}
   else{const t=document.createElement("div");t.className="txt";t.textContent=m.body;el.appendChild(t)}
-  if(cur==="bantuan"){const cb=document.createElement("button");cb.className="cpy";cb.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11z"/></svg>';cb.append(document.createTextNode(m.t==="code"?"Salin semua kode":"Salin teks"));cb.onclick=async()=>{try{await copyTxt(m.body);toast("Tersalin")}catch(e){toast("Gagal menyalin")}};el.appendChild(cb)}
   const mt=document.createElement("div");mt.className="meta";const d=new Date(m.ts||Date.now());mt.textContent=d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});el.appendChild(mt);
   if(own){const x=document.createElement("button");x.className="del";x.textContent="×";x.title="Hapus";x.onclick=()=>{if(x.dataset.arm){del(m)}else{x.dataset.arm="1";x.textContent="Hapus?";x.style.display="block";setTimeout(()=>{x.dataset.arm="";x.textContent="×";x.style.display=""},3000)}};el.appendChild(x)}
   {const sb=document.createElement("button"),on=isStar(m.id);sb.className="mstar"+(on?" on":"");sb.textContent=on?"★":"☆";sb.title="Berbintang";sb.setAttribute("aria-label","Bintangi pesan");
@@ -60,16 +64,16 @@ function cacheSave(ch){let a=[...cacheOf(ch).values()].sort((x,y)=>(x.ts||0)-(y.
 function isOwn(m){return m.uid===uid||m.uid===localUid}
 function view(ch){let a=[...cacheOf(ch).values()].sort((x,y)=>(x.ts||0)-(y.ts||0));if(ch==="umum")a=a.filter(m=>!kasar(m.body||""));else if(ch==="kode")a=a.filter(m=>m.t==="code");return a}
 async function flush(ch){if(!db)return;const mp=cacheOf(ch);let chg=false;for(const m of [...mp.values()]){if(m.sent===false&&isOwn(m)){try{const {sent,...rest}=m;await db.collection("ch_"+ch).doc(m.id).set(rest);m.sent=true;chg=true}catch(e){break}}}if(chg){cacheSave(ch)}}
-function subscribe(){if(unsub){unsub();unsub=null}const ch=cur;msgs=view(ch);render();$("list").scrollTop=$("list").scrollHeight;if(!db)return;flush(ch);
+function subscribe(){if(unsub){unsub();unsub=null}const ch=cur;try{if(!document.hidden)markSeen(ch)}catch(e){}let first1=true;msgs=view(ch);render();$("list").scrollTop=$("list").scrollHeight;if(!db)return;flush(ch);
  try{unsub=db.collection("ch_"+ch).orderBy("ts","asc").onSnapshot(s=>{const mp=cacheOf(ch);let chg=false;
-  for(const d of s.docs){const x={id:d.id,...d.data()};if(delIds.has(x.id))continue;const o=mp.get(x.id);if(!o||!o.sent){x.sent=true;mp.set(x.id,x);chg=true}
+  for(const d of s.docs){const x={id:d.id,...d.data()};if(delIds.has(x.id))continue;const o=mp.get(x.id);if(!o||!o.sent){x.sent=true;mp.set(x.id,x);chg=true;if(!first1&&!o&&!isOwn(x)){try{if(chIds().includes(ch))notifyMsg(ch,x)}catch(e){}}}
    if(ch==="umum"&&kasar(x.body||"")&&!purged.has(x.id)){purged.add(x.id);try{db.collection("ch_umum").doc(x.id).delete().catch(()=>{})}catch(e){}}}
-  if(chg)cacheSave(ch);
+  first1=false;if(chg)cacheSave(ch);
   if(ch===cur){msgs=view(ch);render()}},e=>toast("Gagal memuat pesan"))}catch(e){toast("Gagal memuat pesan")}}
 async function del(m){const ch=cur;delIds.add(m.id);saveDel();cacheOf(ch).delete(m.id);cacheSave(ch);msgs=view(ch);render();if(db){try{await db.collection("ch_"+ch).doc(m.id).delete()}catch(e){toast("Tidak bisa menghapus di server")}}}
 async function send(){const ta=$("ta"),body=ta.value.replace(/\s+$/,"");if(!body.trim()||checking)return;
  {const g=grpOf(cur);if(g&&g.perms.send==="admin"&&!isAdmin(g)){chk("bad","⚠️ Di grup ini hanya admin yang boleh mengirim pesan baru.");return}}
- if(cur==="umum"&&kasar(body)){chk("bad","⚠️ Pesan mengandung kata kasar, jadi tidak dikirim. Chat Umum harus tetap sopan. Coba ubah kalimatmu, atau pindah ke channel Santai.");return}
+ if(cur==="umum"&&kasar(body)){chk("bad","⚠️ Pesan mengandung kata kasar, jadi tidak dikirim. Chat Umum harus tetap sopan. Coba ubah kalimatmu lalu kirim lagi.");return}
  if(cur==="kode"&&(mode!=="code"||$("lang").value==="Teks biasa")){chk("bad","⚠️ Coba lagi, pesan ini hanya untuk mengirim kode saja. Pilih mode Kode dan bahasanya, lalu tempel kodenya.");return}
  if(mode==="code"&&$("lang").value!=="Teks biasa"&&!(await verify(body,$("lang").value)))return;
  const id=Date.now()+"-"+Math.random().toString(36).slice(2,7),m={id,t:mode,lang:mode==="code"?$("lang").value:"",body,name,uid,ts:Date.now(),sent:false};ta.value="";fit();
@@ -106,7 +110,7 @@ async function verify(code,lang){checking=true;$("send").disabled=true;chk("load
 function fit(){const t=$("ta");t.style.height="auto";t.style.height=Math.min(t.scrollHeight,200)+"px"}
 function setMode(m){mode=m;chkOff();$("mT").classList.toggle("on",m==="text");$("mC").classList.toggle("on",m==="code");$("lang").classList.toggle("hide",m!=="code");$("ta").classList.toggle("mono",m==="code");$("ta").placeholder=m==="code"?"Tempel kode di sini...":"Ketik pesan...";$("hint").textContent=m==="code"?"Enter = baris baru, Ctrl+Enter = kirim":"Enter = kirim, Shift+Enter = baris baru"}
 function setView(v){const reg=!store.get("kmPw");["vAuth","vCode","vRec"].forEach(i=>$(i).classList.toggle("hide",i!==v));
- $("dTitle").textContent=v==="vCode"?"Verifikasi lupa sandi":v==="vRec"?"Data akunmu":reg?"Buat akun RedCode Chat":"Masuk ke RedCode Chat";
+ $("dTitle").textContent=v==="vCode"?"Verifikasi lupa sandi":v==="vRec"?"Data akunmu":reg?"Buat akun Whatsschat":"Masuk ke Whatsschat";
  $("dSub").textContent=v==="vCode"?"Masukkan kode verifikasi untuk melihat nama dan sandi yang tersimpan di browser ini.":v==="vRec"?"Kamu bisa mengganti sandi. Tekan Simpan, lalu masuk kembali.":reg?"Pilih nama panggilan dan kata sandi. Keduanya disimpan di browser ini.":"Masukkan nama dan kata sandi yang kamu buat sebelumnya.";
  $("nameOk").textContent=reg?"Daftar & Masuk":"Masuk";$("forgot").classList.toggle("hide",reg)}
 function showAuth(){$("nameOv").classList.remove("hide");$("nameIn").value=store.get("kmName")||"";$("pwIn").value="";$("pwIn").type="password";$("eye").textContent="👁️";setView("vAuth");$("nameIn").focus()}
@@ -125,7 +129,7 @@ $("pwIn").onkeydown=e=>{if(e.key==="Enter")$("nameOk").click()};$("codeIn").onke
 $("nameIn").onkeydown=e=>{if(e.key==="Enter")$("nameOk").click()};
 $("rename").onclick=()=>{$("side").classList.remove("open");showAuth()};
 const PK={name:"kmName",about:"kmAbout",user:"kmUser",pw:"kmPw",link:"kmLink",code:"kmCode"};
-const PROWS=[["name","👤","Nama","Nama kamu"],["about","ℹ️","Tentang","Halo! Aku pakai RedCode Chat"],["user","@","Nama pengguna","Tambah nama pengguna"],["pw","🔑","Kata sandi","Kata sandi"],["link","🔗","Tautan","Tambah tautan"],["code","🆔","Kode teman (tekan untuk menyalin)",""]];
+const PROWS=[["name","👤","Nama","Nama kamu"],["about","ℹ️","Tentang","Halo! Aku pakai Whatsschat"],["user","@","Nama pengguna","Tambah nama pengguna"],["pw","🔑","Kata sandi","Kata sandi"],["link","🔗","Tautan","Tambah tautan"],["code","🆔","Kode teman (tekan untuk menyalin)",""]];
 let pwShow=false,editing="";
 function pVal(k){return store.get(PK[k])||""}
 function drawMe(){const p=store.get("kmPhoto"),a=$("meAv");a.style.backgroundImage=p?"url("+p+")":"";a.textContent="";if(!p)a.innerHTML=PERSON}
@@ -204,7 +208,7 @@ function pushProfile(th){if(!db)return;for(const f of friends){try{db.collection
 async function registerMe(){if(!db||!named)return;try{
  let code=myCode();const ref=()=>db.collection("users").doc(code);let s=await ref().get();
  while(s.exists&&s.data().uid!==uid){code=newCode();store.set("kmCode",code);s=await ref().get()}
- let th=store.get("kmThumb")||"";if(!th&&store.get("kmPhoto")){th=await mkThumb(store.get("kmPhoto"));if(th)store.set("kmThumb",th)}
+ let th=store.get("kmThumb")||"";if((!th||store.get("kmThumbV")!=="2")&&store.get("kmPhoto")){th=(await mkThumb(store.get("kmPhoto")))||th;if(th){store.set("kmThumb",th);store.set("kmThumbV","2")}}
  await ref().set({code,name,uid,photo:th,ts:Date.now()});pushProfile(th);
  if(watchedCode!==code){if(inboxUnsub)inboxUnsub();watchedCode=code;watchInbox()}
  if(!$("prof").classList.contains("hide"))drawProf()}catch(e){}}
@@ -227,7 +231,7 @@ async function addFriend(){if(frBusy)return;const code=$("frIn").value.trim().to
 $("frOk").onclick=addFriend;$("frIn").onkeydown=e=>{if(e.key==="Enter")addFriend()};$("frClose").onclick=()=>$("frOv").classList.add("hide");$("cpCode").onclick=copyCode;
 $("pOut").onclick=()=>{$("prof").classList.add("hide");showAuth()};
 $("pCam").onclick=()=>$("pFile").click();
-$("pFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d"),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);const full=c.toDataURL("image/jpeg",.8);store.set("kmPhoto",full);mkThumb(full).then(t=>{store.set("kmThumb",t);if(db)registerMe()});drawProf();drawMe();toast("Foto diperbarui")};im.onerror=()=>toast("Gambar tidak valid");im.src=rd.result};rd.readAsDataURL(f);e.target.value=""};$("menu").onclick=()=>$("side").classList.toggle("open");$("ruleX").onclick=()=>$("ruleBar").classList.add("hide");
+$("pFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const full=sqScale(im,512).toDataURL("image/jpeg",.92);store.set("kmPhoto",full);mkThumb(full).then(t=>{store.set("kmThumb",t);store.set("kmThumbV","2");if(db)registerMe()});drawProf();drawMe();toast("Foto diperbarui")};im.onerror=()=>toast("Gambar tidak valid");im.src=rd.result};rd.readAsDataURL(f);e.target.value=""};$("menu").onclick=()=>$("side").classList.toggle("open");$("ruleX").onclick=()=>$("ruleBar").classList.add("hide");
 $("mT").onclick=()=>setMode("text");$("mC").onclick=()=>setMode("code");$("send").onclick=send;
 $("ta").oninput=()=>{fit();if(!checking)chkOff()};$("lang").onchange=chkOff;
 $("ta").onkeydown=e=>{if(e.key!=="Enter")return;if(mode==="code"){if(e.ctrlKey||e.metaKey){e.preventDefault();send()}}else if(!e.shiftKey){e.preventDefault();send()}};
@@ -485,6 +489,58 @@ async function postCm(item){if(cmBusy)return;cmErr("");const text=$("cmText").va
 async function delCm(c){if(db){try{await db.collection("store_comments").doc(c.id).delete();toast("Komentar dihapus")}catch(e){toast("Gagal menghapus komentar")}}
  else{ST.cm[c.item]=(ST.cm[c.item]||[]).filter(x=>x.id!==c.id);lsSet("kmSt_cm",JSON.stringify(ST.cm));drawCm();drawStore()}}
 $("sdX").onclick=closeDet;$("stDet").onclick=e=>{if(e.target===$("stDet"))closeDet()};
+
+
+/* ===== Notifikasi pesan ===== */
+const NT={init:{},done:new Set(),base:"Whatsschat",orig:"",last:null};
+function chIds(){return [...groups.map(g=>"grp_"+g.id),...friends.map(f=>dmId(f.code))]}
+function seenGet(ch){let v=store.get("kmSeen_"+ch);if(v==null){v=String(Date.now());try{localStorage.setItem("kmSeen_"+ch,v)}catch(e){}}return +v}
+function markSeen(ch){try{localStorage.setItem("kmSeen_"+ch,String(Date.now()))}catch(e){}updBadges()}
+function unreadOf(ch){if(ch===cur&&!document.hidden)return 0;const s=seenGet(ch);let n=0;for(const m of cacheOf(ch).values())if(!isOwn(m)&&(m.ts||0)>s)n++;return n}
+function favBadge(n){const l=document.querySelector('link[rel="icon"]');if(!l)return;if(!NT.orig)NT.orig=l.href;if(NT.last===(n>0))return;NT.last=n>0;
+ if(!n){l.href=NT.orig;return}
+ const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d");x.drawImage(im,0,0,64,64);x.beginPath();x.arc(46,18,17,0,7);x.fillStyle="#fff";x.fill();x.beginPath();x.arc(46,18,13,0,7);x.fillStyle="#ff1f3a";x.fill();l.href=c.toDataURL("image/png")}catch(e){}};im.src=NT.orig}
+function updBadges(){let tot=0;for(const id of chIds()){const n=unreadOf(id),b=document.querySelector('#chs .ch[data-id="'+id+'"]');
+  if(b){let g=b.querySelector(".bdg");if(!g){g=document.createElement("i");g.className="bdg hide";b.appendChild(g)}g.textContent=n>99?"99+":String(n);g.classList.toggle("hide",!n)}tot+=n}
+ document.title=(tot?"("+tot+") ":"")+NT.base;favBadge(tot);const mn=$("menu");if(mn)mn.classList.toggle("dot",tot>0)}
+function pvText(m){return m.t==="code"?"💻 Kode"+(m.lang?" ("+m.lang+")":"")+": "+String(m.body||"").split("\n")[0].slice(0,60):String(m.body||"").replace(/\s+/g," ").slice(0,120)}
+function goCh(id){if(id==="bantuan"||id==="santai")id="umum";cur=id;$("side").classList.remove("open");drawChs();subscribe();markSeen(id)}
+function beep(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;NT.ac=NT.ac||new A();const a=NT.ac;if(a.state!=="running")return;const t=a.currentTime;[[880,0],[1320,.12]].forEach(([f,d])=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.12,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.25);o.start(t+d);o.stop(t+d+.3)})}catch(e){}}
+let nbT=null;
+function inBanner(ch,title,body,f){let b=$("nbn");if(!b){b=document.createElement("div");b.id="nbn";b.innerHTML='<span class="nav"></span><div class="ntx"><b></b><span></span></div>';document.body.appendChild(b)}
+ const av=b.querySelector(".nav");setAv(av,f||{name:title});b.querySelector("b").textContent=title;b.querySelector(".ntx span").textContent=body;b.onclick=()=>{b.classList.remove("show");goCh(ch)};b.classList.add("show");clearTimeout(nbT);nbT=setTimeout(()=>b.classList.remove("show"),5000)}
+async function sysNotify(ch,title,body,icon){if(!("Notification" in window)||Notification.permission!=="granted")return;
+ const o={body,icon:icon||"assets/icon-192.png",badge:"assets/icon-192.png",tag:"msg_"+ch,renotify:true,data:{ch}};
+ try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,o);return}}catch(e){}
+ try{const n=new Notification(title,o);n.onclick=()=>{window.focus();goCh(ch);n.close()}}catch(e){}}
+function notifyMsg(ch,m){if(!m||NT.done.has(m.id))return;NT.done.add(m.id);
+ if(!document.hidden&&ch===cur){markSeen(ch);return}
+ const g=grpOf(ch),f=g?null:friends.find(x=>dmId(x.code)===ch),title=g?g.name+" · "+(m.name||"Tamu"):(m.name||(f&&f.name)||"Pesan baru"),body=pvText(m);
+ updBadges();
+ if(document.hidden)sysNotify(ch,title,body,f&&f.photo||"");else{beep();inBanner(ch,title,body,f)}}
+const WT={};
+function watchSync(){if(!db)return;const want=new Set(chIds());
+ for(const ch of want){if(ch in WT)continue;WT[ch]=null;
+  try{WT[ch]=db.collection("ch_"+ch).orderBy("ts","desc").limit(30).onSnapshot(s=>{const mp=cacheOf(ch);let chg=false;const fresh=[];
+   for(const d of s.docs){const x={id:d.id,...d.data()};if(delIds.has(x.id))continue;const o=mp.get(x.id);if(o&&o.sent!==false)continue;if(o&&isOwn(o)){o.sent=true;chg=true;continue}x.sent=true;mp.set(x.id,x);chg=true;if(!isOwn(x))fresh.push(x)}
+   if(chg)cacheSave(ch);const first=!NT.init[ch];NT.init[ch]=true;
+   if(!first)for(const m of fresh.sort((a,b)=>(a.ts||0)-(b.ts||0)))notifyMsg(ch,m);
+   if(ch===cur){msgs=view(ch);render();if(!document.hidden)markSeen(ch)}
+   updBadges()},()=>{})}catch(e){WT[ch]=null}}
+ for(const ch of Object.keys(WT))if(!want.has(ch)){try{WT[ch]&&WT[ch]()}catch(e){}delete WT[ch]}
+ notifUi()}
+const IOSWEB=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone&&!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+function notifUi(){const b=$("notifBtn");if(!b)return;const has="Notification" in window;
+ if(has){b.textContent="🔔 Aktifkan notifikasi pesan";b.classList.toggle("hide",!db||Notification.permission==="granted")}
+ else if(IOSWEB){b.textContent="📲 Pasang ke layar utama untuk notifikasi";b.classList.toggle("hide",false)}else b.classList.add("hide")}
+$("notifBtn").onclick=async()=>{
+ if(!("Notification" in window)){toast("Di iPhone: buka menu Bagikan di Safari, pilih “Tambah ke Layar Utama”, lalu buka aplikasinya dari layar utama.");return}
+ if(Notification.permission==="denied"){toast("Notifikasi diblokir. Buka pengaturan situs di browser lalu izinkan Notifikasi.");return}
+ try{const r=await Notification.requestPermission();if(r==="granted"){toast("Notifikasi aktif");sysNotify("test","Whatsschat","Notifikasi pesan sudah aktif.")}}catch(e){}notifUi()};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)markSeen(cur);else updBadges()});
+try{if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(()=>{});navigator.serviceWorker.addEventListener("message",e=>{const d=e.data;if(d&&d.type==="open"&&d.ch)goCh(d.ch)})}}catch(e){}
+{const q=new URLSearchParams(location.search).get("ch");if(q)setTimeout(()=>{try{goCh(q)}catch(e){}},900)}
+setInterval(()=>{try{watchSync()}catch(e){}},4000);
 
 /* ===== STORY: video 23 detik, hilang setelah 24 jam ===== */
 const SV={items:[],seen:new Set(),vw:{},marked:new Set(),u2:null,u1:null,file:null,meta:null,busy:false,urls:new Map(),cleaned:new Set(),play:[],gi:0,ii:0,tok:0,muted:false,pu:null,tick:null,TTL:24*3600*1000,MAXS:23,MAXV:3.5*1024*1024};
@@ -757,6 +813,6 @@ if(store.get("kmAuto")==="1"&&store.get("kmName")&&store.get("kmPw")){store.set(
 window.addEventListener("online",()=>flush(cur));setInterval(()=>{if(db)flush(cur)},20000);
 drawChs();subscribe();
 (()=>{try{const c=window.FIREBASE_CONFIG;if(!c||!c.apiKey||/ISI_/.test(c.apiKey)||!window.firebase)return;
- if(!firebase.apps.length)firebase.initializeApp(c);const d=firebase.firestore();db=d;stat();subscribe();registerMe();lkInit()}catch(e){console.error("Firebase gagal:",e)}})();
-(async()=>{try{if(!window.claude||db)return;const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);if(u)try{uid=await u.id()}catch(e){}if(d){db=d;stat();subscribe();registerMe();lkInit()}}catch(e){}})();
+ if(!firebase.apps.length)firebase.initializeApp(c);const d=firebase.firestore();db=d;stat();subscribe();registerMe();lkInit();try{watchSync()}catch(e){}}catch(e){console.error("Firebase gagal:",e)}})();
+(async()=>{try{if(!window.claude||db)return;const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);if(u)try{uid=await u.id()}catch(e){}if(d){db=d;stat();subscribe();registerMe();lkInit();try{watchSync()}catch(e){}}}catch(e){}})();
 })();

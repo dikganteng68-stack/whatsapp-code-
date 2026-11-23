@@ -3,18 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RedCode Chat</title>
+<title>Whatsschat</title>
 <link rel="icon" href="assets/logo.jpg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12040a">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Whatsschat">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ai.css">
 </head>
 <body>
 <div class="app">
   <aside class="side" id="side">
-    <div class="brand"><div class="logo"><img src="assets/logo.jpg" alt="Logo RedCode Chat"></div><div><b>RedCode <span>Chat</span></b><small>Chat • Share Code • Connect</small></div><button class="kebab" id="kebab" aria-label="Menu">⋮</button>
+    <div class="brand"><div class="logo"><img src="assets/logo.jpg" alt="Logo Whatsschat"></div><div><b>Whatss<span>chat</span></b><small>Chat • Share Code • Connect</small></div><button class="kebab" id="kebab" aria-label="Menu">⋮</button>
       <div class="pop hide" id="pop"><button data-a="grup">Grup baru</button><button data-a="kom">Komunitas baru</button><button data-a="siar">Daftar siaran</button><button data-a="perangkat">Perangkat tertaut</button><button data-a="bintang">Berbintang</button><button data-a="baca">Baca semua</button><button data-a="teman">Tambah teman</button><button data-a="set">Pengaturan</button></div></div>
     <div class="me"><span><span class="mav" id="meAv"></span><b id="meName">Tamu</b></span><button id="rename">Keluar</button></div>
+    <button class="notifbtn hide" id="notifBtn"></button>
     <div class="chs" id="chs"></div>
     <div class="note">Kode yang dikirim hanya ditampilkan sebagai teks dan tidak pernah dijalankan. Tidak ada batas panjang pesan atau jumlah pesan dari aplikasi ini.</div>
   </aside>
@@ -91,7 +99,7 @@
     <button class="pout" id="pOut">Keluar dari beranda &amp; akun</button>
   </div>
 </div>
-<div class="ov hide" id="nameOv"><div class="dlg"><div class="logo" style="margin:0 auto;width:64px;height:64px;border-radius:18px"><img src="assets/logo.jpg" alt="Logo RedCode Chat"></div><h2 id="dTitle"></h2><p id="dSub"></p>
+<div class="ov hide" id="nameOv"><div class="dlg"><div class="logo" style="margin:0 auto;width:64px;height:64px;border-radius:18px"><img src="assets/logo.jpg" alt="Logo Whatsschat"></div><h2 id="dTitle"></h2><p id="dSub"></p>
 <div id="vAuth"><input id="nameIn" maxlength="24" placeholder="Nama kamu" autocomplete="username"><div class="pwwrap"><input id="pwIn" type="password" maxlength="64" placeholder="Kata sandi" autocomplete="current-password"><button type="button" class="eye" id="eye" aria-label="Tampilkan sandi">👁️</button></div><button id="nameOk">Masuk</button><button class="lnk" id="forgot">Lupa sandi?</button><button class="lnk" id="authLink">Tautkan dari perangkat lain</button></div>
 <div id="vCode" class="hide"><input id="codeIn" inputmode="numeric" maxlength="12" placeholder="Kode verifikasi"><button id="codeOk">Verifikasi</button><button class="lnk" id="back1">Kembali</button></div>
 <div id="vRec" class="hide"><div class="rec">Nama: <b id="recName"></b><br>Sandi: <b id="recPw"></b></div><input id="newPw" maxlength="64" placeholder="Sandi baru (kosongkan jika tidak diganti)"><button id="pwSave">Simpan</button></div>
@@ -162,5 +170,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/script.js"></script>
+<script src="js/trail.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>

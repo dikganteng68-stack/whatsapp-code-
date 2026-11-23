@@ -165,7 +165,7 @@ textarea:focus{border-color:var(--red)}textarea.mono{font:13px/1.45 ui-monospace
 .svvwl{overflow:auto;padding:6px 8px 12px}.svvr{display:flex;align-items:center;gap:12px;padding:8px}.svvr b{display:block;font-size:14px;color:var(--text)}.svvr small{color:var(--muted);font-size:12px}
 .svvav{width:40px;height:40px;border-radius:50%;background:var(--panel2) center/cover;display:grid;place-items:center;font-weight:700;color:#ffd0d4;flex:none}
 
-/* ===== RedCode Chat ===== */
+/* ===== Whatsschat ===== */
 :root{--glassb:rgba(255,42,61,.42);--glow:0 0 26px rgba(225,29,46,.4)}
 html,body{font-family:Roboto,Inter,system-ui,"Segoe UI",Arial,sans-serif}
 .app{background:#030001;gap:0;grid-template-columns:360px 1fr}
@@ -238,3 +238,22 @@ textarea{background:rgba(8,1,3,.7);border:1px solid var(--glassb);border-radius:
 @media(max-width:760px){.app{grid-template-columns:1fr}.brand b{font-size:21px}.ch b{font-size:17px}.ch small{font-size:13px}.rule{margin:4px 12px 8px;gap:8px}.rule .rbar{padding:10px 12px;gap:10px}.rule .r1{font-size:13.5px}.rule .r2{font-size:12px}.rule button{width:46px}.rule .rico{width:24px;height:24px}.top .av{width:52px;height:52px}.top small{font-size:13px}}
 
 #nameOv .logo,#frOv .logo{border-radius:50%!important}
+
+/* ===== notifikasi pesan ===== */
+.ch{position:relative}
+.bdg{margin-left:auto;flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#ff1f3a;color:#fff;font:700 12px/22px Roboto,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 10px #ff1f3a}
+.menu{position:relative}.menu.dot::after{content:"";position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:#ff1f3a;border:2px solid #120307;box-shadow:0 0 8px #ff1f3a}
+.notifbtn{display:block;width:calc(100% - 28px);margin:6px 14px;padding:11px 14px;border-radius:16px;border:1px solid #ff2a3d99;background:linear-gradient(90deg,rgba(225,29,46,.3),rgba(120,8,20,.25));color:#fff;font:700 14px Roboto,sans-serif;text-align:left;cursor:pointer;box-shadow:0 0 14px rgba(225,29,46,.3)}
+#nbn{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:400;width:min(440px,calc(100% - 24px));display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:18px;border:1px solid #ff2a3dcc;background:linear-gradient(135deg,rgba(150,10,26,.95),rgba(30,4,9,.96));color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.6),0 0 22px rgba(225,29,46,.5);cursor:pointer;transform:translate(-50%,-140%);transition:transform .28s ease;opacity:0;pointer-events:none}
+#nbn.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+#nbn .nav{flex:none;width:44px;height:44px;border-radius:50%;background:#2a0a10 center/cover;display:grid;place-items:center;font-weight:700;border:1px solid #ff2a3d99}
+#nbn .ntx{min-width:0;display:flex;flex-direction:column}#nbn b{font-size:15px}#nbn .ntx span{font-size:13.5px;color:#ffe3e6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(prefers-reduced-motion:reduce){#nbn{transition:none}}
+
+/* efek seretan */
+#trail{position:fixed;inset:0;z-index:9999;pointer-events:none}
+.side,.top,.rule,.comp .tools,.list,.chs,.brand{-webkit-user-select:none;user-select:none}.msg{-webkit-user-select:text;user-select:text}
+
+/* logo baru: cincin api sudah bagian dari gambar, jadi tanpa bingkai tambahan */
+.logo{width:72px;height:72px;border:0;background:#000;box-shadow:0 0 18px rgba(255,42,61,.55)}
+.logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}

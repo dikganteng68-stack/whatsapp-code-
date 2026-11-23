@@ -1,0 +1,29 @@
+/* Tampilan AI Whatsschat. Semua kelas berawalan ai- supaya tidak bentrok dengan style.css */
+.ai-fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(20px,calc(12px + env(safe-area-inset-bottom,0px)));width:54px;height:54px;border-radius:50%;border:0;cursor:pointer;z-index:8000;display:grid;place-items:center;font-size:24px;color:#fff;background:linear-gradient(135deg,#7c3aed,#e11d2e);box-shadow:0 8px 24px #000a}
+.ai-fab:focus-visible,.ai-x:focus-visible,.ai-send:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ai-pn{position:fixed;inset:0;z-index:8500;background:var(--bg,#0a0a0c);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.ai-pn[hidden]{display:none}
+@media(min-width:820px){.ai-pn{inset:auto 20px 20px auto;width:420px;height:min(680px,calc(100% - 40px));border:1px solid var(--line,#26262c);border-radius:20px;box-shadow:0 20px 60px #000c;overflow:hidden;padding-top:0}}
+.ai-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel,#131316);border-bottom:1px solid var(--line,#26262c)}
+.ai-hd .ai-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#7c3aed,#e11d2e);font-size:18px}
+.ai-hd b{display:block;font-size:15px;font-weight:600}.ai-hd small{color:var(--muted,#9a9aa4);font-size:12px}
+.ai-hd .ai-t{flex:1;min-width:0}
+.ai-x{background:none;border:0;color:var(--text,#f3f3f6);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px}.ai-x:hover{background:var(--panel2,#1a1a1f)}
+.ai-ms{flex:1;overflow:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px;background-image:radial-gradient(#ffffff0f 1.2px,transparent 1.4px);background-size:26px 26px}
+.ai-m{max-width:88%;padding:8px 12px;border-radius:12px;background:var(--panel2,#1a1a1f);font-size:14.5px;line-height:1.45;word-break:break-word;align-self:flex-start}
+.ai-m.me{background:#7a1520;align-self:flex-end;white-space:pre-wrap}
+.ai-m.err{border:1px solid #6b1a24;color:#ff9aa5}
+.ai-m p{margin:0 0 8px}.ai-m p:last-child{margin:0}.ai-m ol,.ai-m ul{margin:0 0 8px;padding-left:22px}
+.ai-m code{background:#0d0d10;padding:1px 5px;border-radius:5px;font-size:13px}
+.ai-cb{position:relative;margin:8px 0}.ai-cb pre{background:#0d0d10;border-radius:10px;padding:12px;margin:0;overflow:auto;font-size:12.5px;max-height:320px;white-space:pre}
+.ai-cp{position:absolute;right:8px;top:6px;font-size:11px;background:var(--panel2,#1a1a1f);border:1px solid var(--line,#26262c);border-radius:8px;padding:3px 9px;cursor:pointer}
+.ai-qk{display:flex;gap:8px;padding:8px 12px 0;overflow-x:auto;background:var(--panel,#131316);border-top:1px solid var(--line,#26262c);scrollbar-width:none}
+.ai-qk button{border:1px solid var(--line,#26262c);background:none;border-radius:16px;padding:6px 12px;font-size:13px;color:var(--muted,#9a9aa4);white-space:nowrap;cursor:pointer}
+.ai-in{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:var(--panel,#131316);align-items:flex-end}
+.ai-in textarea{flex:1;background:var(--panel2,#1a1a1f);border:0;border-radius:20px;padding:10px 14px;resize:none;outline:0;max-height:120px;font-size:15px;color:var(--text,#f3f3f6)}
+.ai-send,.ai-at{border:0;border-radius:50%;width:42px;height:42px;cursor:pointer;flex:none;display:grid;place-items:center;font-size:18px}
+.ai-send{background:var(--red,#e11d2e);color:#fff}.ai-send:disabled{opacity:.5;cursor:default}
+.ai-at{background:none;color:var(--muted,#9a9aa4)}
+.ai-dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--muted,#9a9aa4);animation:aib 1s infinite}.ai-dots span:nth-child(2){animation-delay:.15s}.ai-dots span:nth-child(3){animation-delay:.3s}
+@keyframes aib{0%,80%,100%{opacity:.3}40%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.ai-dots span{animation:none}}

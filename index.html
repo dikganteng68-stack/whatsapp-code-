@@ -2,6 +2,7 @@
 <html lang="id"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Whatsschat</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ctext y='.9em' font-size='9'%3E💬%3C/text%3E%3C/svg%3E">
+<script src="firebase-config.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#0a0a0c;--rail:#0e0e11;--panel:#131316;--p2:#1c1c21;--line:#26262c;--red:#e11d2e;--red2:#ff4757;--tx:#f3f3f6;--mu:#9a9aa4;--chip:#3a0f15;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:Roboto,system-ui,"Segoe UI",Arial,sans-serif;overflow:hidden}
@@ -158,6 +159,10 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .dsep{align-self:center;margin:10px 0}.dsep span{background:#1c1c21cc;border-radius:8px;padding:4px 12px;font-size:12.5px;color:var(--mu)}
 .tk{font-style:normal;margin-left:4px;color:#ffd0d5}
 .m.mi{padding:4px}.m.mi small{padding:0 6px 2px}.im{max-width:280px}.im img{display:block;max-width:100%;border-radius:8px;cursor:zoom-in}.im .cap{padding:6px 6px 0;font-size:14.5px;white-space:pre-wrap;word-break:break-word}
+.mctx{position:fixed;z-index:80;background:var(--p2);border:1px solid var(--line);border-radius:14px;padding:6px;min-width:170px;box-shadow:0 14px 40px #000a}
+.mctx.hide{display:none}.mctx button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:9px;font-size:15px;text-align:left}
+.mctx button:hover{background:#ffffff12}.mctx .dg{color:#ff5a68}.mctx svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+@media (pointer:coarse){.m{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
 </style></head><body>
 <div class="toast" id="toast"><div class="av" id="tAv" style="width:40px;height:40px;font-size:15px"></div><div><b id="tB"></b><span id="tS"></span></div></div>
 <div class="app">
@@ -204,7 +209,8 @@ try{S=JSON.parse(localStorage.getItem("wsc")||"null")||S}catch(e){}
 if(!S.me)S.me=Math.random().toString(36).slice(2,10);
 if(!S.name)S.name="Tamu";if(!S.stars)S.stars=[];
 if(!S.items)S.items=[];
-S.items=S.items.filter(i=>i.id!="s1"&&i.id!="s2");S.stars=(S.stars||[]).filter(x=>x!="s1"&&x!="s2");
+S.items=S.items.filter(i=>i.id!="s1"&&i.id!="s2");
+S.chats.forEach(c=>{if(!c.ai&&c.msgs)c.msgs=c.msgs.filter(m=>m.me||!(m.t==="Oke, pesanmu terkirim. 👍"||/^Hai! Kita sudah terhubung lewat kode /.test(m.t||"")))});S.stars=(S.stars||[]).filter(x=>x!="s1"&&x!="s2");
 if(!S.chats.some(c=>c.id=="ai"))S.chats.unshift({id:"ai",name:"AI Whatsschat",ai:1,msgs:[{t:"Halo! Aku AI Whatsschat. Fitur utamanya belum tersambung, ini masih tampilan HTML dulu.",time:hm()}],unread:0});
 const save=()=>{try{localStorage.setItem("wsc",JSON.stringify(S))}catch(e){}};
 function hm(){return new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}).replace(":",".")}
@@ -246,8 +252,7 @@ function addFriend(){const code=$("code").value.trim().toLowerCase();if(!/^[a-z0
  if(code==S.me){toast("Kode ini milikmu","Masukkan kode teman, bukan kodemu.");return}
  let c=S.chats.find(x=>x.code==code);
  if(!c){c={id:code,code,name:$("nm").value.trim()||"Teman "+code.slice(0,4),msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
- $("ov").classList.add("hide");$("code").value=$("nm").value="";view="chat";open(c.id);
- setTimeout(()=>{push(c,"Hai! Kita sudah terhubung lewat kode "+code+".",0)},1800)}
+ $("ov").classList.add("hide");$("code").value=$("nm").value="";view="chat";open(c.id)}
 function act(a){$("pop").classList.add("hide");
  if(a=="teman"){$("ov").classList.remove("hide");$("code").focus()}
  else if(a=="arsip"){view="arsip";flt="all";render()}
@@ -498,9 +503,9 @@ async function dbStart(){if(DBS||!DBH||!S.in)return;DBS=1;
  try{if(S.pn!==S.name){await DBH.doc('profiles/'+S.me).set({name:S.name,ts:Date.now()});S.pn=S.name;save()}}catch(e){}
  DBH.collection('inbox/'+S.me+'/m').orderBy('ts','desc').limit(200).onSnapshot(snap=>{snap.docChanges().filter(x=>x.type=='added').map(x=>x.doc).sort((a,b)=>a.data().ts-b.data().ts).forEach(d=>{RQ=RQ.then(()=>recv(d))})},()=>{DBS=0})}
 async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
- if(!DBH){setTimeout(()=>push(c,'Oke, pesanmu terkirim. 👍',0),900);return}
+ if(!DBH){save();return}
  try{await DBH.collection('inbox/'+c.code+'/m').add({from:S.me,name:S.name,c:await enc(c.code,t),ts:Date.now()})}
- catch(e){m.fail=1;toast('Pesan belum terkirim',e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.')}
+ catch(e){m.fail=1;toast('Pesan belum terkirim',e&&e.code=='permission-denied'?'Firebase menolak. Periksa Rules di Firestore (lihat README).':e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.')}
  if(cur==c.id)draw(c);save()}
 async function addFriend(){const code=$('code').value.trim().toLowerCase();if(!/^[a-z0-9]{8}$/.test(code)){$('code').style.borderColor='#e11d2e';return}
  if(code==S.me){toast('Kode ini milikmu','Masukkan kode teman, bukan kodemu.');return}
@@ -509,15 +514,19 @@ async function addFriend(){const code=$('code').value.trim().toLowerCase();if(!/
   if(DBH){try{const p=await DBH.doc('profiles/'+code).get();if(p.exists)real=p.data().name||null;else{toast('Kode tidak ditemukan','Orang itu belum membuka Whatsschat, atau kodenya salah.');return}}catch(e){toast('Tidak bisa memeriksa kode','Coba lagi sebentar lagi.');return}}
   c={id:code,code,name:nm||real||('Teman '+code.slice(0,4)),named:!!nm,msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
  $('ov').classList.add('hide');$('code').value=$('nm').value='';view='chat';open(c.id);
- if(!DBH)setTimeout(()=>{push(c,'Hai! Kita sudah terhubung lewat kode '+code+'.',0)},1800)}
-(async()=>{try{DBH=window.claude?await window.claude.use('db'):null}catch(e){DBH=null}dbStart();render()})();
+ if(!DBH)toast('Mode demo','Teman belum bisa menerima pesan. Chat ini hanya tersimpan di perangkatmu.')}
+async function loadFB(){const cfg=window.FIREBASE_CONFIG;if(!cfg||!cfg.projectId||!cfg.apiKey||/^ISI_/.test(cfg.apiKey)||/^ISI_/.test(cfg.projectId))return null;
+ const ld=u=>new Promise((ok,no)=>{const x=document.createElement('script');x.src=u;x.onload=ok;x.onerror=no;document.head.appendChild(x)});
+ await ld('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');await ld('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js');
+ firebase.initializeApp(cfg);const db=firebase.firestore();return{doc:p=>db.doc(p),collection:p=>db.collection(p)}}
+(async()=>{try{DBH=window.claude?await window.claude.use('db'):await loadFB()}catch(e){DBH=null}dbStart();render();{const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai)draw(c)}})();
 function dayLbl(ts){const d=new Date(ts),n=new Date();if(d.toDateString()==n.toDateString())return 'Hari Ini';if(d.toDateString()==new Date(Date.now()-864e5).toDateString())return 'Kemarin';if(n-d<6*864e5)return d.toLocaleDateString('id-ID',{weekday:'long'});return d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}
 function draw(c){let h='',last='';
  if(!c.ai)h+="<div class='sysn'>🔒 Pesan di chat ini disandikan memakai kode penerima. Jangan bagikan kodemu ke sembarang orang.</div>";
  c.msgs.forEach((m,i)=>{const dl=dayLbl(m.ts||Date.now());if(dl!=last){h+=`<div class='dsep'><span>${dl}</span></div>`;last=dl}
-  const tick=m.me&&!c.ai&&!m.fail?"<i class='tk'>✓</i>":'';
+  const tick=m.me&&!c.ai&&!m.fail&&DBH?"<i class='tk'>✓</i>":'';
   const body=m.iid?`<div class='im' data-im='${i}'><img src='${m.th}' alt='Foto'>${m.cap?`<div class='cap'>${esc(m.cap)}</div>`:''}</div>`:(c.ai&&!m.me?md(m.t):esc(m.t));
-  h+=`<div class='m ${m.me?'me':''}${m.iid?' mi':''}'>${body}<small>${m.fail?'⚠ belum terkirim · ':''}${m.time}${tick}</small></div>`});
+  h+=`<div class='m ${m.me?'me':''}${m.iid?' mi':''}' data-i='${i}'>${body}<small>${m.fail?'⚠ belum terkirim · ':(m.me&&!c.ai&&!DBH?'tersimpan di perangkat · ':'')}${m.time}${tick}</small></div>`});
  $('msgs').innerHTML=h;$('msgs').scrollTop=1e9}
 function push(c,t,me){c.msgs.push({t,me,time:hm(),ts:Date.now()});c.ts=Date.now();if(!me&&cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?t:'Pesan baru',c.id)}if(cur==c.id)draw(c);render()}
 function thumbOf(d){return new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,320/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.6))};i.onerror=()=>r('');i.src=d})}
@@ -536,16 +545,16 @@ async function recv(d){const x=d.data();if(!x||!x.from||S.got.includes(d.id))ret
  if(cur==c.id)draw(c);else{c.unread=(c.unread||0)+1;if(Date.now()-x.ts<12e4&&!c.arch&&nf().pesan)toast(c.name,nf().prev?m.t:'Pesan baru',c.id)}
  render()}
 async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
- if(!DBH){setTimeout(()=>push(c,'Oke, pesanmu terkirim. 👍',0),900);return}
+ if(!DBH){save();return}
  try{await DBH.collection('inbox/'+c.code+'/m').add({from:S.me,name:S.name,c:await enc(c.code,JSON.stringify({k:'t',t})),ts:m.ts||Date.now()})}
- catch(e){m.fail=1;toast('Pesan belum terkirim',e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.')}
+ catch(e){m.fail=1;toast('Pesan belum terkirim',e&&e.code=='permission-denied'?'Firebase menolak. Periksa Rules di Firestore (lihat README).':e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.')}
  if(cur==c.id)draw(c);save()}
 async function sendImg(c,f){const {d,t}=await shrink(f);if(d.length>165000){toast('Foto terlalu besar','Pilih foto yang lebih kecil.');return}
  const id='p'+Date.now()+Math.random().toString(36).slice(2,6),cap=$('ta').value.trim();$('ta').value='';
  await mput('img:'+id,d);const m={t:'📷 Foto',me:1,time:hm(),ts:Date.now(),iid:'img:'+id,th:t,cap};c.msgs.push(m);c.ts=Date.now();draw(c);render();
  if(!DBH)return;
  try{await DBH.collection('inbox/'+c.code+'/m').add({from:S.me,name:S.name,c:await enc(c.code,JSON.stringify({k:'img',d,cap})),ts:m.ts})}
- catch(e){m.fail=1;toast('Foto belum terkirim',e&&e.code=='quota_exceeded'?'Penyimpanan bersama penuh.':e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.');draw(c);save()}}
+ catch(e){m.fail=1;toast('Foto belum terkirim',e&&e.code=='quota_exceeded'?'Penyimpanan bersama penuh.':e&&e.code=='permission-denied'?'Firebase menolak. Periksa Rules di Firestore (lihat README).':e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.');draw(c);save()}}
 $('imgB').onclick=()=>$('imgF').click();
 $('imgF').onchange=async e=>{const fs=[...e.target.files];e.target.value='';const c=S.chats.find(x=>x.id==cur);if(!c||c.ai)return;for(const f of fs){if(!f.type.startsWith('image/')){toast('Bukan foto',f.name);continue}try{await sendImg(c,f)}catch(x){toast('Foto gagal diproses','Coba foto lain.')}}};
 function contactInfo(){const c=S.chats.find(x=>x.id==cur);if(!c||c.ai)return;
@@ -564,6 +573,30 @@ function subPage(k,y){const s=$("set"),v=pvd();s.classList.remove("hide");let h;
  s.innerHTML=h;if(y)s.querySelector(".stb").scrollTop=y}
 rail();
 render();
+/* Menu pesan: klik kanan di PC, tekan lama di HP */
+(function(){
+ const box=$('msgs'),mc=document.createElement('div');mc.className='mctx hide';document.body.appendChild(mc);
+ const cp='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',tr='<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+ let sel=null,lp=null,lx=0,ly=0,opened=0;
+ const hide=()=>{mc.classList.add('hide');sel=null};
+ function show(i,x,y){const c=S.chats.find(z=>z.id==cur);if(!c)return;const m=c.msgs[i];if(!m||m.pending)return;sel={c,m};opened=Date.now();
+  mc.innerHTML=(!m.iid&&m.t?'<button data-mc="cp">'+cp+'Salin</button>':'')+'<button class="dg" data-mc="del">'+tr+'Hapus</button>';
+  mc.classList.remove('hide');const w=mc.offsetWidth,h=mc.offsetHeight;
+  mc.style.left=Math.max(8,Math.min(x,innerWidth-w-8))+'px';mc.style.top=Math.max(8,Math.min(y,innerHeight-h-8))+'px'}
+ box.addEventListener('contextmenu',e=>{const el=e.target.closest('.m[data-i]');if(!el)return;e.preventDefault();show(+el.dataset.i,e.clientX,e.clientY)});
+ box.addEventListener('touchstart',e=>{const el=e.target.closest('.m[data-i]');if(!el||e.touches.length!=1)return;const t=e.touches[0];lx=t.clientX;ly=t.clientY;clearTimeout(lp);
+  lp=setTimeout(()=>{lp=null;show(+el.dataset.i,lx,ly);try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}},480)},{passive:true});
+ box.addEventListener('touchmove',e=>{const t=e.touches[0];if(lp&&(Math.abs(t.clientX-lx)>10||Math.abs(t.clientY-ly)>10)){clearTimeout(lp);lp=null}},{passive:true});
+ ['touchend','touchcancel'].forEach(n=>box.addEventListener(n,()=>{clearTimeout(lp);lp=null}));
+ box.addEventListener('click',e=>{if(Date.now()-opened<700){e.stopPropagation();e.preventDefault()}},true);
+ box.addEventListener('scroll',hide,{passive:true});
+ document.addEventListener('click',e=>{if(Date.now()-opened<700)return;if(!mc.contains(e.target))hide()});
+ document.addEventListener('keydown',e=>{if(e.key=='Escape')hide()});addEventListener('resize',hide);
+ mc.addEventListener('click',e=>{const b=e.target.closest('[data-mc]');if(!b||!sel)return;
+  if(b.dataset.mc=='cp'){try{navigator.clipboard.writeText(sel.m.t)}catch(x){}hide();toast('Disalin','Pesan disalin.');return}
+  if(!b.dataset.ok){b.dataset.ok=1;b.lastChild.textContent='Ketuk lagi untuk menghapus';return}
+  const c=sel.c,k=c.msgs.indexOf(sel.m);if(k>-1){const m=c.msgs[k];if(m.iid)mdel(m.iid);c.msgs.splice(k,1);save();if(cur==c.id)draw(c);render()}hide()});
+})();
 /* Simpan akun lebih awet: salinan cadangan di IndexedDB, dipulihkan otomatis kalau localStorage kosong */
 const IDBK={
  o(){return new Promise((ok,no)=>{try{const r=indexedDB.open("wsc-backup",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})},

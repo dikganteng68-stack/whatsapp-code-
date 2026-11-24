@@ -26,23 +26,31 @@ module.exports = async (req, res) => {
     content: String(m.content || "").slice(0, 30000)
   }));
 
+  // Model bawaan: pengganti resmi llama-3.3-70b-versatile. Kalau satu model ditolak, coba berikutnya.
+  const models = [process.env.GROQ_MODEL, "openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]
+    .filter((m, i, a) => m && a.indexOf(m) === i);
+  let lastErr = "Gagal memanggil AI", lastCode = 502;
   try {
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "content-type": "application/json", "authorization": "Bearer " + key },
-      body: JSON.stringify({
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-        messages,
-        max_tokens: 1000
-      })
-    });
-    const j = await r.json();
-    if (!r.ok) {
-      const code = r.status === 429 ? 429 : 502;
-      return res.status(code).json({ error: (j.error && j.error.message) || "Gagal memanggil AI" });
+    for (const model of models) {
+      const payload = { model, messages, max_completion_tokens: 2000 };
+      if (model.startsWith("openai/gpt-oss")) payload.reasoning_effort = "low"; // model "berpikir"; low = lebih cepat dan hemat kuota
+      const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "content-type": "application/json", "authorization": "Bearer " + key },
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) {
+        const text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "";
+        return res.status(200).json({ text: text.trim() || "(AI tidak memberi jawaban untuk pesan ini)" });
+      }
+      lastErr = (j.error && j.error.message) || lastErr;
+      lastCode = r.status === 429 ? 429 : 502;
+      // Hanya lanjut ke model berikutnya kalau modelnya yang bermasalah (tidak ada / dihentikan)
+      const modelProblem = r.status === 404 || /does not exist|decommission|deprecat|not supported|no access/i.test(lastErr);
+      if (!modelProblem) break;
     }
-    const text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "";
-    return res.status(200).json({ text: text || "(AI tidak memberi jawaban untuk pesan ini)" });
+    return res.status(lastCode).json({ error: lastErr });
   } catch (e) {
     return res.status(500).json({ error: "Server error" });
   }

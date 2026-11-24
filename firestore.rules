@@ -6,7 +6,7 @@ service cloud.firestore {
     match /profiles/{code} {
       allow get: if true;
       allow list: if false;
-      allow create, update: if code.matches('[a-z0-9]{8}')
+      allow create, update: if code.matches('[a-z0-9]{6,8}')
         && request.resource.data.keys().hasOnly(['name', 'ts', 'pic'])
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 24
@@ -17,7 +17,7 @@ service cloud.firestore {
 
     // Kotak masuk: siapa pun bisa mengirim, pesan tidak bisa diubah atau dihapus orang lain.
     match /inbox/{code}/m/{id} {
-      allow create: if code.matches('[a-z0-9]{8}')
+      allow create: if code.matches('[a-z0-9]{6,8}')
         && request.resource.data.keys().hasOnly(['from', 'name', 'c', 'ts'])
         && request.resource.data.c is string
         && request.resource.data.c.size() < 900000;

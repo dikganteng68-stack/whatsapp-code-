@@ -180,7 +180,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
   <div class="stp hide" id="stp"></div>
  </section>
  <main class="main" id="main">
-  <div class="home"><div class="card"><div class="av" style="margin:auto;width:64px;height:64px;font-size:26px">💬</div><h2>Chat pakai kode teman</h2><p>Hanya teman yang sudah kamu DM lewat kode 8 karakter yang muncul di daftar chat.</p><button class="pill" id="h1">Tambah teman</button></div>
+  <div class="home"><div class="card"><div class="av" style="margin:auto;width:64px;height:64px;font-size:26px">💬</div><h2>Chat pakai kode teman</h2><p>Hanya teman yang sudah kamu DM lewat kode teman yang muncul di daftar chat.</p><button class="pill" id="h1">Tambah teman</button></div>
    <div class="qa"><button data-a="arsip"><i id="qi1"></i>Arsip</button><button data-a="ai"><i id="qi2"></i>Tanya AI</button><button data-a="teman"><i id="qi3"></i>Tambah teman</button></div></div>
   <div id="stHome"><div class="av" style="margin:auto;width:84px;height:84px;font-size:34px"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-dasharray="4.2 2.6"/><circle cx="12" cy="12" r="4.5"/></svg></div><h2>Bagikan story</h2><p>Bagikan foto, video, dan teks yang hilang setelah 24 jam. Video maksimal 20 detik.</p><div class="qa"><button data-sa="t"><i id="sh1"></i>Story teks</button><button data-sa="m"><i id="sh2"></i>Foto dan video</button></div></div>
   <div class="cv" id="cv"><div class="ct"><button class="ib back" id="bk">←</button><div class="av" id="cA" style="width:40px;height:40px;font-size:15px"></div><div data-ct="info" style="cursor:pointer;min-width:0"><b id="cN"></b><small id="cS"></small></div><span class="ctr" id="fcT"><button class="ib" data-ct="video" aria-label="Video">🎥</button><button class="ib" data-ct="call" aria-label="Telepon">📞</button><button class="ib" data-ct="find" aria-label="Cari">🔍</button><button class="ib" data-ct="info" aria-label="Info kontak">⋮</button></span><button class="ib hide" id="aiK" aria-label="Menu AI" style="margin-left:auto">⋮</button></div>
@@ -199,14 +199,17 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 <div class="auth hide" id="auth"><div class="acard"><div class="av" style="margin:0 auto 10px;width:64px;height:64px;font-size:28px">💬</div><h1>Whatss<span>chat</span></h1><p class="as" id="aSub"></p><label for="aN">Nama</label><input id="aN" maxlength="24" autocomplete="username" placeholder="Nama kamu"><label for="aD">Tanggal lahir</label><input id="aD" type="date"><label for="aP">Kata sandi</label><div class="apw"><input id="aP" type="password" autocomplete="current-password" placeholder="Minimal 6 karakter"><button type="button" id="aEye" aria-label="Tampilkan kata sandi">👁</button></div><div id="aP2w"><label for="aP2">Ulangi kata sandi</label><input id="aP2" type="password" autocomplete="new-password"></div><div class="warn">🔒 Jangan berikan kata sandi ke siapa pun. Simpan di tempat yang aman. Kata sandi tidak bisa dipulihkan kalau lupa.</div><p class="aerr" id="aE"></p><button class="btn" id="aGo">Masuk</button><button class="btn s" id="aForgot">Lupa kata sandi?</button></div></div>
 <div class="ov hide" id="lb" style="z-index:60"><img id="lbI" alt="Pratinjau" style="max-width:94vw;max-height:88vh;border-radius:12px"></div>
 <div class="pg hide" id="pg"><div class="pgh"><button class="ib" id="pgBk" aria-label="Kembali">←</button><b id="pgT"></b></div><div class="pgb" id="pgB"></div></div>
-<div class="ov hide" id="ov"><div class="dlg"><h3>Tambah teman</h3><p>Masukkan kode teman (8 huruf/angka) untuk mulai DM.</p><div class="mycode">Kodemu: <b id="my"></b></div><input id="code" maxlength="8" placeholder="contoh: dik34h82" autocomplete="off" spellcheck="false"><input id="nm" maxlength="24" placeholder="Nama teman (opsional)" autocomplete="off"><button class="btn" id="go">Kirim DM</button><button class="btn s" id="cl">Tutup</button></div></div>
+<div class="ov hide" id="ov"><div class="dlg"><h3>Tambah teman</h3><p>Masukkan kode teman (6 sampai 8 huruf/angka) untuk mulai DM.</p><div class="mycode">Kodemu: <b id="my"></b></div><input id="code" maxlength="8" placeholder="contoh: 48k2m1" autocomplete="off" spellcheck="false"><input id="nm" maxlength="24" placeholder="Nama teman (opsional)" autocomplete="off"><button class="btn" id="go">Kirim DM</button><button class="btn s" id="cl">Tutup</button></div></div>
 <script>
 const P={chat:"M4 5h16v11H9l-5 4z",story:"M12 4a8 8 0 1 0 8 8M12 8a4 4 0 1 0 4 4",store:"M3 7l2-3h14l2 3v12H3zM3 7h18M10 12h4",ai:"M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z",arch:"M4 4h16v4H4zM5 8v12h14V8M12 11v6M9 14l3 3 3-3",search:"M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",plus:"M12 5v14M5 12h14",send:"M3 11l18-8-8 18-2-8z",user:"M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM5 20c1-4 4-5 7-5s6 1 7 5",cam:"M4 8h4l2-3h4l2 3h4v11H4zM12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",doc:"M7 3h7l4 4v14H7zM14 3v4h4"};
 const I=n=>`<svg class="i" viewBox="0 0 24 24"><path d="${P[n]}"/></svg>`;
 const $=id=>document.getElementById(id);
 let S={chats:[],me:""},view="chat",flt="all",cur=null,tt;
 try{S=JSON.parse(localStorage.getItem("wsc")||"null")||S}catch(e){}
-if(!S.me)S.me=Math.random().toString(36).slice(2,10);
+function genCode(){const r=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n},D='0123456789',L='abcdefghijklmnopqrstuvwxyz';
+ const a=[r(10),r(10),r(10),r(10)].map(i=>D[i]).concat([r(26),r(26)].map(i=>L[i]));
+ for(let i=a.length-1;i>0;i--){const j=r(i+1);[a[i],a[j]]=[a[j],a[i]]}return a.join('')}
+if(!S.me||!/^[a-z0-9]{6,8}$/.test(S.me))S.me=genCode();
 if(!S.name)S.name="Tamu";if(!S.stars)S.stars=[];
 if(!S.items)S.items=[];
 S.items=S.items.filter(i=>i.id!="s1"&&i.id!="s2");
@@ -248,7 +251,7 @@ function draw(c){$("msgs").innerHTML=c.msgs.map(m=>`<div class="m ${m.me?"me":""
 function push(c,t,me){c.msgs.push({t,me,time:hm()});c.ts=Date.now();if(!me&&cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?t:"Pesan baru",c.id)}if(cur==c.id)draw(c);render()}
 function send(){const t=$("ta").value.trim(),c=S.chats.find(x=>x.id==cur);if(!t||!c)return;$("ta").value="";push(c,t,1);
  if(c.ai)return askAI(c);sendDM(c,t)}
-function addFriend(){const code=$("code").value.trim().toLowerCase();if(!/^[a-z0-9]{8}$/.test(code)){$("code").style.borderColor="#e11d2e";return}
+function addFriend(){const code=$("code").value.trim().toLowerCase();if(!/^[a-z0-9]{6,8}$/.test(code)){$("code").style.borderColor="#e11d2e";return}
  if(code==S.me){toast("Kode ini milikmu","Masukkan kode teman, bukan kodemu.");return}
  let c=S.chats.find(x=>x.code==code);
  if(!c){c={id:code,code,name:$("nm").value.trim()||"Teman "+code.slice(0,4),msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
@@ -347,7 +350,7 @@ async function mput(k,b){try{const d=await idb();d.transaction("m","readwrite").
 async function mget(k){try{const d=await idb();return await new Promise(r=>{const q=d.transaction("m").objectStore("m").get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}}
 async function mdel(k){try{const d=await idb();d.transaction("m","readwrite").objectStore("m").delete(k)}catch(e){}}
 function purge(){const dead=S.st.filter(x=>!alive(x));if(dead.length){dead.forEach(x=>{mdel(x.id);delete MEM[x.id]});S.st=S.st.filter(alive);save()}}
-function seedSt(){const n=Date.now();if(!S.st.some(x=>x.demo&&alive(x))){S.st.push({id:"d"+n,demo:1,by:"Rina",code:"rina2026",type:"text",text:"Selamat pagi! Semangat ya hari ini ☀️",bg:"#7a1520",ts:n-72e5},{id:"e"+n,demo:1,by:"Dimas",code:"dimas777",type:"text",text:"Ada kode bagus? Cek Storage ya.",bg:"#2a3b7a",ts:n-324e5});save()}}
+function seedSt(){const n=S.st.length;S.st=S.st.filter(x=>!x.demo);let ch=S.st.length!=n;if(!S.vc){S.st.forEach(x=>{if(x.views&&x.views.length){x.views=[];ch=1}});S.vc=1;ch=1}if(ch)save()}
 S.st=S.st||[];S.seen=S.seen||[];purge();seedSt();
 function groups(){const m={};S.st.filter(alive).forEach(x=>{(m[x.code]=m[x.code]||{code:x.code,by:x.by,mine:x.code==S.me,l:[]}).l.push(x)});return Object.values(m).map(g=>{g.l.sort((a,b)=>a.ts-b.ts);g.last=g.l[g.l.length-1].ts;g.un=g.l.some(x=>!S.seen.includes(x.id));return g})}
 const unseenAny=()=>groups().some(g=>!g.mine&&g.un);
@@ -389,7 +392,7 @@ function openV(code){purge();const G=groups(),by=(a,b)=>b.last-a.last;VU=[...G.f
  VQ=S.st.filter(x=>x.code==code&&alive(x)).sort((a,b)=>a.ts-b.ts);if(!VQ.length)return;const un=VQ.findIndex(x=>!S.seen.includes(x.id));$("sv").classList.remove("hide");showV(code==S.me||un<0?0:un)}
 let VU=[];
 function nextU(d){const c=VQ[0]?VQ[0].code:S.me,k=VU.indexOf(c)+d;if(k>=VU.length)return closeV();if(k<0)return showV(0);const q=S.st.filter(x=>x.code==VU[k]&&alive(x)).sort((a,b)=>a.ts-b.ts);if(!q.length)return closeV();VQ=q;showV(0)}
-function simViews(id){const names=[...new Set(["Rina","Dimas",...S.chats.filter(c=>!c.ai).map(c=>c.name)])];names.forEach((n,i)=>setTimeout(()=>{const x=S.st.find(s=>s.id==id);if(!x)return;x.views=x.views||[];if(x.views.some(v=>v.n==n))return;x.views.push({n,ts:Date.now()});save();if(VQ[VI]&&VQ[VI].id==id)$("svEN").textContent=x.views.length},4000+i*6000+Math.random()*4000))}
+function simViews(id){}
 $("svE").onclick=()=>{clearTimeout(VT);const v=$("svBody").querySelector("video");if(v)v.pause();const x=VQ[VI],L=x.views||[];$("svVn").textContent="Dilihat oleh "+L.length;
  $("svVl").innerHTML=L.length?L.map(w=>`<div class="vr"><div class="av" style="width:40px;height:40px;font-size:15px">${esc(ini(w.n))}</div><div><b>${esc(w.n)}</b><small>${tf(w.ts)}</small></div></div>`).join(""):`<div class="empty">Belum ada yang melihat story ini.</div>`;$("svVw").classList.remove("hide")};
 $("svVx").onclick=()=>{$("svVw").classList.add("hide");showV(VI)};
@@ -457,15 +460,21 @@ function chkCode(l,t){const ok=k=>{try{return LGX[k](t)}catch(e){return false}};
  return{t:'Bukan kode '+l,m:'Isi yang kamu tempel terdeteksi sebagai '+f.join(' / ')+', bukan '+l+'. Ganti bahasanya atau tempel kode '+l+', lalu coba lagi.'}}
 function codeErr(e){$('seT').textContent=e.t;$('seM').textContent=e.m;$('stErr').classList.remove('hide')}
 $('seOk').onclick=()=>{$('stErr').classList.add('hide');const a=$('uC');if(a)a.focus()};
-Object.assign(P,{check:'M5 12l5 5 9-10',copy:'M9 9h10v11H9zM5 4h10v3M5 4v12h3'});
+Object.assign(P,{check:'M5 12l5 5 9-10',copy:'M9 9h10v11H9zM5 4h10v3M5 4v12h3',reload:'M21 12a9 9 0 1 1-9-9c2.5 0 4.9 1 6.7 2.7L21 8M21 3v5h-5'});
 function profileEdit(ed){const s=$('set');s.dataset.v='p';
  const f=(k,lb,val,max,hint,ph)=>ed==k?`<div class="pfr"><label>${lb}</label><div class="pfe"><input id="pI" data-k="${k}" maxlength="${max}" value="${esc(val)}" placeholder="${ph}" autocomplete="off"><button class="ib" data-pk="${k}" aria-label="Simpan">${I('check')}</button></div></div>`:`<div class="pfr"><label>${lb}</label><div class="pfv"><span>${val?esc(val):'<i>'+ph+'</i>'}</span><button class="ib" data-pe="${k}" aria-label="Ubah ${lb}">${I('pen')}</button></div>${hint?`<small>${hint}</small>`:''}</div>`;
- s.innerHTML=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>Profil</h2></div><div class="stb">${avBlock()}${f('name','Nama',S.name,24,'Ini bukan PIN atau kata sandi. Nama ini terlihat oleh teman di Whatsschat.','Nama kamu')}${f('about','Tentang',S.about||'',80,'','Tulis sesuatu tentang kamu')}<div class="pfr"><label>Nama pengguna</label><div class="pfv"><span>${S.me}</span><button class="ib" data-pcp="1" aria-label="Salin kode">${I('copy')}</button></div><small>Kode ini dipakai teman untuk memulai DM denganmu.</small></div></div>`;
+ s.innerHTML=`<div class="sth"><button class="ib" id="stBk" aria-label="Kembali">←</button><h2>Profil</h2></div><div class="stb">${avBlock()}${f('name','Nama',S.name,24,'Ini bukan PIN atau kata sandi. Nama ini terlihat oleh teman di Whatsschat.','Nama kamu')}${f('about','Tentang',S.about||'',80,'','Tulis sesuatu tentang kamu')}<div class="pfr"><label>Nama pengguna</label><div class="pfv"><span>${S.me}</span><button class="ib" data-pnew="1" aria-label="Buat kode baru">${I('reload')}</button><button class="ib" data-pcp="1" aria-label="Salin kode">${I('copy')}</button></div><small id="pNs">Kode ini dipakai teman untuk memulai DM denganmu.</small></div></div>`;
  if(ed){const i=$('pI');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
 function saveF(k){const v=$('pI').value.trim();if(k=='name')S.name=v||'Tamu';else S.about=v;save();profileEdit();toast('Tersimpan',k=='name'?'Nama diperbarui.':'Tentang diperbarui.')}
 $('set').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.pe)profileEdit(b.dataset.pe);else if(b.dataset.pk)saveF(b.dataset.pk);
- else if(b.dataset.pcp){try{navigator.clipboard.writeText(S.me)}catch(x){}toast('Kode disalin',S.me)}});
+ else if(b.dataset.pcp){try{navigator.clipboard.writeText(S.me)}catch(x){}toast('Kode disalin',S.me)}
+ else if(b.dataset.pnew){const n=$('pNs');if(!b.dataset.ok){b.dataset.ok=1;n.style.color='#ff5a68';n.textContent='Ketuk lagi untuk membuat kode baru. Teman yang masih memakai kode lama tidak bisa mengirim pesan ke kamu lagi, jadi beri tahu kode barumu.';setTimeout(()=>{delete b.dataset.ok;if(n){n.style.color='';n.textContent='Kode ini dipakai teman untuk memulai DM denganmu.'}},6000)}else newCode()}});
+function newCode(){const old=S.me;let n;do{n=genCode()}while(n==old);
+ if(DBU){try{DBU()}catch(e){}DBU=null}DBS=0;SPN=0;
+ S.st.forEach(x=>{if(x.code==old)x.code=n});S.items.forEach(x=>{if(x.code==old)x.code=n});
+ S.me=n;S.pk='';S.pwarn=0;save();const m=$('my');if(m)m.textContent=n;
+ dbStart();profileEdit();toast('Kode baru dibuat',n)}
 $('set').addEventListener('keydown',e=>{if(e.target.id=='pI'){if(e.key=='Enter')saveF(e.target.dataset.k);if(e.key=='Escape')profileEdit()}});
 const AU={mode:'login',fails:0,until:0};
 const b2h=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -500,15 +509,16 @@ async function recv(d){const x=d.data();if(!x||!x.from||S.got.includes(d.id))ret
  c.msgs.push({t,me:0,time:new Date(x.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace(':','.')});c.ts=Math.max(c.ts||0,x.ts);
  if(cur==c.id)draw(c);else{c.unread=(c.unread||0)+1;if(Date.now()-x.ts<12e4&&!c.arch&&nf().pesan)toast(c.name,nf().prev?t.slice(0,80):'Pesan baru',c.id)}
  render()}
+let DBU=null;
 async function dbStart(){if(DBS||!DBH||!S.in)return;DBS=1;
  await syncProfile();
- DBH.collection('inbox/'+S.me+'/m').orderBy('ts','desc').limit(200).onSnapshot(snap=>{snap.docChanges().filter(x=>x.type=='added').map(x=>x.doc).sort((a,b)=>a.data().ts-b.data().ts).forEach(d=>{RQ=RQ.then(()=>recv(d))})},()=>{DBS=0})}
+ DBU=DBH.collection('inbox/'+S.me+'/m').orderBy('ts','desc').limit(200).onSnapshot(snap=>{snap.docChanges().filter(x=>x.type=='added').map(x=>x.doc).sort((a,b)=>a.data().ts-b.data().ts).forEach(d=>{RQ=RQ.then(()=>recv(d))})},()=>{DBS=0})}
 async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
  if(!DBH){save();return}
  try{await DBH.collection('inbox/'+c.code+'/m').add({from:S.me,name:S.name,c:await enc(c.code,t),ts:Date.now()})}
  catch(e){m.fail=1;toast('Pesan belum terkirim',e&&e.code=='permission-denied'?'Firebase menolak. Periksa Rules di Firestore (lihat README).':e&&e.code=='invalid_argument'?'Akunmu belum punya izin menulis di aplikasi ini (perlu akses Contributor).':'Coba lagi sebentar lagi.')}
  if(cur==c.id)draw(c);save()}
-async function addFriend(){const code=$('code').value.trim().toLowerCase();if(!/^[a-z0-9]{8}$/.test(code)){$('code').style.borderColor='#e11d2e';return}
+async function addFriend(){const code=$('code').value.trim().toLowerCase();if(!/^[a-z0-9]{6,8}$/.test(code)){$('code').style.borderColor='#e11d2e';return}
  if(code==S.me){toast('Kode ini milikmu','Masukkan kode teman, bukan kodemu.');return}
  let c=S.chats.find(x=>x.code==code);const nm=$('nm').value.trim();
  if(!c){let real=null,pic0='';

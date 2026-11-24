@@ -67,7 +67,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .toast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);width:min(440px,94vw);background:#1f1f25;border:1px solid #5a1a21;border-left:4px solid var(--red);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;z-index:90;box-shadow:0 12px 36px #000b;transition:transform .3s;cursor:pointer}
 .toast.show{transform:translate(-50%,0)}.toast b{font-size:14px;display:block}.toast span{font-size:13px;color:var(--mu)}
 @media(max-width:760px){
- .app{display:block}.rail{display:none}.pnl{height:100%;border:0}.main{position:fixed;inset:0;transform:translateX(100%);transition:transform .25s;z-index:20;padding-top:env(safe-area-inset-top,0px)}
+ .app{display:block}.rail{display:none}.pnl{height:100%;border:0}.main{position:fixed;inset:0;transform:translateX(100%);transition:transform .25s;z-index:36;padding-top:env(safe-area-inset-top,0px)}
  .main.open{transform:none}.home{display:none}.back{display:grid}
  .cam{display:grid}.hd .new{position:fixed;right:18px;bottom:calc(86px + env(safe-area-inset-bottom,0px));border-radius:18px;width:62px;height:62px;z-index:10}
  .hd h1{font-size:26px}.chips button{font-size:15px}.r1 b{font-size:18px}.r2{font-size:15px}.av{width:54px;height:54px}
@@ -232,7 +232,7 @@ function render(){
  if(view=="ai")L=S.chats.filter(c=>c.ai);
  if(flt=="unread")L=L.filter(c=>c.unread);if(flt=="fav")L=L.filter(c=>c.fav);if(flt=="group")L=L.filter(c=>c.group);
  L.sort((a,b)=>(b.ai?1:0)-(a.ai?1:0)||(b.ts||0)-(a.ts||0));
- $("list").innerHTML=L.length?L.map(c=>{const m=c.msgs[c.msgs.length-1];return `<button class="ch ${cur==c.id?"on":""}" data-id="${c.id}"><div class="av ${c.ai?"ai":""}">${c.ai?"✦":ini(c.name)}</div><div class="mid"><div class="r1"><b>${esc(c.name)}</b><small>${m?m.time:""}</small></div><div class="r2"><span>${m?(m.me?"Anda: ":"")+esc(m.t):""}</span>${c.unread?`<i class="bd">${c.unread}</i>`:""}</div></div>${c.ai?"":`<span class="act"><span data-ar="${c.id}">${c.arch?"Keluarkan":"Arsipkan"}</span></span>`}</button>`}).join(""):`<div class="empty">${arch?"Belum ada chat yang diarsipkan. Arsipkan chat saat kamu sedang malas membalas.":"Belum ada teman. Ketuk + lalu masukkan kode teman untuk mulai DM."}</div>`;
+ $("list").innerHTML=L.length?L.map(c=>{const m=c.msgs[c.msgs.length-1];return `<button class="ch ${cur==c.id?"on":""}" data-id="${c.id}"><div class="av ${c.ai?"ai":""}">${c.ai?"✦":avc(c)}</div><div class="mid"><div class="r1"><b>${esc(c.name)}</b><small>${m?m.time:""}</small></div><div class="r2"><span>${m?(m.me?"Anda: ":"")+esc(m.t):""}</span>${c.unread?`<i class="bd">${c.unread}</i>`:""}</div></div>${c.ai?"":`<span class="act"><span data-ar="${c.id}">${c.arch?"Keluarkan":"Arsipkan"}</span></span>`}</button>`}).join(""):`<div class="empty">${arch?"Belum ada chat yang diarsipkan. Arsipkan chat saat kamu sedang malas membalas.":"Belum ada teman. Ketuk + lalu masukkan kode teman untuk mulai DM."}</div>`;
  const n=S.chats.filter(c=>c.arch).length;$("ac").textContent=n||"";$("arc").classList.toggle("hide",arch||view=="ai");
  $("arc").querySelector("span").textContent="Diarsipkan";
  document.querySelectorAll("[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f==flt));
@@ -242,7 +242,7 @@ function render(){
  save();
 }
 function open(id){const c=S.chats.find(x=>x.id==id);if(!c)return;cur=id;c.unread=0;
- $("cA").textContent=c.ai?"✦":ini(c.name);$("cA").className="av"+(c.ai?" ai":"");$("cN").innerHTML=esc(c.name)+(c.ai?' <span class="vb">✓</span>':'');$("cS").textContent=c.ai?"Asisten AI · bisa menganalisis data":"klik di sini untuk melihat info kontak"+(DBH?"":" · mode demo");
+ $("cA").innerHTML=c.ai?"✦":avc(c);$("cA").className="av"+(c.ai?" ai":"");$("cN").innerHTML=esc(c.name)+(c.ai?' <span class="vb">✓</span>':'');$("cS").textContent=c.ai?"Asisten AI · bisa menganalisis data":"klik di sini untuk melihat info kontak"+(DBH?"":" · mode demo");
  $("cv").classList.add("show");{const a=c.ai?1:0;$("aiK").classList.toggle("hide",!a);$("aiQ").classList.toggle("hide",!a);$("attB").classList.toggle("hide",!a);$("imgB").classList.toggle("hide",!!a);$("fcT").classList.toggle("hide",!!a);$("msgs").classList.toggle("aiw",!!a);$("aiPop").classList.add("hide")}document.querySelector(".home").classList.add("hide");$("main").classList.add("open");draw(c);render()}
 function draw(c){$("msgs").innerHTML=c.msgs.map(m=>`<div class="m ${m.me?"me":""}">${c.ai&&!m.me?md(m.t):esc(m.t)}<small>${m.fail?'⚠ belum terkirim · ':''}${m.time}</small></div>`).join("");$("msgs").scrollTop=1e9}
 function push(c,t,me){c.msgs.push({t,me,time:hm()});c.ts=Date.now();if(!me&&cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?t:"Pesan baru",c.id)}if(cur==c.id)draw(c);render()}
@@ -298,6 +298,7 @@ $("pgB").onclick=e=>{const b=e.target.closest("button");if(!b)return;const d=b.d
  else if(d.del){S.items=S.items.filter(x=>x.id!=d.del);S.stars=S.stars.filter(x=>x!=d.del);save();open=="Storage"?drawStore():starPage()}};
 Object.assign(P,{key:"M8 14a4 4 0 1 1 3.9-5H21v3h-2v2h-3v-2h-4.1A4 4 0 0 1 8 14z",lock:"M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3",bell:"M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4",kbd:"M3 7h18v10H3zM7 11h1M11 11h1M15 11h1M8 14h8",help:"M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.1",out:"M10 4H4v16h6M15 8l4 4-4 4M19 12H9"});
 const ROWS=[["profil","user","Profil","Nama, foto profil, nama pengguna"],["akun","key","Akun","Notifikasi keamanan, info akun"],["priv","lock","Privasi","Kontak diblokir, pesan sementara"],["chat","chat","Chat","Tema, wallpaper, pengaturan obrolan"],["notif","bell","Notifikasi","Pesan, grup, suara"],["kbd","kbd","Pintasan keyboard","Tindakan cepat"],["help","help","Bantuan dan masukan","Pusat Bantuan, hubungi kami, Kebijakan Privasi"]];
+const avc=c=>c.pic?`<img class="ph" src="${c.pic}" alt="">`:esc(ini(c.name)),picBy=code=>{const c=S.chats.find(x=>x.code&&x.code==code);return c&&c.pic?`<img class="ph" src="${c.pic}" alt="">`:''};
 const avt=()=>S.photo?`<img class="ph" src="${S.photo}" alt="Foto profil">`:esc(ini(S.name));
 function rail(){const b=$("rMe");if(b)b.innerHTML=S.photo?`<img class="ph" src="${S.photo}" alt="Profil">`:I("user")}
 function setPhoto(f){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),m=Math.min(im.width,im.height);c.width=c.height=256;c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,256,256);S.photo=c.toDataURL("image/jpeg",.8);save();rail();$("set").dataset.v=="p"?profileEdit():settingsPage()};im.src=r.result};r.readAsDataURL(f)}
@@ -351,7 +352,7 @@ S.st=S.st||[];S.seen=S.seen||[];purge();seedSt();
 function groups(){const m={};S.st.filter(alive).forEach(x=>{(m[x.code]=m[x.code]||{code:x.code,by:x.by,mine:x.code==S.me,l:[]}).l.push(x)});return Object.values(m).map(g=>{g.l.sort((a,b)=>a.ts-b.ts);g.last=g.l[g.l.length-1].ts;g.un=g.l.some(x=>!S.seen.includes(x.id));return g})}
 const unseenAny=()=>groups().some(g=>!g.mine&&g.un);
 function storyDraw(){purge();seedSt();const G=groups(),me=G.find(g=>g.mine),oth=G.filter(g=>!g.mine).sort((a,b)=>b.last-a.last),nw=oth.filter(g=>g.un),sn=oth.filter(g=>!g.un);
- const row=g=>`<button class="ch" data-sv="${g.code}"><div class="av ring ${g.un?"":"seen"}">${esc(ini(g.by))}</div><div class="mid"><div class="r1"><b>${esc(g.by)}</b></div><div class="r2"><span>${tf(g.last)}</span></div></div></button>`;
+ const row=g=>`<button class="ch" data-sv="${g.code}"><div class="av ring ${g.un?"":"seen"}">${picBy(g.code)||esc(ini(g.by))}</div><div class="mid"><div class="r1"><b>${esc(g.by)}</b></div><div class="r2"><span>${tf(g.last)}</span></div></div></button>`;
  $("stp").innerHTML=`<div class="sth"><h2 style="flex:1;padding-left:8px">Story</h2><button class="ib" data-sa="menu" aria-label="Tambah story">${I("plus")}</button></div><div class="pop hide" id="stMenu"><button data-sa="t">Story teks</button><button data-sa="m">Foto dan video</button></div><div class="stb"><button class="ch" data-sv="${S.me}"><div class="av ${me?"ring":""}" style="position:relative;overflow:visible"><span style="width:100%;height:100%;border-radius:50%;overflow:hidden;display:grid;place-items:center">${avt()}</span><i class="pb" data-sa="menu">+</i></div><div class="mid"><div class="r1"><b>Story saya</b></div><div class="r2"><span>${me?tf(me.last):"Ketuk untuk menambah story"}</span></div></div></button>${nw.length?`<div class="psec">Terbaru</div>`+nw.map(row).join(""):""}${sn.length?`<div class="psec">Telah dilihat</div>`+sn.map(row).join(""):""}${oth.length?"":`<div class="empty">Belum ada story dari orang lain.</div>`}</div>`;
  $("rdstory").classList.toggle("hide",!unseenAny())}
 setInterval(()=>{if(view=="story"&&$("sv").classList.contains("hide"))storyDraw()},60000);
@@ -477,7 +478,7 @@ async function authGo(){const e=m=>{$('aE').textContent=m},n=$('aN').value.trim(
  if(AU.mode=='reg'){if(p.length<6)return e('Kata sandi minimal 6 karakter.');if(p.toLowerCase()==n.toLowerCase())return e('Kata sandi tidak boleh sama dengan nama.');if(p!=$('aP2').value)return e('Ulangi kata sandi tidak cocok.');
   const salt=b2h(crypto.getRandomValues(new Uint8Array(16)));S.acct={n:n.toLowerCase(),dob:d,salt,h:await hpw(p,salt)};S.name=n;S.in=1;save();authDone()}
  else{const a=S.acct;if(n.toLowerCase()==a.n&&d==a.dob&&await hpw(p,a.salt)==a.h){AU.fails=0;S.in=1;save();authDone()}else{if(++AU.fails>=5){AU.fails=0;AU.until=Date.now()+30000;e('Salah 5 kali. Coba lagi 30 detik lagi.')}else e('Nama, tanggal lahir, atau kata sandi salah.')}}}
-function authDone(){dbStart();$('auth').classList.add('hide');$('aP').value=$('aP2').value='';render();toast('Selamat datang, '+S.name,'Jangan berikan kata sandimu ke siapa pun.')}
+function authDone(){dbStart();fetchFriends();$('auth').classList.add('hide');$('aP').value=$('aP2').value='';render();toast('Selamat datang, '+S.name,'Jangan berikan kata sandimu ke siapa pun.')}
 $('aGo').onclick=authGo;['aN','aD','aP','aP2'].forEach(i=>$(i).onkeydown=e=>{if(e.key=='Enter')authGo()});
 $('aEye').onclick=()=>{const t=$('aP').type=='password';$('aP').type=t?'text':'password';$('aP2').type=t?'text':'password'};
 $('aForgot').onclick=()=>{const b=$('aForgot');if(b.dataset.ok){try{localStorage.removeItem('wsc')}catch(x){}location.reload()}else{b.dataset.ok=1;b.textContent='Ketuk lagi untuk menghapus akun dan semua data di perangkat ini';$('aE').textContent='Kata sandi tidak bisa dipulihkan. Menghapus akun akan menghapus semua data.'}};
@@ -500,7 +501,7 @@ async function recv(d){const x=d.data();if(!x||!x.from||S.got.includes(d.id))ret
  if(cur==c.id)draw(c);else{c.unread=(c.unread||0)+1;if(Date.now()-x.ts<12e4&&!c.arch&&nf().pesan)toast(c.name,nf().prev?t.slice(0,80):'Pesan baru',c.id)}
  render()}
 async function dbStart(){if(DBS||!DBH||!S.in)return;DBS=1;
- try{if(S.pn!==S.name){await DBH.doc('profiles/'+S.me).set({name:S.name,ts:Date.now()});S.pn=S.name;save()}}catch(e){}
+ await syncProfile();
  DBH.collection('inbox/'+S.me+'/m').orderBy('ts','desc').limit(200).onSnapshot(snap=>{snap.docChanges().filter(x=>x.type=='added').map(x=>x.doc).sort((a,b)=>a.data().ts-b.data().ts).forEach(d=>{RQ=RQ.then(()=>recv(d))})},()=>{DBS=0})}
 async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
  if(!DBH){save();return}
@@ -510,16 +511,16 @@ async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
 async function addFriend(){const code=$('code').value.trim().toLowerCase();if(!/^[a-z0-9]{8}$/.test(code)){$('code').style.borderColor='#e11d2e';return}
  if(code==S.me){toast('Kode ini milikmu','Masukkan kode teman, bukan kodemu.');return}
  let c=S.chats.find(x=>x.code==code);const nm=$('nm').value.trim();
- if(!c){let real=null;
-  if(DBH){try{const p=await DBH.doc('profiles/'+code).get();if(p.exists)real=p.data().name||null;else{toast('Kode tidak ditemukan','Orang itu belum membuka Whatsschat, atau kodenya salah.');return}}catch(e){toast('Tidak bisa memeriksa kode','Coba lagi sebentar lagi.');return}}
-  c={id:code,code,name:nm||real||('Teman '+code.slice(0,4)),named:!!nm,msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
+ if(!c){let real=null,pic0='';
+  if(DBH){try{const p=await DBH.doc('profiles/'+code).get();if(p.exists){real=p.data().name||null;pic0=p.data().pic||''}else{toast('Kode tidak ditemukan','Orang itu belum membuka Whatsschat, atau kodenya salah.');return}}catch(e){toast('Tidak bisa memeriksa kode','Coba lagi sebentar lagi.');return}}
+  c={id:code,code,name:nm||real||('Teman '+code.slice(0,4)),named:!!nm,pic:pic0,msgs:[],unread:0,ts:Date.now()};S.chats.push(c)}
  $('ov').classList.add('hide');$('code').value=$('nm').value='';view='chat';open(c.id);
  if(!DBH)toast('Mode demo','Teman belum bisa menerima pesan. Chat ini hanya tersimpan di perangkatmu.')}
 async function loadFB(){const cfg=window.FIREBASE_CONFIG;if(!cfg||!cfg.projectId||!cfg.apiKey||/^ISI_/.test(cfg.apiKey)||/^ISI_/.test(cfg.projectId))return null;
  const ld=u=>new Promise((ok,no)=>{const x=document.createElement('script');x.src=u;x.onload=ok;x.onerror=no;document.head.appendChild(x)});
  await ld('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');await ld('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js');
  firebase.initializeApp(cfg);const db=firebase.firestore();return{doc:p=>db.doc(p),collection:p=>db.collection(p)}}
-(async()=>{try{DBH=window.claude?await window.claude.use('db'):await loadFB()}catch(e){DBH=null}dbStart();render();{const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai)draw(c)}})();
+(async()=>{try{DBH=window.claude?await window.claude.use('db'):await loadFB()}catch(e){DBH=null}dbStart();render();{const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai)draw(c)}fetchFriends()})();
 function dayLbl(ts){const d=new Date(ts),n=new Date();if(d.toDateString()==n.toDateString())return 'Hari Ini';if(d.toDateString()==new Date(Date.now()-864e5).toDateString())return 'Kemarin';if(n-d<6*864e5)return d.toLocaleDateString('id-ID',{weekday:'long'});return d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}
 function draw(c){let h='',last='';
  if(!c.ai)h+="<div class='sysn'>🔒 Pesan di chat ini disandikan memakai kode penerima. Jangan bagikan kodemu ke sembarang orang.</div>";
@@ -558,7 +559,7 @@ async function sendImg(c,f){const {d,t}=await shrink(f);if(d.length>165000){toas
 $('imgB').onclick=()=>$('imgF').click();
 $('imgF').onchange=async e=>{const fs=[...e.target.files];e.target.value='';const c=S.chats.find(x=>x.id==cur);if(!c||c.ai)return;for(const f of fs){if(!f.type.startsWith('image/')){toast('Bukan foto',f.name);continue}try{await sendImg(c,f)}catch(x){toast('Foto gagal diproses','Coba foto lain.')}}};
 function contactInfo(){const c=S.chats.find(x=>x.id==cur);if(!c||c.ai)return;
- page('Info kontak',`<div class="pf"><div class="av big">${esc(ini(c.name))}</div><div class="cd">Kode: <b>${esc(c.code||'-')}</b></div><input id="ciN" maxlength="24" value="${esc(c.name)}"><button class="btn" data-ci="save">Simpan nama</button><button class="btn" data-ci="arch" style="background:var(--p2);margin-top:8px">${c.arch?'Keluarkan dari arsip':'Arsipkan chat'}</button></div>`)}
+ page('Info kontak',`<div class="pf"><div class="av big" style="overflow:hidden${c.pic?';cursor:zoom-in':''}" ${c.pic?'data-zoom="1"':''}>${avc(c)}</div><div class="cd">Kode: <b>${esc(c.code||'-')}</b></div><input id="ciN" maxlength="24" value="${esc(c.name)}"><button class="btn" data-ci="save">Simpan nama</button><button class="btn" data-ci="arch" style="background:var(--p2);margin-top:8px">${c.arch?'Keluarkan dari arsip':'Arsipkan chat'}</button></div>`)}
 $('pgB').addEventListener('click',e=>{const b=e.target.closest('[data-ci]');if(!b)return;const c=S.chats.find(x=>x.id==cur);if(!c)return;
  if(b.dataset.ci=='save'){c.name=$('ciN').value.trim()||c.name;c.named=true;$('cN').innerHTML=esc(c.name);save();render();toast('Tersimpan','Nama kontak diperbarui.')}
  else{c.arch=!c.arch;$('pg').classList.add('hide');if(c.arch)goBack();render()}});
@@ -597,6 +598,20 @@ render();
   if(!b.dataset.ok){b.dataset.ok=1;b.lastChild.textContent='Ketuk lagi untuk menghapus';return}
   const c=sel.c,k=c.msgs.indexOf(sel.m);if(k>-1){const m=c.msgs[k];if(m.iid)mdel(m.iid);c.msgs.splice(k,1);save();if(cur==c.id)draw(c);render()}hide()});
 })();
+/* Foto profil: bagikan ke teman lewat Firestore dan ambil foto teman */
+function thumbPhoto(d){return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;c.getContext('2d').drawImage(i,0,0,192,192);r(c.toDataURL('image/jpeg',.7))};i.onerror=()=>r('');i.src=d})}
+let SPB=0,SPN=0,FPB=0;
+async function syncProfile(){if(!DBH||!S.in||SPB||Date.now()<SPN)return;
+ const sh=S.photo&&pvd().foto!='Tidak ada'?S.photo:'',key=S.name+'|'+sh.length+'|'+sh.slice(-24);if(S.pk===key)return;
+ SPB=1;try{const pic=sh?await thumbPhoto(sh):'';await DBH.doc('profiles/'+S.me).set({name:S.name,ts:Date.now(),pic});S.pk=key;S.pn=S.name;save()}
+ catch(e){SPN=Date.now()+60000;if(e&&e.code=='permission-denied'&&!S.pwarn){S.pwarn=1;toast('Foto profil belum terbagi','Perbarui Rules Firestore dengan isi firestore.rules terbaru (lihat README).')}}
+ SPB=0}
+async function fetchFriends(){if(!DBH||!S.in||FPB)return;FPB=1;let ch=0;
+ for(const c of S.chats){if(c.ai||!c.code)continue;try{const p=await DBH.doc('profiles/'+c.code).get();if(!p.exists)continue;const d=p.data()||{},pic=d.pic||'';
+  if((c.pic||'')!==pic){c.pic=pic;ch=1}if(!c.named&&d.name&&c.name!==d.name){c.name=d.name;ch=1}}catch(e){}}
+ FPB=0;if(ch){save();render();const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai){$('cA').innerHTML=avc(c);$('cN').innerHTML=esc(c.name)}}}
+setInterval(syncProfile,2500);setInterval(fetchFriends,45000);
+document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;const c=S.chats.find(x=>x.id==cur);if(c&&c.pic){$('lbI').src=c.pic;$('lb').classList.remove('hide')}});
 /* Simpan akun lebih awet: salinan cadangan di IndexedDB, dipulihkan otomatis kalau localStorage kosong */
 const IDBK={
  o(){return new Promise((ok,no)=>{try{const r=indexedDB.open("wsc-backup",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})},

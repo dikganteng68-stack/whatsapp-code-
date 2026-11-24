@@ -7,9 +7,11 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
       allow create, update: if code.matches('[a-z0-9]{8}')
-        && request.resource.data.keys().hasOnly(['name', 'ts'])
+        && request.resource.data.keys().hasOnly(['name', 'ts', 'pic'])
         && request.resource.data.name is string
-        && request.resource.data.name.size() <= 24;
+        && request.resource.data.name.size() <= 24
+        && (!('pic' in request.resource.data)
+            || (request.resource.data.pic is string && request.resource.data.pic.size() < 60000));
       allow delete: if false;
     }
 

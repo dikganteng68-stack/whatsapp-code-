@@ -23,6 +23,7 @@ Buka `index.html` di browser. Semua tampilan ada di satu file (HTML, CSS, JS).
 2. Tab Rules: tempel isi `firestore.rules`, lalu Publish.
 3. Project settings -> General -> Your apps -> tambah Web app -> salin `firebaseConfig`.
 4. Isi nilainya di `firebase-config.js`, deploy ulang.
+Foto profil dibagikan ke teman lewat dokumen profil (thumbnail kecil). Kalau Rules lama masih terpasang, tempel ulang `firestore.rules` terbaru supaya foto bisa tersimpan. Pengaturan Privasi → Foto profil = "Tidak ada" menghentikan pembagian foto.
 Batasan: aplikasi belum memakai Firebase Auth. Pesan disandikan dengan kunci dari kode penerima,
 jadi siapa pun yang tahu kodemu bisa membaca kotak masukmu. Untuk privasi yang kuat perlu Firebase Auth.
 

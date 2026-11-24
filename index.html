@@ -410,14 +410,14 @@ function md(s){const B=[];s=s.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g,(_,l,c)=>{
   else if(!L.trim())end();else{end();o+=`<p>${inl(L)}</p>`}});end();return `<div class='md'>${o}</div>`}
 let AIP=0;
 async function serverAI(msgs){let r;try{r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:msgs})})}catch(e){throw{code:'no_server'}}
- if(r.status==404||r.status==405)throw{code:'no_server'};if(r.status==429)throw{code:'rate_limited'};if(!r.ok)throw{code:'err'};const j=await r.json();return{text:j.text}}
+ if(r.status==404||r.status==405)throw{code:'no_server'};if(r.status==429)throw{code:'rate_limited'};if(!r.ok){let m='';try{m=(await r.json()).error||''}catch(e){}throw{code:'err',msg:m||('kode '+r.status)}}let j;try{j=await r.json()}catch(e){throw{code:'err',msg:'balasan server tidak terbaca'}}return{text:j.text}}
 async function askAI(c){if(AIP)return;let sm=window.claude?await window.claude.use('sample').catch(()=>null):null;if(!sm)sm=serverAI;
  if(!sm){c.msgs.push({t:'AI hanya aktif kalau halaman ini dibuka dari tautan claude.ai. Buka lewat sana ya.',me:0,time:hm()});if(cur==c.id)draw(c);render();return}
  const msgs=[];c.msgs.slice(-16).forEach(m=>{let t=m.t;if(m.data)t+='\n\n[Isi file '+m.fname+']\n'+m.data;const r=m.me?'user':'assistant',l=msgs[msgs.length-1];if(l&&l.role==r)l.content+='\n\n'+t;else msgs.push({role:r,content:t})});
  while(msgs.length&&msgs[0].role!='user')msgs.shift();if(!msgs.length)return;msgs[0].content=SYS()+'\n\n---\n\n'+msgs[0].content;
  const ph={t:'Sedang mengetik...',me:0,time:hm(),pending:1};c.msgs.push(ph);draw(c);AIP=1;
  try{const r=await sm(msgs,{cache:false,onText:({text})=>{ph.t=text;if(cur==c.id)draw(c)}});ph.t=r.text||'(kosong)'}
- catch(e){ph.t=e&&e.code=='no_server'?'AI belum tersambung ke server. Pastikan folder api/chat.js ikut ter-deploy dan GROQ_API_KEY sudah diisi di Vercel.':e&&e.code=='not_granted'?'Izin AI belum diberikan. Kirim pesan lagi dan pilih Izinkan.':e&&e.code=='rate_limited'?'Terlalu cepat. Tunggu sebentar lalu coba lagi.':'AI sedang bermasalah. Coba kirim ulang.'}
+ catch(e){ph.t=e&&e.code=='no_server'?'AI belum tersambung ke server. Pastikan folder api/chat.js ikut ter-deploy dan GROQ_API_KEY sudah diisi di Vercel.':e&&e.code=='not_granted'?'Izin AI belum diberikan. Kirim pesan lagi dan pilih Izinkan.':e&&e.code=='rate_limited'?'Terlalu cepat. Tunggu sebentar lalu coba lagi.':e&&e.msg?'AI bermasalah: '+e.msg:'AI sedang bermasalah. Coba kirim ulang.'}
  delete ph.pending;ph.time=hm();AIP=0;c.ts=Date.now();if(cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?ph.t.slice(0,80):'Pesan baru',c.id)}
  if(cur==c.id)draw(c);render()}
 $('attB').onclick=()=>$('attF').click();

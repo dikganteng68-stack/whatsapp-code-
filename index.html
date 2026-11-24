@@ -177,7 +177,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
  <main class="main" id="main">
   <div class="home"><div class="card"><div class="av" style="margin:auto;width:64px;height:64px;font-size:26px">💬</div><h2>Chat pakai kode teman</h2><p>Hanya teman yang sudah kamu DM lewat kode 8 karakter yang muncul di daftar chat.</p><button class="pill" id="h1">Tambah teman</button></div>
    <div class="qa"><button data-a="arsip"><i id="qi1"></i>Arsip</button><button data-a="ai"><i id="qi2"></i>Tanya AI</button><button data-a="teman"><i id="qi3"></i>Tambah teman</button></div></div>
-  <div id="stHome"><div class="av" style="margin:auto;width:84px;height:84px;font-size:34px">◎</div><h2>Bagikan story</h2><p>Bagikan foto, video, dan teks yang hilang setelah 24 jam. Video maksimal 20 detik.</p><div class="qa"><button data-sa="t"><i id="sh1"></i>Story teks</button><button data-sa="m"><i id="sh2"></i>Foto dan video</button></div></div>
+  <div id="stHome"><div class="av" style="margin:auto;width:84px;height:84px;font-size:34px"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-dasharray="4.2 2.6"/><circle cx="12" cy="12" r="4.5"/></svg></div><h2>Bagikan story</h2><p>Bagikan foto, video, dan teks yang hilang setelah 24 jam. Video maksimal 20 detik.</p><div class="qa"><button data-sa="t"><i id="sh1"></i>Story teks</button><button data-sa="m"><i id="sh2"></i>Foto dan video</button></div></div>
   <div class="cv" id="cv"><div class="ct"><button class="ib back" id="bk">←</button><div class="av" id="cA" style="width:40px;height:40px;font-size:15px"></div><div data-ct="info" style="cursor:pointer;min-width:0"><b id="cN"></b><small id="cS"></small></div><span class="ctr" id="fcT"><button class="ib" data-ct="video" aria-label="Video">🎥</button><button class="ib" data-ct="call" aria-label="Telepon">📞</button><button class="ib" data-ct="find" aria-label="Cari">🔍</button><button class="ib" data-ct="info" aria-label="Info kontak">⋮</button></span><button class="ib hide" id="aiK" aria-label="Menu AI" style="margin-left:auto">⋮</button></div>
    <div class="pop hide" id="aiPop"><button data-ai="persona">Atur kepribadian AI</button><button data-ai="clear">Hapus riwayat chat</button></div>
    <div class="msgs" id="msgs"></div>
@@ -203,7 +203,8 @@ let S={chats:[],me:""},view="chat",flt="all",cur=null,tt;
 try{S=JSON.parse(localStorage.getItem("wsc")||"null")||S}catch(e){}
 if(!S.me)S.me=Math.random().toString(36).slice(2,10);
 if(!S.name)S.name="Tamu";if(!S.stars)S.stars=[];
-if(!S.items)S.items=[{id:"s1",by:"Rina",code:"rina2026",lang:"JavaScript",title:"Hitung diskon",body:"function diskon(harga, persen){\n  return harga - (harga * persen / 100);\n}\nconsole.log(diskon(100000, 15));",ts:2},{id:"s2",by:"Dimas",code:"dimas777",lang:"Python",title:"Cek bilangan genap",body:"def genap(n):\n    return n % 2 == 0\n\nprint(genap(10))",ts:1}];
+if(!S.items)S.items=[];
+S.items=S.items.filter(i=>i.id!="s1"&&i.id!="s2");S.stars=(S.stars||[]).filter(x=>x!="s1"&&x!="s2");
 if(!S.chats.some(c=>c.id=="ai"))S.chats.unshift({id:"ai",name:"AI Whatsschat",ai:1,msgs:[{t:"Halo! Aku AI Whatsschat. Fitur utamanya belum tersambung, ini masih tampilan HTML dulu.",time:hm()}],unread:0});
 const save=()=>{try{localStorage.setItem("wsc",JSON.stringify(S))}catch(e){}};
 function hm(){return new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}).replace(":",".")}
@@ -279,7 +280,7 @@ function storagePage(){
  $("uOk").onclick=()=>{const t=$("uT").value.trim(),b=$("uC").value.trim();if(!t||!b){toast("Belum lengkap","Isi judul dan kodenya dulu.");return}
   const er=chkCode($("uL").value,b);if(er){codeErr(er);return}
   const it={id:"i"+Date.now(),by:S.name,code:S.me,lang:$("uL").value,title:t,body:b,ts:Date.now(),img:UP.img,kind:$("uK").value};S.items.unshift(it);try{localStorage.setItem("wsc",JSON.stringify(S))}catch(x){if(x&&x.name=="QuotaExceededError"){S.items.shift();toast("Penyimpanan penuh","Hapus item lama atau pakai foto yang lebih kecil.");return}}UP.img=null;storagePage();toast("Terunggah","Kodemu sekarang terlihat oleh semua orang.")};
- upDraw();$("upB").onclick=()=>$("upF").click();$("upF").onchange=e=>{upPick(e.target.files[0]);e.target.value=""};$("uList").innerHTML=[...S.items].sort((a,b)=>b.ts-a.ts).map(i=>itemCard(i,0)).join("")}
+ upDraw();$("upB").onclick=()=>$("upF").click();$("upF").onchange=e=>{upPick(e.target.files[0]);e.target.value=""};$("uList").innerHTML=S.items.length?[...S.items].sort((a,b)=>b.ts-a.ts).map(i=>itemCard(i,0)).join(""):'<div class="empty">Storage masih kosong. Jadi yang pertama mengunggah kode!</div>'}
 function starPage(){const L=S.items.filter(i=>S.stars.includes(i.id));
  page("Berbintang",`<p class="nt">Kode yang kamu beri bintang tersimpan di sini dan bisa disalin kapan saja.</p>`+(L.length?L.map(i=>itemCard(i,1)).join(""):`<div class="empty">Belum ada yang berbintang. Buka Storage lalu beri bintang pada kode yang kamu mau.</div>`))}
 function profilePage(){
@@ -408,13 +409,15 @@ function md(s){const B=[];s=s.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g,(_,l,c)=>{
   else if(m=L.match(/^#{1,3}\s+(.*)/)){end();o+=`<p><b>${inl(m[1])}</b></p>`}
   else if(!L.trim())end();else{end();o+=`<p>${inl(L)}</p>`}});end();return `<div class='md'>${o}</div>`}
 let AIP=0;
-async function askAI(c){if(AIP)return;const sm=window.claude?await window.claude.use('sample').catch(()=>null):null;
+async function serverAI(msgs){let r;try{r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:msgs})})}catch(e){throw{code:'no_server'}}
+ if(r.status==404||r.status==405)throw{code:'no_server'};if(r.status==429)throw{code:'rate_limited'};if(!r.ok)throw{code:'err'};const j=await r.json();return{text:j.text}}
+async function askAI(c){if(AIP)return;let sm=window.claude?await window.claude.use('sample').catch(()=>null):null;if(!sm)sm=serverAI;
  if(!sm){c.msgs.push({t:'AI hanya aktif kalau halaman ini dibuka dari tautan claude.ai. Buka lewat sana ya.',me:0,time:hm()});if(cur==c.id)draw(c);render();return}
  const msgs=[];c.msgs.slice(-16).forEach(m=>{let t=m.t;if(m.data)t+='\n\n[Isi file '+m.fname+']\n'+m.data;const r=m.me?'user':'assistant',l=msgs[msgs.length-1];if(l&&l.role==r)l.content+='\n\n'+t;else msgs.push({role:r,content:t})});
  while(msgs.length&&msgs[0].role!='user')msgs.shift();if(!msgs.length)return;msgs[0].content=SYS()+'\n\n---\n\n'+msgs[0].content;
  const ph={t:'Sedang mengetik...',me:0,time:hm(),pending:1};c.msgs.push(ph);draw(c);AIP=1;
  try{const r=await sm(msgs,{cache:false,onText:({text})=>{ph.t=text;if(cur==c.id)draw(c)}});ph.t=r.text||'(kosong)'}
- catch(e){ph.t=e&&e.code=='not_granted'?'Izin AI belum diberikan. Kirim pesan lagi dan pilih Izinkan.':e&&e.code=='rate_limited'?'Terlalu cepat. Tunggu sebentar lalu coba lagi.':'AI sedang bermasalah. Coba kirim ulang.'}
+ catch(e){ph.t=e&&e.code=='no_server'?'AI belum tersambung ke server. Pastikan folder api/chat.js ikut ter-deploy dan GROQ_API_KEY sudah diisi di Vercel.':e&&e.code=='not_granted'?'Izin AI belum diberikan. Kirim pesan lagi dan pilih Izinkan.':e&&e.code=='rate_limited'?'Terlalu cepat. Tunggu sebentar lalu coba lagi.':'AI sedang bermasalah. Coba kirim ulang.'}
  delete ph.pending;ph.time=hm();AIP=0;c.ts=Date.now();if(cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?ph.t.slice(0,80):'Pesan baru',c.id)}
  if(cur==c.id)draw(c);render()}
 $('attB').onclick=()=>$('attF').click();
@@ -476,7 +479,6 @@ $('aForgot').onclick=()=>{const b=$('aForgot');if(b.dataset.ok){try{localStorage
 const UP={img:null};
 function upDraw(){const v=$('upv');if(!v)return;v.innerHTML=UP.img?`<div class="thumb"><img src="${UP.img}" alt="Pratinjau"><button class="rmx" id="upX" aria-label="Hapus foto">✕</button></div>`:'';const x=$('upX');if(x)x.onclick=()=>{UP.img=null;upDraw()};$('upB').textContent=UP.img?'📷 Ganti foto':'📷 Tambah foto hasil kode'}
 function upPick(f){if(!f)return;if(!f.type.startsWith('image/')){toast('Bukan foto','Pilih file gambar.');return}const im=new Image();im.onload=()=>{const k=Math.min(1,800/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#15151a';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);UP.img=c.toDataURL('image/jpeg',.75);upDraw()};im.onerror=()=>toast('Foto gagal dibaca','Coba foto lain.');im.src=URL.createObjectURL(f)}
-{const D1='data:image/svg+xml,'+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 270'><rect width='480' height='270' fill='#15151a'/><rect x='20' y='20' width='110' height='230' rx='12' fill='#1f1f26'/><rect x='146' y='20' width='314' height='50' rx='12' fill='#1f1f26'/><rect x='146' y='84' width='150' height='80' rx='12' fill='#e11d2e'/><rect x='310' y='84' width='150' height='80' rx='12' fill='#2a3b7a'/><rect x='146' y='178' width='314' height='72' rx='12' fill='#1f1f26'/><polyline points='160,236 210,206 260,222 310,194 360,208 440,188' fill='none' stroke='#ff4757' stroke-width='4'/></svg>"),D2='data:image/svg+xml,'+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 270'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#7c3aed'/><stop offset='1' stop-color='#e11d2e'/></linearGradient></defs><rect width='480' height='270' fill='#15151a'/><rect x='170' y='55' width='140' height='140' rx='34' fill='url(#g)'/><circle cx='240' cy='125' r='34' fill='none' stroke='#fff' stroke-width='9'/><rect x='150' y='215' width='180' height='12' rx='6' fill='#2a2a32'/></svg>");S.items.forEach(i=>{if(!i.img&&i.id=='s1'){i.img=D1;i.kind='Dashboard'}if(!i.img&&i.id=='s2'){i.img=D2;i.kind='Logo / ikon APK'}})}
 $('pgB').addEventListener('click',e=>{const t=e.target.closest('[data-lb]');if(!t)return;const it=S.items.find(x=>x.id==t.dataset.lb);if(it&&it.img){$('lbI').src=it.img;$('lb').classList.remove('hide')}});
 $('lb').onclick=()=>$('lb').classList.add('hide');
 $('pgB').addEventListener('click',e=>{const b=e.target.closest('[data-vw]');if(!b)return;const it=S.items.find(x=>x.id==b.dataset.vw),pre=b.closest('.it').querySelector('pre'),op=b.dataset.o=='1';if(!it)return;
@@ -562,5 +564,22 @@ function subPage(k,y){const s=$("set"),v=pvd();s.classList.remove("hide");let h;
  s.innerHTML=h;if(y)s.querySelector(".stb").scrollTop=y}
 rail();
 render();
-if(!S.acct||!S.in)authShow();
+/* Simpan akun lebih awet: salinan cadangan di IndexedDB, dipulihkan otomatis kalau localStorage kosong */
+const IDBK={
+ o(){return new Promise((ok,no)=>{try{const r=indexedDB.open("wsc-backup",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})},
+ async get(){try{const d=await this.o();return await new Promise(ok=>{const q=d.transaction("k").objectStore("k").get("wsc");q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}},
+ async set(v){try{const d=await this.o();d.transaction("k","readwrite").objectStore("k").put(v,"wsc")}catch(e){}}
+};
+let lastBak="";
+function backup(){let v=null;try{v=localStorage.getItem("wsc")}catch(e){}if(!v)try{v=JSON.stringify(S)}catch(e){}if(v&&v!==lastBak&&S.acct){lastBak=v;IDBK.set(v)}}
+setInterval(backup,2000);addEventListener("pagehide",backup);document.addEventListener("visibilitychange",()=>{if(document.hidden)backup()});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+(async()=>{
+ if(!S.acct){const r=await IDBK.get();let o=null;try{o=r&&JSON.parse(r)}catch(e){}
+  if(o&&o.acct){let ok=false;try{localStorage.setItem("wsc",r);ok=localStorage.getItem("wsc")===r}catch(e){}
+   if(ok&&!sessionStorage.getItem("wscR")){try{sessionStorage.setItem("wscR","1")}catch(e){}location.reload();return}
+   S=o;if(!S.stars)S.stars=[];if(!S.items)S.items=[];if(!S.chats)S.chats=[];render()}}
+ else backup();
+ if(!S.acct||!S.in)authShow();
+})();
 </script></body></html>

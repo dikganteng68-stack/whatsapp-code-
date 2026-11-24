@@ -20,3 +20,12 @@ Buka `index.html` di browser. Semua tampilan ada di satu file (HTML, CSS, JS).
   pengirim dan penerima yang bisa membaca percakapan.
 - Login memakai penyimpanan browser (kata sandi di-hash dengan PBKDF2). Ini belum
   setara akun server. Pakai HTTPS atau localhost agar fitur enkripsi browser aktif.
+
+## Mengaktifkan AI di Vercel (Groq, ada kuota gratis)
+1. Buat kunci di https://console.groq.com/keys (Buat Kunci API). Salin kuncinya saat muncul, karena hanya tampil sekali.
+2. Deploy seluruh folder ini (termasuk folder `api/`) ke Vercel.
+3. Di Vercel: Project → Settings → Environment Variables, tambahkan `GROQ_API_KEY` berisi kunci tadi.
+   Opsional: `GROQ_MODEL` untuk mengganti model (bawaannya `llama-3.3-70b-versatile`).
+4. Redeploy. Chat AI sekarang memakai `/api/chat`.
+Jangan menaruh kunci API di `index.html` atau membagikannya ke orang lain.
+Kuota gratis dibatasi per menit dan per hari; cek angka terbarunya di console.groq.com.

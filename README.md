@@ -6,6 +6,7 @@ Buka `index.html` di browser. Semua tampilan ada di satu file (HTML, CSS, JS).
 - Login akun (nama, tanggal lahir, kata sandi) dengan peringatan menjaga kata sandi
 - Rel ikon kiri, daftar chat teman (lewat kode 8 karakter), Diarsipkan
 - Chat teman: tanggal pemisah, kirim teks dan foto, info kontak, hapus pesan (klik kanan di PC, tekan lama di HP)
+- Grup: menu ⋮ → Grup baru (nama, foto, pesan sementara, izin grup, tambah anggota lewat daftar teman atau kode). Info grup bisa diedit (nama, foto, deskripsi, admin, keluarkan anggota, keluar grup). Maksimal 16 anggota. Pesan grup dikirim ke kotak masuk tiap anggota (terenkripsi per kode), jadi Firestore Rules tidak perlu diubah.
 - Story (teks, foto, video maks. 20 detik, hilang 24 jam, daftar penonton)
 - Storage kode (cek bahasa, foto pratinjau, bintang untuk menyalin) dan Berbintang
 - Pengaturan: Profil, Akun, Privasi, Notifikasi, Bantuan dan masukan

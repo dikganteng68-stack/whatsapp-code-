@@ -175,7 +175,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .ctr{margin-left:auto;display:flex}
 .sysn{align-self:center;max-width:80%;text-align:center;background:#1c1c21cc;border-radius:10px;padding:8px 14px;font-size:12.5px;color:var(--mu);margin-bottom:8px}
 .dsep{align-self:center;margin:10px 0}.dsep span{background:#1c1c21cc;border-radius:8px;padding:4px 12px;font-size:12.5px;color:var(--mu)}
-.tk{font-style:normal;margin-left:4px;color:#ffd0d5}
+.tk{font-style:normal;margin-left:4px;color:#ffd0d5}.tk.rd{color:#ff4d5e;font-weight:700;letter-spacing:-5px;margin-right:5px}
+.pd{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:7px;background:#6b6b73;vertical-align:middle}.pd.on{background:#25d366}
 .m.mi{padding:4px}.m.mi small{padding:0 6px 2px}.im{max-width:280px}.im img{display:block;max-width:100%;border-radius:8px;cursor:zoom-in}.im .cap{padding:6px 6px 0;font-size:14.5px;white-space:pre-wrap;word-break:break-word}
 .mctx{position:fixed;z-index:80;background:var(--p2);border:1px solid var(--line);border-radius:14px;padding:6px;min-width:170px;box-shadow:0 14px 40px #000a}
 .mctx.hide{display:none}.mctx button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:9px;font-size:15px;text-align:left}
@@ -201,7 +202,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
   <div class="home"><div class="card"><div class="av" style="margin:auto;width:64px;height:64px;font-size:26px">💬</div><h2>Chat pakai kode teman</h2><p>Hanya teman yang sudah kamu DM lewat kode teman yang muncul di daftar chat.</p><button class="pill" id="h1">Tambah teman</button></div>
    <div class="qa"><button data-a="arsip"><i id="qi1"></i>Arsip</button><button data-a="ai"><i id="qi2"></i>Tanya AI</button><button data-a="teman"><i id="qi3"></i>Tambah teman</button></div></div>
   <div id="stHome"><div class="av" style="margin:auto;width:84px;height:84px;font-size:34px"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-dasharray="4.2 2.6"/><circle cx="12" cy="12" r="4.5"/></svg></div><h2>Bagikan story</h2><p>Bagikan foto, video, dan teks yang hilang setelah 24 jam. Video maksimal 20 detik.</p><div class="qa"><button data-sa="t"><i id="sh1"></i>Story teks</button><button data-sa="m"><i id="sh2"></i>Foto dan video</button></div></div>
-  <div class="cv" id="cv"><div class="ct"><button class="ib back" id="bk">←</button><div class="av" id="cA" style="width:40px;height:40px;font-size:15px"></div><div data-ct="info" style="cursor:pointer;min-width:0"><b id="cN"></b><small id="cS"></small></div><span class="ctr" id="fcT"><button class="ib" data-ct="video" aria-label="Video">🎥</button><button class="ib" data-ct="call" aria-label="Telepon">📞</button><button class="ib" data-ct="find" aria-label="Cari">🔍</button><button class="ib" data-ct="info" aria-label="Info kontak">⋮</button></span><button class="ib hide" id="aiK" aria-label="Menu AI" style="margin-left:auto">⋮</button></div>
+  <div class="cv" id="cv"><div class="ct"><button class="ib back" id="bk">←</button><div class="av" id="cA" style="width:40px;height:40px;font-size:15px"></div><div data-ct="info" style="cursor:pointer;min-width:0"><b id="cN"></b><i class="pd hide" id="pDot"></i><small id="cS"></small></div><span class="ctr" id="fcT"><button class="ib" data-ct="video" aria-label="Video">🎥</button><button class="ib" data-ct="call" aria-label="Telepon">📞</button><button class="ib" data-ct="find" aria-label="Cari">🔍</button><button class="ib" data-ct="info" aria-label="Info kontak">⋮</button></span><button class="ib hide" id="aiK" aria-label="Menu AI" style="margin-left:auto">⋮</button></div>
    <div class="pop hide" id="aiPop"><button data-ai="persona">Atur kepribadian AI</button><button data-ai="clear">Hapus riwayat chat</button></div>
    <div class="msgs" id="msgs"></div>
    <div class="aiq hide" id="aiQ"><button data-q='Aku punya data nilai siswa, bantu analisis dan kasih solusinya.'>Analisis data</button><button data-q='Buatkan web kamus lengkap dalam satu file HTML.'>Bikin kode web</button><button data-q='Buatkan 5 caption story yang keren dan singkat.'>Caption story</button><button data-q='Ada masalah di grup, aku bingung cara membalasnya.'>Masalah grup</button></div>
@@ -265,7 +266,7 @@ function render(){
 }
 function open(id){const c=S.chats.find(x=>x.id==id);if(!c)return;cur=id;c.unread=0;
  $("cA").innerHTML=c.ai?"✦":avc(c);$("cA").className="av"+(c.ai?" ai":"");$("cN").innerHTML=esc(c.name)+(c.ai?' <span class="vb">✓</span>':'');$("cS").textContent=c.ai?"Asisten AI · bisa menganalisis data":"klik di sini untuk melihat info kontak"+(DBH?"":" · mode demo");
- $("cv").classList.add("show");{const a=c.ai?1:0;$("aiK").classList.toggle("hide",!a);$("aiQ").classList.toggle("hide",!a);$("attB").classList.toggle("hide",!a);$("imgB").classList.toggle("hide",!!a);$("clpB").classList.toggle("hide",!!a);$("fcT").classList.toggle("hide",!!a);$("msgs").classList.toggle("aiw",!!a);$("aiPop").classList.add("hide")}document.querySelector(".home").classList.add("hide");$("main").classList.add("open");draw(c);render()}
+ $("cv").classList.add("show");{const a=c.ai?1:0;$("aiK").classList.toggle("hide",!a);$("aiQ").classList.toggle("hide",!a);$("attB").classList.toggle("hide",!a);$("imgB").classList.toggle("hide",!!a);$("clpB").classList.toggle("hide",!!a);$("fcT").classList.toggle("hide",!!a);$("msgs").classList.toggle("aiw",!!a);$("aiPop").classList.add("hide")}document.querySelector(".home").classList.add("hide");$("main").classList.add("open");draw(c);render();presUi();pollPres();sendRead(c)}
 function draw(c){$("msgs").innerHTML=c.msgs.map(m=>`<div class="m ${m.me?"me":""}">${c.ai&&!m.me?md(m.t):esc(m.t)}<small>${m.fail?'⚠ belum terkirim · ':''}${m.time}</small></div>`).join("");$("msgs").scrollTop=1e9}
 function push(c,t,me){c.msgs.push({t,me,time:hm()});c.ts=Date.now();if(!me&&cur!=c.id){c.unread=(c.unread||0)+1;if(!c.arch&&nf().pesan)toast(c.name,nf().prev?t:"Pesan baru",c.id)}if(cur==c.id)draw(c);render()}
 function send(){const t=$("ta").value.trim(),c=S.chats.find(x=>x.id==cur);if(!t||!c)return;$("ta").value="";push(c,t,1);
@@ -572,7 +573,7 @@ function dayLbl(ts){const d=new Date(ts),n=new Date();if(d.toDateString()==n.toD
 function draw(c){let h='',last='';
  if(!c.ai)h+="<div class='sysn'>🔒 Pesan di chat ini disandikan memakai kode penerima. Jangan bagikan kodemu ke sembarang orang.</div>";
  c.msgs.forEach((m,i)=>{const dl=dayLbl(m.ts||Date.now());if(dl!=last){h+=`<div class='dsep'><span>${dl}</span></div>`;last=dl}
-  const tick=m.me&&!c.ai&&!m.fail&&DBH?"<i class='tk'>✓</i>":'';
+  const tick=m.me&&!c.ai&&!m.fail&&DBH?(m.rd?"<i class='tk rd' title='Dibaca'>✓✓</i>":"<i class='tk'>✓</i>"):'';
   const body=m.vid?vnHtml(m,i):m.iid?`<div class='im' data-im='${i}'><img src='${m.th}' alt='Foto'>${m.cap?`<div class='cap'>${esc(m.cap)}</div>`:''}</div>`:(c.ai&&!m.me?md(m.t):esc(m.t));
   h+=`<div class='m ${m.me?'me':''}${m.iid?' mi':''}${m.vid?' mv':''}' data-i='${i}'>${body}<small>${m.fail?'⚠ belum terkirim · ':(m.me&&!c.ai&&!DBH?'tersimpan di perangkat · ':'')}${m.time}${tick}</small></div>`});
  $('msgs').innerHTML=h;$('msgs').scrollTop=1e9;if(typeof vnUi=='function')vnUi()}
@@ -584,6 +585,7 @@ async function shrink(f){const im=await new Promise((r,j)=>{const i=new Image();
 async function recv(d){const x=d.data();if(!x||!x.from||S.got.includes(d.id))return;S.got.push(d.id);if(S.got.length>600)S.got.shift();
  let raw;try{raw=await dec(S.me,x.c)}catch(e){return}
  let env;try{env=JSON.parse(raw)}catch(e){env=null}if(!env||typeof env!='object'||!env.k)env={k:'t',t:raw};
+ if(env.k=='rd'){const rc=S.chats.find(k=>k.code==x.from);if(rc&&pvd().read){const up=+env.upto||0;let ch=0;rc.msgs.forEach(m=>{if(m.me&&!m.rd&&(m.ts||0)<=up){m.rd=1;ch=1}});if(ch){save();if(cur==rc.id)draw(rc)}}return}
  let c=S.chats.find(k=>k.code==x.from);if(!c){c={id:x.from,code:x.from,name:x.name||('Teman '+x.from.slice(0,4)),msgs:[],unread:0,ts:0};S.chats.push(c)}
  if(x.name&&!c.named)c.name=x.name;
  const tm=new Date(x.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace(':','.');let m;
@@ -591,7 +593,7 @@ async function recv(d){const x=d.data();if(!x||!x.from||S.got.includes(d.id))ret
  else if(env.k=='vn'&&typeof env.d=='string'&&env.d.length<900000&&/^data:audio\/(webm|ogg|mp4)[;,]/.test(env.d)){await mput('vn:'+d.id,env.d);m={t:'🎤 Pesan suara',me:0,time:tm,ts:x.ts,vid:'vn:'+d.id,dur:Math.min(300,Math.max(0,+env.dur||0)),wf:Array.isArray(env.wf)?env.wf.slice(0,40).map(v=>Math.max(0,Math.min(100,+v||0))):[]}}
  else m={t:String(env.t||''),me:0,time:tm,ts:x.ts};
  c.msgs.push(m);c.ts=Math.max(c.ts||0,x.ts);
- if(cur==c.id)draw(c);else{c.unread=(c.unread||0)+1;if(Date.now()-x.ts<12e4&&!c.arch&&nf().pesan)toast(c.name,nf().prev?m.t:'Pesan baru',c.id)}
+ if(cur==c.id){draw(c);sendRead(c)}else{c.unread=(c.unread||0)+1;if(Date.now()-x.ts<12e4&&!c.arch&&nf().pesan)toast(c.name,nf().prev?m.t:'Pesan baru',c.id)}
  render()}
 async function sendDM(c,t){const m=c.msgs[c.msgs.length-1];
  if(!DBH){save();return}
@@ -715,6 +717,14 @@ async function fetchFriends(){if(!DBH||!S.in||FPB)return;FPB=1;let ch=0;
   if((c.pic||'')!==pic){c.pic=pic;ch=1}if(!c.named&&d.name&&c.name!==d.name){c.name=d.name;ch=1}}catch(e){}}
  FPB=0;if(ch){save();render();const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai){$('cA').innerHTML=avc(c);$('cN').innerHTML=esc(c.name)}}}
 setInterval(syncProfile,2500);setInterval(fetchFriends,45000);
+function hb(){if(!DBH||!S.in||document.visibilityState!=='visible'||pvd().last=='Tidak ada')return;try{const r=DBH.doc('profiles/'+S.me).update({ts:Date.now()});if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+async function pollPres(){const c=S.chats.find(x=>x.id==cur);if(!DBH||!c||c.ai||!c.code)return;try{const q=await DBH.doc('profiles/'+c.code).get();if(q.exists){c.seen=(q.data()||{}).ts||0;presUi()}}catch(e){}}
+function presUi(){const d=$('pDot');if(!d)return;const c=S.chats.find(x=>x.id==cur);if(!c||c.ai||!c.code||!DBH){d.classList.add('hide');return}d.classList.remove('hide');const on=!!(c.seen&&Date.now()-c.seen<65000);d.classList.toggle('on',on);d.title=on?'Online':'Offline'}
+async function sendRead(c){if(!DBH||!c||c.ai||!c.code||cur!=c.id||document.visibilityState!=='visible'||!pvd().read)return;
+ let last=0;c.msgs.forEach(m=>{if(!m.me&&m.ts>last)last=m.ts});if(!last||(c.rdS||0)>=last)return;const prev=c.rdS||0;c.rdS=last;
+ try{await DBH.collection('inbox/'+c.code+'/m').add({from:S.me,name:S.name,c:await enc(c.code,JSON.stringify({k:'rd',upto:last})),ts:Date.now()});save()}catch(e){c.rdS=prev}}
+setInterval(hb,25000);setInterval(pollPres,20000);setInterval(presUi,10000);setTimeout(()=>{hb();pollPres()},3000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible'){hb();const c=S.chats.find(x=>x.id==cur);if(c&&!c.ai){pollPres();sendRead(c)}}});
 document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(!z)return;const c=S.chats.find(x=>x.id==cur);if(c&&c.pic){$('lbI').src=c.pic;$('lb').classList.remove('hide')}});
 /* Simpan akun lebih awet: salinan cadangan di IndexedDB, dipulihkan otomatis kalau localStorage kosong */
 const IDBK={

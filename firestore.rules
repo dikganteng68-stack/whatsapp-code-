@@ -24,5 +24,18 @@ service cloud.firestore {
       allow read: if true;
       allow update, delete: if false;
     }
+
+    // Storage kode: terbuka untuk semua orang (tanpa perlu DM). Tidak bisa diubah/dihapus dari klien.
+    match /storage/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['by', 'code', 'lang', 'title', 'body', 'ts', 'img', 'kind'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 60
+        && request.resource.data.body is string && request.resource.data.body.size() <= 100000
+        && request.resource.data.by is string && request.resource.data.by.size() <= 24
+        && request.resource.data.lang is string && request.resource.data.kind is string
+        && (!('img' in request.resource.data)
+            || (request.resource.data.img is string && request.resource.data.img.size() < 400000));
+      allow update, delete: if false;
+    }
   }
 }

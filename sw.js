@@ -1,5 +1,5 @@
 // Service worker Whatsschat: cache supaya aplikasi bisa dibuka cepat dan tampil saat offline.
-const V = "wsc-v3.7.1";
+const V = "wsc-v3.7.3";
 const SHELL = ["./", "index.html", "css/style.css", "js/script.js", "manifest.webmanifest", "assets/icon-192.png", "assets/icon-512.png", "assets/apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(V).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));

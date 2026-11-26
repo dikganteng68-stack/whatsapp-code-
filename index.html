@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="id"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Whatsschat</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ctext y='.9em' font-size='9'%3E💬%3C/text%3E%3C/svg%3E">
+<title>Whatsschat</title><link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Whatsschat">
 <script src="firebase-config.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#0a0a0c;--rail:#0e0e11;--panel:#131316;--p2:#1c1c21;--line:#26262c;--red:#e11d2e;--red2:#ff4757;--tx:#f3f3f6;--mu:#9a9aa4;--chip:#3a0f15;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -233,6 +238,37 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .gout{display:flex;align-items:center;gap:20px;width:100%;text-align:left;padding:16px 22px;color:#ff5a68!important;font-size:16.5px}.gout:hover{background:#ffffff0a}
 .glk{padding:16px;text-align:center;color:var(--mu);font-size:14px;background:var(--panel);border-top:1px solid var(--line)}
 .gsn{display:block;font-size:12.5px;font-weight:500;margin-bottom:2px}
+
+/* ===== Animasi halus ===== */
+:root{--ease:cubic-bezier(.22,.9,.3,1)}
+html{-webkit-tap-highlight-color:transparent}
+button,.ch,[data-a],[data-f],[data-v]{touch-action:manipulation}
+button,.ch,.ib,.btn,.grow,input,textarea{transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .2s ease,transform .16s var(--ease),opacity .2s ease}
+.ib:active,.btn:active,.new:active,.grow:active,.pop button:active,#chips button:active{transform:scale(.94)}
+.ch:active{background:#e11d2e26}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pgIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes gpIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes dlgIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:translateY(-6px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes appIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:none}}
+.app{animation:appIn .45s ease-out}
+.pg:not(.hide),#gp:not(.hide){animation:pgIn .28s var(--ease)}
+@media(min-width:761px){#gp:not(.hide){animation:gpIn .26s var(--ease)}}
+.ov:not(.hide){animation:fadeIn .2s ease}
+.ov:not(.hide)>.dlg,.ov:not(.hide)>img{animation:dlgIn .27s var(--ease)}
+.pop:not(.hide){animation:popIn .17s var(--ease);transform-origin:top right}
+.mctx{animation:popIn .15s var(--ease);transform-origin:top left}
+.cv.show{animation:fadeUp .24s var(--ease)}
+.auth:not(.hide){animation:fadeIn .35s ease}
+.auth:not(.hide) .acard{animation:dlgIn .42s var(--ease)}
+.pgb.sw-in{animation:fadeUp .26s var(--ease)}
+.msgs.sw-in2{animation:fadeIn .24s ease}
+.toast{transition:transform .38s var(--ease)}
+.pgb,#list,.msgs{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:760px){.main{transition:transform .32s var(--ease)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style></head><body>
 <div class="toast" id="toast"><div class="av" id="tAv" style="width:40px;height:40px;font-size:15px"></div><div><b id="tB"></b><span id="tS"></span></div></div>
 <div class="app">
@@ -266,7 +302,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 <div class="svt"><div class="av" id="svA" style="width:38px;height:38px;font-size:15px;overflow:hidden"></div><div class="svw"><b id="svN"></b><small id="svM"></small></div><button class="ib hide" id="svD" aria-label="Hapus story">🗑</button><button class="ib" id="svC" aria-label="Tutup">✕</button></div></div></div>
 <div class="ov hide" id="aiOv"><div class="dlg"><h3>Atur kepribadian AI</h3><p>Ubah nama dan gaya bicaranya. Contoh: gaya Jawa Timuran, suka motor.</p><input id="aiN" maxlength="24" placeholder="Nama AI" autocomplete="off"><textarea id="aiP" rows="4" placeholder="Gaya bicara dan minat" style="background:var(--p2);font-size:14px;margin-bottom:10px"></textarea><button class="btn" id="aiS">Simpan</button><button class="btn s" id="aiX">Batal</button></div></div>
 <div class="ov hide" id="stErr"><div class="dlg" style="text-align:center"><div style="font-size:34px;margin-bottom:6px">⚠️</div><h3 id="seT"></h3><p id="seM"></p><button class="btn" id="seOk">Coba lagi</button></div></div>
-<div class="auth hide" id="auth"><div class="acard"><div class="av" style="margin:0 auto 10px;width:64px;height:64px;font-size:28px">💬</div><h1>Whatss<span>chat</span></h1><p class="as" id="aSub"></p><label for="aN">Nama</label><input id="aN" maxlength="24" autocomplete="username" placeholder="Nama kamu"><label for="aD">Tanggal lahir</label><input id="aD" type="date"><label for="aP">Kata sandi</label><div class="apw"><input id="aP" type="password" autocomplete="current-password" placeholder="Minimal 6 karakter"><button type="button" id="aEye" aria-label="Tampilkan kata sandi">👁</button></div><div id="aP2w"><label for="aP2">Ulangi kata sandi</label><input id="aP2" type="password" autocomplete="new-password"></div><div class="warn">🔒 Jangan berikan kata sandi ke siapa pun. Simpan di tempat yang aman. Kata sandi tidak bisa dipulihkan kalau lupa.</div><p class="aerr" id="aE"></p><button class="btn" id="aGo">Masuk</button><button class="btn s" id="aForgot">Lupa kata sandi?</button></div></div>
+<div class="auth hide" id="auth"><div class="acard"><img src="assets/icon-192.png" alt="Whatsschat" style="display:block;margin:0 auto 10px;width:72px;height:72px;border-radius:50%;box-shadow:0 0 28px #e11d2e66"><h1>Whatss<span>chat</span></h1><p class="as" id="aSub"></p><label for="aN">Nama</label><input id="aN" maxlength="24" autocomplete="username" placeholder="Nama kamu"><label for="aD">Tanggal lahir</label><input id="aD" type="date"><label for="aP">Kata sandi</label><div class="apw"><input id="aP" type="password" autocomplete="current-password" placeholder="Minimal 6 karakter"><button type="button" id="aEye" aria-label="Tampilkan kata sandi">👁</button></div><div id="aP2w"><label for="aP2">Ulangi kata sandi</label><input id="aP2" type="password" autocomplete="new-password"></div><div class="warn">🔒 Jangan berikan kata sandi ke siapa pun. Simpan di tempat yang aman. Kata sandi tidak bisa dipulihkan kalau lupa.</div><p class="aerr" id="aE"></p><button class="btn" id="aGo">Masuk</button><button class="btn s" id="aForgot">Lupa kata sandi?</button></div></div>
 <div class="ov hide" id="lb" style="z-index:60"><img id="lbI" alt="Pratinjau" style="max-width:94vw;max-height:88vh;border-radius:12px"></div>
 <div class="hide" id="gp"></div><input type="file" id="gF" accept="image/*" class="hide">
 <div class="pg hide" id="pg"><div class="pgh"><button class="ib" id="pgBk" aria-label="Kembali">←</button><b id="pgT"></b></div><div class="pgb" id="pgB"></div></div>
@@ -1006,4 +1042,11 @@ async function stRecv(x,env){const k=env.k;
  if(k=='sv'){const s=S.st.find(z=>z.code==S.me&&z.id==env.id);if(s){s.views=s.views||[];if(!s.views.some(v=>v.c==x.from)){s.views.push({c:x.from,n:String(x.name||'').slice(0,24)||nameOf(null,x.from),ts:x.ts});save();if(!$('sv').classList.contains('hide')&&VQ[VI]===s)$('svEN').textContent=s.views.length}}return true}
  return false}
 setInterval(stSync,8000);setTimeout(stSync,2500);
+
+/* animasi halus saat pindah halaman / chat */
+(()=>{try{const rt=(el,c)=>{el.classList.remove(c);void el.offsetWidth;el.classList.add(c)};
+ const t=document.getElementById('pgT'),b=document.getElementById('pgB'),pg=document.getElementById('pg');let lt='';
+ if(t&&b&&pg)new MutationObserver(()=>{const x=t.textContent;if(x!==lt){lt=x;if(!pg.classList.contains('hide'))rt(b,'sw-in')}}).observe(t,{childList:true,characterData:true,subtree:true});
+ const n=document.getElementById('cN'),m=document.getElementById('msgs');let ln='';
+ if(n&&m)new MutationObserver(()=>{const x=n.textContent;if(x!==ln){ln=x;rt(m,'sw-in2')}}).observe(n,{childList:true,characterData:true,subtree:true})}catch(e){}})();
 </script></body></html>
